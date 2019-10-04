@@ -1,0 +1,1 @@
+Get lyrics for songs and add visuals to them.
