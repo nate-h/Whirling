@@ -1,5 +1,7 @@
 import time
 import librosa
+import pygame as pg
+from whirling_primitives import Point
 from whirling_audio_controller import WhirlingAudioController
 from rx.subject.behaviorsubject import BehaviorSubject
 
@@ -15,18 +17,26 @@ from rx.subject.behaviorsubject import BehaviorSubject
 
 
 class WhirlingVisualizer(object):
-    def __init__(self, rect, audio_controller: WhirlingAudioController,
+    def __init__(self, rect: pg.Rect, audio_controller: WhirlingAudioController,
                  current_track: BehaviorSubject):
         self.rect = rect
         self.audio_controller = audio_controller
 
         current_track.subscribe(self.load_track)
 
+    @property
+    def width(self):
+        return self.rect.width
+
+    @property
+    def height(self):
+        return self.rect.height
+
     def update(self):
         pass
     def draw(self, window):
         #print(self.audio_controller.player.get_time())
-        pass
+        self.draw_circle(window)
 
     def load_track(self, new_track):
         start_time = time.time()
@@ -37,7 +47,11 @@ class WhirlingVisualizer(object):
         print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
 
         # 4. Convert the frame indices of beat events into timestamps
-        beat_times = librosa.frames_to_time(beat_frames, sr=sr)
-        print(len(beat_times))
+        self.beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 
         print('Current time to process song:  %f' % (time.time() - start_time))
+
+    def draw_circle(self, window, radius=0.1, color=(20, 20, 20), center=Point(.5, .5)):
+        center = (int(self.width*center.x), int(self.height*center.y))
+        radius = int(self.width * radius)
+        pg.draw.circle(window, color, center, radius)

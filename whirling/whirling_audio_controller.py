@@ -1,16 +1,14 @@
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 from rx.subject.behaviorsubject import BehaviorSubject
 import pygame as pg
 import vlc
 import os
 import whirling_ui as UI
+from whirling_primitives import Point
 
 
 """The audio controller for whirling.
 """
-
-
-Point = namedtuple('Point', ['x', 'y'])
 
 
 class WhirlingAudioController():
