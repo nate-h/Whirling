@@ -2,3 +2,4 @@ Whirling
 music_visualizer/*
 __pycache__/
 data/*
+.vscode
