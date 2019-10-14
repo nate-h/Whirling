@@ -1,3 +1,5 @@
+import time
+import librosa
 from whirling_audio_controller import WhirlingAudioController
 from rx.subject.behaviorsubject import BehaviorSubject
 
@@ -27,4 +29,15 @@ class WhirlingVisualizer(object):
         pass
 
     def load_track(self, new_track):
+        start_time = time.time()
         print('librosa load: %s' % new_track)
+        y, sr = librosa.load(new_track)
+        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+
+        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
+
+        # 4. Convert the frame indices of beat events into timestamps
+        beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+        print(len(beat_times))
+
+        print('Current time to process song:  %f' % (time.time() - start_time))

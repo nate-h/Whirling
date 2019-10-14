@@ -6,7 +6,7 @@ from whirling_visualizer import WhirlingVisualizer
 
 MUSIC_TRACKS = [
     'data/Christian Löffler - Mare/Christian Löffler - Mare - 02 Haul (feat. Mohna).mp3',
-    'data/bensound-buddy.mp3'
+    'data/bensound-buddy.mp3',
 ]
 
 

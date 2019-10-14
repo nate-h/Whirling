@@ -17,3 +17,6 @@ virtualenv -p python3 Whirling
 pip install pygame
 pip install python-vlc
 pip install rx
+pip install librosa
+
+sudo apt-get install ffmpeg
