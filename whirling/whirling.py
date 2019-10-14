@@ -1,6 +1,7 @@
 import pygame as pg
 import whirling_ui as UI
-import whirling_audio_controller as wac
+from whirling_audio_controller import WhirlingAudioController
+from whirling_visualizer import WhirlingVisualizer
 
 MUSIC_TRACKS = [
     'data/Christian Löffler - Mare/Christian Löffler - Mare - 02 Haul (feat. Mohna).mp3',
@@ -26,8 +27,11 @@ class Whirling(object):
         self.is_playing = False
 
         # Create audio controller.
-        rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
-        self.audio_controller = wac.WhirlingAudioController(rect, MUSIC_TRACKS)
+        ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
+        v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
+        self.audio_controller = WhirlingAudioController(
+            ac_rect, MUSIC_TRACKS)
+        self.visualizer = WhirlingVisualizer(v_rect, self.audio_controller)
         self.Main()
 
     def Main(self):
@@ -47,16 +51,12 @@ class Whirling(object):
             # Update
             self.audio_controller.update()
 
-            # Draw
-            self.window.fill((0, 0, 0))
-            self.render_fps()
-            self.render_controls()
+            # Draw visuals
+            self.draw()
 
             # Update display and clock last.
             pg.display.update()
             self.clock.tick(60)
-
-        # TODO: reset variables here.
 
     def handle_key_down(self, event):
         if event.key == pg.K_ESCAPE:
@@ -66,7 +66,10 @@ class Whirling(object):
         fps = self.font.render(str(int(self.clock.get_fps())), True, pg.Color('white'))
         self.window.blit(fps, (50, 50))
 
-    def render_controls(self):
+    def draw(self):
+        self.window.fill((0, 0, 0))
+        self.visualizer.draw(self.window)
+        self.render_fps()
         self.audio_controller.draw(self.window)
 
 
