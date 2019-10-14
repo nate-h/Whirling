@@ -1,4 +1,5 @@
 from collections import OrderedDict, namedtuple
+from rx.subject.behaviorsubject import BehaviorSubject
 import pygame as pg
 import vlc
 import os
@@ -13,7 +14,7 @@ Point = namedtuple('Point', ['x', 'y'])
 
 
 class WhirlingAudioController():
-    def __init__(self, rect, music_tracks, current_track):
+    def __init__(self, rect, music_tracks, current_track: BehaviorSubject):
         # Setup player.
         self.track_num = 0
         self.player = None

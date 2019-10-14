@@ -33,7 +33,9 @@ class Whirling(object):
         v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
         self.audio_controller = WhirlingAudioController(
             ac_rect, MUSIC_TRACKS, self.current_track)
-        self.visualizer = WhirlingVisualizer(v_rect, self.audio_controller)
+        self.visualizer = WhirlingVisualizer(v_rect,
+                                             self.audio_controller,
+                                             self.current_track)
         self.Main()
 
     def Main(self):
