@@ -13,16 +13,33 @@ Point = namedtuple('Point', ['x', 'y'])
 
 
 class WhirlingAudioController():
-    def __init__(self, rect, music_tracks):
+    def __init__(self, rect, music_tracks, current_track):
+        # Setup player.
         self.track_num = 0
-        self.offset = Point(rect.left, rect.top)
+        self.player = None
+        self.current_track = current_track
         self.music_tracks = music_tracks
-        self.player = vlc.MediaPlayer(self.music_tracks[self.track_num])
-        self.font = pg.font.Font(None, 30)
+        self.current_track.on_next(self.music_tracks[self.track_num])
+        self.current_track.subscribe(self.change_song)
 
+        # Initialize pygame vars.
+        self.font = pg.font.Font(None, 30)
+        self.offset = Point(rect.left, rect.top)
+
+        # Initialize background and buttons.
         self.bg_color = (20, 20, 20)
         self.bg = self.relative_rect(0, 0, rect.width, rect.height)
+        self.initialize_buttons()
 
+        # Time string
+        self.current_time_loc = (self.offset.x + 10, self.offset.y + 10)
+        self.track_name_loc = (self.bg.width - 50, 50)
+
+    def relative_rect(self, x, y, w, h):
+        rect = pg.Rect(x, y, w, h)
+        return rect.move(self.offset.x, self.offset.y)
+
+    def initialize_buttons(self):
         # Play button
         states = OrderedDict([
             ('play', {'action': self.play}),
@@ -47,13 +64,14 @@ class WhirlingAudioController():
         self.prev_button = UI.Button('Prev', self.prev, prev_rect)
         self.next_button = UI.Button('Next', self.next, next_rect)
 
-        # Time string
-        self.current_time_loc = (self.offset.x + 10, self.offset.y + 10)
-        self.track_name_loc = (self.bg.width - 50, 50)
-
-    def relative_rect(self, x, y, w, h):
-        rect = pg.Rect(x, y, w, h)
-        return rect.move(self.offset.x, self.offset.y)
+    def change_song(self, new_track):
+        print('New track: ', new_track)
+        is_playing = self.player and self.player.is_playing()
+        if is_playing:
+            self.player.stop()
+        self.player = vlc.MediaPlayer(new_track)
+        if is_playing:
+            self.player.play()
 
     @property
     def center(self):
@@ -91,22 +109,14 @@ class WhirlingAudioController():
         self.player.pause()
 
     def prev(self):
-        is_playing = self.player.is_playing
-        self.player.stop()
         count = len(self.music_tracks)
         self.track_num = (self.track_num - 1 + count) % count
-        self.player = vlc.MediaPlayer(self.music_tracks[self.track_num])
-        if is_playing:
-            self.player.play()
+        self.current_track.on_next(self.music_tracks[self.track_num])
 
     def next(self):
-        is_playing = self.player.is_playing
-        self.player.stop()
         count = len(self.music_tracks)
         self.track_num = (self.track_num + 1) % count
-        self.player = vlc.MediaPlayer(self.music_tracks[self.track_num])
-        if is_playing:
-            self.player.play()
+        self.current_track.on_next(self.music_tracks[self.track_num])
 
     def get_pretty_time_string(self):
         length = round(self.player.get_length()/1000, 1)

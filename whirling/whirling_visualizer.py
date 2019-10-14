@@ -18,7 +18,8 @@ class WhirlingVisualizer(object):
     def update(self):
         pass
     def draw(self, window):
-        print(self.audio_controller.player.get_time())
+        #print(self.audio_controller.player.get_time())
+        pass
 
     def on_song_load(self):
         pass

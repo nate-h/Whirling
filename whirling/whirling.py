@@ -1,4 +1,5 @@
 import pygame as pg
+from rx.subject.behaviorsubject import BehaviorSubject
 import whirling_ui as UI
 from whirling_audio_controller import WhirlingAudioController
 from whirling_visualizer import WhirlingVisualizer
@@ -25,12 +26,13 @@ class Whirling(object):
         self.font = pg.font.Font(None, 30)
         self.clock = pg.time.Clock()
         self.is_playing = False
+        self.current_track = BehaviorSubject('')
 
         # Create audio controller.
         ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
         v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
         self.audio_controller = WhirlingAudioController(
-            ac_rect, MUSIC_TRACKS)
+            ac_rect, MUSIC_TRACKS, self.current_track)
         self.visualizer = WhirlingVisualizer(v_rect, self.audio_controller)
         self.Main()
 

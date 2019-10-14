@@ -16,3 +16,4 @@ sudo apt-get install vlc
 virtualenv -p python3 Whirling
 pip install pygame
 pip install python-vlc
+pip install rx
