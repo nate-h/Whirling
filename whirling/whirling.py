@@ -20,6 +20,7 @@ class Whirling(object):
         pg.init()
 
         self.window = pg.display.set_mode((displayw, displayh))
+        pg.display.set_caption('Whirling')
         self.stopped = False
         self.dw = displayw
         self.dh = displayh
