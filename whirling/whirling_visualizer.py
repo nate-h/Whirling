@@ -33,21 +33,21 @@ class WhirlingVisualizer(object):
         return self.rect.height
 
     def update(self):
+        # Should job of this to queue up work?
         pass
+
     def draw(self, window):
-        #print(self.audio_controller.player.get_time())
-        self.draw_circle(window)
+        curr_time = self.audio_controller.player.get_time() / 1000
+        beats = self.get_beats(curr_time)
+        if len(beats) > 0:
+            self.draw_circle(window)
 
     def load_track(self, new_track):
         start_time = time.time()
         print('librosa load: %s' % new_track)
         y, sr = librosa.load(new_track)
-        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        self.process_beats(y, sr)
 
-        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
-
-        # 4. Convert the frame indices of beat events into timestamps
-        self.beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 
         print('Current time to process song:  %f' % (time.time() - start_time))
 
@@ -55,3 +55,18 @@ class WhirlingVisualizer(object):
         center = (int(self.width*center.x), int(self.height*center.y))
         radius = int(self.width * radius)
         pg.draw.circle(window, color, center, radius)
+
+    def process_beats(self, y, sr):
+        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
+        # 4. Convert the frame indices of beat events into timestamps
+        beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+        sustain = 0.2
+        self.beats = [(b, b + sustain) for b in beat_times]
+
+    def get_beats(self, curr_time):
+        # See what beats should be played at curr_time
+        return [b for b in self.beats if curr_time >= b[0] and curr_time < b[1]]
+
+    def create_linear_envelope(times, peak, slope):
+        pass
