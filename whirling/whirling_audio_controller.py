@@ -3,6 +3,7 @@ from rx.subject.behaviorsubject import BehaviorSubject
 import pygame as pg
 import vlc
 import os
+import time
 import whirling_ui as UI
 from whirling_primitives import Point
 
@@ -20,6 +21,10 @@ class WhirlingAudioController():
         self.music_tracks = music_tracks
         self.current_track.on_next(self.music_tracks[self.track_num])
         self.current_track.subscribe(self.change_song)
+
+        # Vars needed to track current time.
+        self.last_play_time = 0
+        self.last_play_time_global = 0
 
         # Initialize pygame vars.
         self.font = pg.font.Font(None, 30)
@@ -73,6 +78,10 @@ class WhirlingAudioController():
             self.player.play()
 
     @property
+    def is_playing(self):
+        return self.player and self.player.is_playing()
+
+    @property
     def center(self):
         return Point(self.offset.x + self.bg.width/2, self.offset.y + self.bg.height/2)
 
@@ -121,6 +130,23 @@ class WhirlingAudioController():
         length = round(self.player.get_length()/1000, 1)
         time = round(self.player.get_time()/1000, 1)
         return '%s / %s' % (time, length)
+
+    def get_time(self):
+        # This exists because vlcs default get time updates only a couple
+        # of times per second.
+
+        if not self.is_playing:
+            return -1
+
+        curr_time = self.player.get_time() * .001
+
+        if self.last_play_time == curr_time and self.last_play_time != 0:
+            curr_time += time.time() - self.last_play_time_global
+        else:
+            self.last_play_time = curr_time
+            self.last_play_time_global = time.time()
+
+        return curr_time
 
     def update(self):
         pass

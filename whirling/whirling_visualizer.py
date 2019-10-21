@@ -37,10 +37,15 @@ class WhirlingVisualizer(object):
         pass
 
     def draw(self, window):
-        curr_time = self.audio_controller.player.get_time() / 1000
+        curr_time = self.audio_controller.get_time()
+        print(curr_time)
         beats = self.get_beats(curr_time)
         if len(beats) > 0:
-            self.draw_circle(window)
+            beat = beats[0]
+            percent = self.time_lerp(beat[0], beat[1], curr_time)
+            radius = 0.1 * percent
+            #print('%3f %3f %3f %3f' % (beat[0], beat[1], curr_time, percent))
+            self.draw_circle(window, radius=radius)
 
     def load_track(self, new_track):
         start_time = time.time()
@@ -70,3 +75,10 @@ class WhirlingVisualizer(object):
 
     def create_linear_envelope(times, peak, slope):
         pass
+
+    def time_lerp(self, begin_time, end_time, curr_time):
+        # Returns a lerp from 1 -> 0 depending on how close curr_time is to
+        # begin time or end time.
+        diff = end_time - begin_time
+        progress = curr_time - begin_time
+        return max(1 - progress/diff, 0)
