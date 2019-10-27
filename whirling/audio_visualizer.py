@@ -1,8 +1,8 @@
 import time
 import librosa
 import pygame as pg
-from whirling_primitives import Point
-from whirling_audio_controller import WhirlingAudioController
+from primitives import Point
+from audio_controller import AudioController
 from rx.subject.behaviorsubject import BehaviorSubject
 
 """A class that spits out visuals
@@ -16,13 +16,16 @@ from rx.subject.behaviorsubject import BehaviorSubject
 # Possibly chunk data up so can minimize buffering.
 
 
-class WhirlingVisualizer(object):
-    def __init__(self, rect: pg.Rect, audio_controller: WhirlingAudioController,
-                 current_track: BehaviorSubject):
+class AudioVisualizer(object):
+    def __init__(self, rect: pg.Rect, audio_controller: AudioController,
+                 current_track: BehaviorSubject, use_cache=False):
         self.rect = rect
         self.audio_controller = audio_controller
+        self.use_cache=use_cache
+        self.current_track_audio_features = None
 
-        current_track.subscribe(self.load_track)
+        # Register function on track change.
+        current_track.subscribe(self.current_track_change)
 
     @property
     def width(self):
@@ -38,7 +41,6 @@ class WhirlingVisualizer(object):
 
     def draw(self, window):
         curr_time = self.audio_controller.get_time()
-        print(curr_time)
         beats = self.get_beats(curr_time)
         if len(beats) > 0:
             beat = beats[0]
@@ -47,13 +49,21 @@ class WhirlingVisualizer(object):
             #print('%3f %3f %3f %3f' % (beat[0], beat[1], curr_time, percent))
             self.draw_circle(window, radius=radius)
 
+    def current_track_change(self, new_track):
+        cache_exists = False
+        if self.use_cache and cache_exists:
+            self.current_track_audio_features = self.load_cache(new_track)
+        else:
+            self.load_track(new_track)
+
+    def load_cache(self):
+        pass
+
     def load_track(self, new_track):
         start_time = time.time()
         print('librosa load: %s' % new_track)
         y, sr = librosa.load(new_track)
         self.process_beats(y, sr)
-
-
         print('Current time to process song:  %f' % (time.time() - start_time))
 
     def draw_circle(self, window, radius=0.1, color=(20, 20, 20), center=Point(.5, .5)):

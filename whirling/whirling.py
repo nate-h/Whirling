@@ -1,8 +1,9 @@
+import os
+import argparse
 import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
-import whirling_ui as UI
-from whirling_audio_controller import WhirlingAudioController
-from whirling_visualizer import WhirlingVisualizer
+from audio_controller import AudioController
+from audio_visualizer import AudioVisualizer
 
 MUSIC_TRACKS = [
     'data/Christian Löffler - Mare/Christian Löffler - Mare - 02 Haul (feat. Mohna).mp3',
@@ -15,7 +16,7 @@ MUSIC_TRACKS = [
 ###############################################################################
 
 class Whirling(object):
-    def __init__(self, displayw, displayh):
+    def __init__(self, displayw, displayh, use_cache=False):
 
         pg.init()
 
@@ -31,12 +32,13 @@ class Whirling(object):
 
         # Create audio controller.
         ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
-        v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
-        self.audio_controller = WhirlingAudioController(
+        self.audio_controller = AudioController(
             ac_rect, MUSIC_TRACKS, self.current_track)
-        self.visualizer = WhirlingVisualizer(v_rect,
-                                             self.audio_controller,
-                                             self.current_track)
+
+        # Create audio visualizer.
+        v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
+        self.visualizer = AudioVisualizer(v_rect, self.audio_controller,
+            self.current_track, use_cache)
         self.Main()
 
     def Main(self):
@@ -77,8 +79,25 @@ class Whirling(object):
         self.render_fps()
         self.audio_controller.draw(self.window)
 
+###############################################################################
+# Main and option handling.
+###############################################################################
+
+def parse_options():
+    description = 'A python music visualizer using audio feature extraction'
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--use-cache', default=False, action='store_true',
+         help='Load cached audio features stored as dnz files along side the '
+              'original audio file.')
+    args = parser.parse_args()
+    return args
 
 if __name__ == '__main__':
     display_width = 1280
     display_height = 960
-    Whirling(display_width, display_height)
+
+    # Position window in lower left corner.
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 1000)
+
+    args = parse_options()
+    Whirling(display_width, display_height, use_cache=args.use_cache)

@@ -4,15 +4,15 @@ import pygame as pg
 import vlc
 import os
 import time
-import whirling_ui as UI
-from whirling_primitives import Point
+import ui_core
+from primitives import Point
 
 
 """The audio controller for whirling.
 """
 
 
-class WhirlingAudioController():
+class AudioController():
     def __init__(self, rect, music_tracks, current_track: BehaviorSubject):
         # Setup player.
         self.track_num = 0
@@ -54,7 +54,7 @@ class WhirlingAudioController():
         x = self.bg.width/2 - pw/2
         y = self.bg.height/2 - ph/2
         play_rect = self.relative_rect(x, y, pw, ph)
-        self.play_button = UI.ToggleButton(states, play_rect)
+        self.play_button = ui_core.ToggleButton(states, play_rect)
 
         # Prev/Next buttons
         pnh = self.bg.height*0.5
@@ -65,8 +65,8 @@ class WhirlingAudioController():
         next_offset_x = x + pw/2 + 20
         prev_rect = self.relative_rect(prev_offset_x, y, pnw, pnh)
         next_rect = self.relative_rect(next_offset_x, y, pnw, pnh)
-        self.prev_button = UI.Button('Prev', self.prev, prev_rect)
-        self.next_button = UI.Button('Next', self.next, next_rect)
+        self.prev_button = ui_core.Button('Prev', self.prev, prev_rect)
+        self.next_button = ui_core.Button('Next', self.next, next_rect)
 
     def change_song(self, new_track):
         print('New track: ', new_track)
