@@ -70,7 +70,7 @@ class AudioController():
         self.next_button = ui_core.Button('Next', self.next, next_rect)
 
     def change_song(self, new_track):
-        logging.info('New track: ', new_track)
+        logging.info('New track: %s', new_track)
         is_playing = self.player and self.player.is_playing()
         if is_playing:
             self.player.stop()
