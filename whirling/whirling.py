@@ -1,5 +1,7 @@
 import os
+import logging
 import argparse
+import coloredlogs
 import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
 from audio_controller import AudioController
@@ -93,6 +95,7 @@ def parse_options():
     return args
 
 if __name__ == '__main__':
+    coloredlogs.install()
     display_width = 1280
     display_height = 960
 

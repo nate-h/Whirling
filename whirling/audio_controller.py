@@ -4,6 +4,7 @@ import pygame as pg
 import vlc
 import os
 import time
+import logging
 import ui_core
 from primitives import Point
 
@@ -69,7 +70,7 @@ class AudioController():
         self.next_button = ui_core.Button('Next', self.next, next_rect)
 
     def change_song(self, new_track):
-        print('New track: ', new_track)
+        logging.info('New track: ', new_track)
         is_playing = self.player and self.player.is_playing()
         if is_playing:
             self.player.stop()
@@ -109,11 +110,11 @@ class AudioController():
         self.draw_song_name(window)
 
     def play(self):
-        print('Play')
+        logging.info('Play')
         self.player.play()
 
     def pause(self):
-        print('Pause')
+        logging.info('Pause')
         self.player.pause()
 
     def prev(self):
