@@ -72,6 +72,7 @@ cqt    - Measures the energy in each pitch
 spectral centroid - center of mass for sound
     calculated as the weighted mean of the frequencies
 frequency -> mel scale: mel(f) = 2595*log(1+ f/700)
+Note: output length (y) = (seconds) * (sample rate) / (hop_length)
 
 
 ################################################################################

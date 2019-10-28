@@ -17,6 +17,7 @@ virtualenv -p python3 Whirling
 pip install pygame
 pip install python-vlc
 pip install rx
+pip install sklearn
 pip install librosa
 pip install coloredlogs
 sudo apt-get install ffmpeg
