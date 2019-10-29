@@ -25,6 +25,7 @@ class AudioVisualizer(object):
         self.use_cache=use_cache
         self.current_track_audio_features = None
         self.debug_visuals = True
+        self.font = pg.font.Font(None, 30)
 
         # Register function for track changes.
         current_track.subscribe(self.current_track_change)
@@ -85,8 +86,8 @@ class AudioVisualizer(object):
         frame_times = framed['frame_times']
         row = 0
 
-        for k, data in framed.items():
-            if k == 'frame_times':
+        for feature_name, data in framed.items():
+            if feature_name == 'frame_times':
                 continue
             # Points spanning seconds_worth.
             pnts = data[max(0, curr_frame - number_of_frames): curr_frame]
@@ -94,15 +95,16 @@ class AudioVisualizer(object):
             w = 0.8
             r = 0.001
             margin = 0.1
-            delta = w/number_of_frames
             color = COLORS[row][1]
 
-            # if len(pnts) == 215:
-            #     import pdb; pdb.set_trace()
+            # Draw feature name text.
+            text_pos = Point(0.1, row*0.2 + margin - 0.03)
+            self.draw_text(window, feature_name, text_pos, color)
 
+            # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
                 x = 1 - margin - (number_of_frames - i - 1)/ (number_of_frames - 1) * w
-                y = row*0.2 + 2*margin + h * (p - 1)
+                y = row*0.2 + margin + h * (1 - p)
                 center = Point(x, y)
                 self.draw_circle(window, r, center, color)
             row += 1
@@ -114,10 +116,15 @@ class AudioVisualizer(object):
         else:
             self.current_track_audio_features = audio_features.generate_features(new_track)
 
-    def draw_circle(self, window, radius=0.1, center=Point(.5, .5), color=(20, 20, 20),):
+    def draw_circle(self, window, radius=0.1, center=Point(.5, .5), color=(20, 20, 20)):
         center = (int(self.width*center.x), int(self.height*center.y))
         radius = int(self.width * radius)
         pg.draw.circle(window, color, center, radius)
+
+    def draw_text(self, window, text:str, text_pos=Point(.5, .5), color=(20, 20, 20)):
+        text_pos = (int(self.width*text_pos.x), int(self.height*text_pos.y))
+        text = self.font.render(text, True, color)
+        window.blit(text, text_pos)
 
     def create_linear_envelope(self, times, peak, slope):
         pass
