@@ -5,7 +5,7 @@ import librosa
 import logging
 import sklearn
 
-version = '0.0.2'
+version = '0.3'
 
 
 ###############################################################################
@@ -29,6 +29,9 @@ def get_events_at_time(current_track_audio_features, curr_time):
 
 def normalize(x, axis=0):
     return sklearn.preprocessing.minmax_scale(x, axis=axis)
+
+def get_frame_number(time, sr, hop_length):
+    return librosa.core.time_to_frames([time], sr, hop_length)[0]
 
 
 ###############################################################################

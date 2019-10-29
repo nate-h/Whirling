@@ -136,6 +136,8 @@ class AudioController():
         # This exists because vlcs default get time updates only a couple
         # of times per second.
 
+        # TODO: Shouldn't short circuit here and need to rewrite time interpolation code so it returns
+        #       the correct time when paused.
         if not self.is_playing:
             return -1
 
