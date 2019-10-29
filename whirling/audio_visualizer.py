@@ -1,3 +1,4 @@
+import numpy as np
 import librosa
 import pygame as pg
 from primitives import Point
@@ -23,12 +24,16 @@ class AudioVisualizer(object):
         self.rect = rect
         self.audio_controller = audio_controller
         self.use_cache=use_cache
-        self.current_track_audio_features = None
+        self.curr_track_audio_features = None
         self.debug_visuals = True
         self.font = pg.font.Font(None, 30)
 
         # Register function for track changes.
         current_track.subscribe(self.current_track_change)
+
+    ####################################
+    # Props.
+    ####################################
 
     @property
     def width(self):
@@ -40,11 +45,18 @@ class AudioVisualizer(object):
 
     @property
     def sr(self):
-        return self.current_track_audio_features['metadata']['sr']
+        return self.curr_track_audio_features['metadata']['sr']
 
     @property
     def hop_length(self):
-        return self.current_track_audio_features['metadata']['hop_length']
+        return self.curr_track_audio_features['metadata']['hop_length']
+
+    def get_frame_number(self, time):
+        return audio_features.get_frame_number(time, self.sr, self.hop_length)
+
+    ####################################
+    # Game functions.
+    ####################################
 
     def update(self):
         # Should job of this to queue up work?
@@ -61,16 +73,19 @@ class AudioVisualizer(object):
         return
 
         beats = audio_features.get_events_at_time(
-            self.current_track_audio_features, curr_time)
+            self.curr_track_audio_features, curr_time)
         if len(beats) > 0:
             beat = beats[0]
             percent = self.time_lerp(beat[0], beat[1], curr_time)
             radius = 0.1 * percent
             self.draw_circle(window, radius=radius)
 
+    ####################################
+    # Visuals.
+    ####################################
+
     def draw_framed_features(self, window, curr_time):
-        curr_frame = audio_features.get_frame_number(
-            curr_time, self.sr, self.hop_length)
+        curr_frame = self.get_frame_number(curr_time)
         print('%f    %d' % (curr_time, curr_frame))
 
         if self.debug_visuals:
@@ -79,42 +94,91 @@ class AudioVisualizer(object):
     def draw_debug_visuals(self, window, curr_frame):
         # Get number of frames to extract data from.
         seconds_worth = 5
-        number_of_frames = audio_features.get_frame_number(
-            seconds_worth, self.sr, self.hop_length)
+        num_frames = self.get_frame_number(seconds_worth)
 
-        framed = self.current_track_audio_features['framed']
+        framed = self.curr_track_audio_features['framed']
+        framed_events = self.curr_track_audio_features['framed_events']
         frame_times = framed['frame_times']
+        oldest_frame = max(0, curr_frame - num_frames)
+
+        # Plot properties.
         row = 0
+        row_growth = 0.15
+        h = 0.1
+        w = 0.8
+        r = 0.001
+        margin = 0.1
 
         for feature_name, data in framed.items():
             if feature_name == 'frame_times':
                 continue
             # Points spanning seconds_worth.
-            pnts = data[max(0, curr_frame - number_of_frames): curr_frame]
-            h = 0.1
-            w = 0.8
-            r = 0.001
-            margin = 0.1
+            pnts = data[oldest_frame: curr_frame]
             color = COLORS[row][1]
 
             # Draw feature name text.
-            text_pos = Point(0.1, row*0.2 + margin - 0.03)
+            text_pos = Point(0.1, row*row_growth + margin - 0.03)
             self.draw_text(window, feature_name, text_pos, color)
 
             # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
-                x = 1 - margin - (number_of_frames - i - 1)/ (number_of_frames - 1) * w
-                y = row*0.2 + margin + h * (1 - p)
+                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * w
+                y = row*row_growth + margin + h * (1 - p)
                 center = Point(x, y)
                 self.draw_circle(window, r, center, color)
             row += 1
 
+        # Convert beat events to frames and then plot them.
+        for feature_name, data in framed_events.items():
+            beat_pnts = filter(lambda x: oldest_frame <= x <= curr_frame, data)
+            beat_pnts = [p - oldest_frame for p in beat_pnts]
+            pnts = np.zeros(curr_frame - oldest_frame + 1)
+            np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
+
+            color = COLORS[row][1]
+
+            # Draw feature name text.
+            text_pos = Point(0.1, row*row_growth + margin - 0.03)
+            self.draw_text(window, feature_name, text_pos, color)
+
+            # Draw points for subset of feature data.
+            for i, p in enumerate(pnts):
+                r = 0.004 if p > 0 else 0
+                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * w
+                y = row*row_growth + margin + h * (1 - p)
+                center = Point(x, y)
+                self.draw_circle(window, r, center, color)
+            row += 1
+
+        # I have starting/endpoint for data pnts
+
+    ####################################
+    # Load data.
+    ####################################
+
     def current_track_change(self, new_track):
         cache_exists = audio_features.cache_exists(new_track)
         if self.use_cache and cache_exists:
-            self.current_track_audio_features = audio_features.load_features(new_track)
+            self.curr_track_audio_features = audio_features.load_features(new_track)
         else:
-            self.current_track_audio_features = audio_features.generate_features(new_track)
+            self.curr_track_audio_features = audio_features.generate_features(new_track)
+
+        # Post processing. Converts events to framed events.
+        self.post_process_audio_features()
+
+    def post_process_audio_features(self):
+        # Post processing. Converts events to framed events.
+        # The reason I do this is so everything operates as a frame since
+        # since that's the fundamental thing librosa returns.
+        events = self.curr_track_audio_features['events']
+        self.curr_track_audio_features['framed_events'] = {
+            k: [self.get_frame_number(e) for e in v] for k, v in events.items()
+        }
+
+
+    ####################################
+    # Primitives.
+    ####################################
 
     def draw_circle(self, window, radius=0.1, center=Point(.5, .5), color=(20, 20, 20)):
         center = (int(self.width*center.x), int(self.height*center.y))
