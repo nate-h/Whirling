@@ -1,24 +1,9 @@
 # README.md
 
-## Getting environment up and running.
-pipenv install jupyter matplotlib pandas
-pipenv shell
-jupyter notebook
-
-
-pip install ipykernel
-python -m ipykernel install --user --name music_visualizer --display-name "Python (music_visualizer)"
-
+## How to get project up and running.
+```console
 sudo apt-get install vlc
-
-
-# Make this official.
+sudo apt-get install ffmpeg # Needed for librosa
 virtualenv -p python3 Whirling
-pip install pygame
-pip install python-vlc
-pip install rx
-pip install sklearn
-pip install librosa
-pip install coloredlogs
-pip install numpy
-sudo apt-get install ffmpeg
+run pip install -e .
+```
