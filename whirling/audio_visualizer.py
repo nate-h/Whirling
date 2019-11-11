@@ -1,11 +1,11 @@
 import numpy as np
 import librosa
 import pygame as pg
-from primitives import Point
-from audio_controller import AudioController
-import audio_features
 from rx.subject.behaviorsubject import BehaviorSubject
-from colors import COLORS
+from whirling.colors import COLORS
+from whirling.primitives import Point
+from whirling.audio_controller import AudioController
+from whirling import audio_features
 
 """A class that spits out visuals
 """
@@ -69,16 +69,6 @@ class AudioVisualizer(object):
             return
 
         self.draw_framed_features(window, curr_time)
-
-        return
-
-        beats = audio_features.get_events_at_time(
-            self.curr_track_audio_features, curr_time)
-        if len(beats) > 0:
-            beat = beats[0]
-            percent = self.time_lerp(beat[0], beat[1], curr_time)
-            radius = 0.1 * percent
-            self.draw_circle(window, radius=radius)
 
     ####################################
     # Visuals.
@@ -149,8 +139,6 @@ class AudioVisualizer(object):
                 center = Point(x, y)
                 self.draw_circle(window, r, center, color)
             row += 1
-
-        # I have starting/endpoint for data pnts
 
     ####################################
     # Load data.

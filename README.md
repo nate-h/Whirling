@@ -20,4 +20,5 @@ pip install rx
 pip install sklearn
 pip install librosa
 pip install coloredlogs
+pip install numpy
 sudo apt-get install ffmpeg

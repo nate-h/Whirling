@@ -3,3 +3,4 @@ music_visualizer/*
 __pycache__/
 data/*
 .vscode
+*.egg-info/

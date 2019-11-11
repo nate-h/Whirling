@@ -4,6 +4,7 @@ import time
 import librosa
 import logging
 import sklearn
+import numpy as np
 
 version = '0.3'
 
@@ -80,6 +81,8 @@ def generate_features(track: str):
         'hop_length': hop_length,
     }
 
+    get_loudness(**ingredients)
+
     data = {
         'metadata': {
             'version': version,
@@ -94,6 +97,8 @@ def generate_features(track: str):
                 get_volume_levels(**ingredients).tolist(),
             'spectral_centroid':
                 get_spectral_centroids(**ingredients).tolist(),
+            'spectral_flatness':
+                get_spectral_flatness(**ingredients).tolist(),
             'zero_crossing_rates':
                 get_zero_crossing_rates(**ingredients).tolist(),
         },
@@ -121,6 +126,11 @@ def get_spectral_centroids(y, sr, hop_length):
     return normalize(spectral_centroids)
 
 @timeit
+def get_spectral_flatness(y, sr, hop_length):
+    spectral_flatness = librosa.feature.spectral_flatness(y)[0]
+    return normalize(spectral_flatness)
+
+@timeit
 def get_zero_crossing_rates(y, sr, hop_length):
     # Zero crossings are associated with percussive events.
     zcr = librosa.feature.zero_crossing_rate(y, sr)[0]
@@ -131,3 +141,10 @@ def get_beats(y, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return librosa.frames_to_time(beat_frames, sr=sr)
+
+@timeit
+def get_loudness(y, sr, hop_length):
+    S = librosa.stft(y, hop_length=hop_length)
+    D = librosa.amplitude_to_db(S, ref=np.max)
+    #import pdb; pdb.set_trace()
+    pass

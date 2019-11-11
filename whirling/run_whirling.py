@@ -4,8 +4,8 @@ import argparse
 import coloredlogs
 import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
-from audio_controller import AudioController
-from audio_visualizer import AudioVisualizer
+from whirling.audio_controller import AudioController
+from whirling.audio_visualizer import AudioVisualizer
 
 MUSIC_TRACKS = [
     'data/Christian Löffler - Mare/Christian Löffler - Mare - 02 Haul (feat. Mohna).mp3',
@@ -94,13 +94,13 @@ def parse_options():
     args = parser.parse_args()
     return args
 
-if __name__ == '__main__':
+def main():
     coloredlogs.install()
     display_width = 1280
     display_height = 960
 
     # Position window in lower left corner.
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 1000)
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 300)
 
     args = parse_options()
     Whirling(display_width, display_height, use_cache=args.use_cache)

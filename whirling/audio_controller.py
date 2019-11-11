@@ -5,8 +5,8 @@ import vlc
 import os
 import time
 import logging
-import ui_core
-from primitives import Point
+from whirling import ui_core
+from whirling.primitives import Point
 
 
 """The audio controller for whirling.
