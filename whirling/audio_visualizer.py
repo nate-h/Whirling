@@ -26,7 +26,7 @@ class AudioVisualizer(object):
         self.use_cache=use_cache
         self.curr_track_audio_features = None
         self.debug_visuals = True
-        self.font = pg.font.Font(None, 30)
+        self.font = pg.font.Font(None, 25)
 
         # Register function for track changes.
         current_track.subscribe(self.current_track_change)
@@ -88,16 +88,17 @@ class AudioVisualizer(object):
 
         framed = self.curr_track_audio_features['framed']
         framed_events = self.curr_track_audio_features['framed_events']
-        frame_times = framed['frame_times']
         oldest_frame = max(0, curr_frame - num_frames)
 
         # Plot properties.
+        num_rows = len(framed) + len(framed_events) - 1  # -1 to skip frame times plot
+        margin = 0.05
         row = 0
-        row_growth = 0.15
-        h = 0.1
-        w = 0.8
+        text_height = .04
+        row_h = (1-2*margin - num_rows*text_height)/num_rows
+        row_growth = row_h + text_height
         r = 0.001
-        margin = 0.1
+        row_w = 1 - 2*margin
 
         for feature_name, data in framed.items():
             if feature_name == 'frame_times':
@@ -107,13 +108,13 @@ class AudioVisualizer(object):
             color = COLORS[row][1]
 
             # Draw feature name text.
-            text_pos = Point(0.1, row*row_growth + margin - 0.03)
+            text_pos = Point(0.1, row*row_growth + margin + .01)
             self.draw_text(window, feature_name, text_pos, color)
 
             # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
-                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * w
-                y = row*row_growth + margin + h * (1 - p)
+                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
+                y = row*row_growth + margin + row_h * (1 - p) + text_height
                 center = Point(x, y)
                 self.draw_circle(window, r, center, color)
             row += 1
@@ -128,14 +129,14 @@ class AudioVisualizer(object):
             color = COLORS[row][1]
 
             # Draw feature name text.
-            text_pos = Point(0.1, row*row_growth + margin - 0.03)
+            text_pos = Point(0.1, row*row_growth + margin + .01)
             self.draw_text(window, feature_name, text_pos, color)
 
             # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
                 r = 0.004 if p > 0 else 0
-                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * w
-                y = row*row_growth + margin + h * (1 - p)
+                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
+                y = row*row_growth + margin + row_h * (1 - p) + text_height
                 center = Point(x, y)
                 self.draw_circle(window, r, center, color)
             row += 1

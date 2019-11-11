@@ -73,7 +73,7 @@ class Whirling(object):
 
     def render_fps(self):
         fps = self.font.render(str(int(self.clock.get_fps())), True, pg.Color('white'))
-        self.window.blit(fps, (50, 50))
+        self.window.blit(fps, (50, 20))
 
     def draw(self):
         self.window.fill((0, 0, 0))

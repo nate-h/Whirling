@@ -38,7 +38,7 @@ class AudioController():
 
         # Time string
         self.current_time_loc = (self.offset.x + 10, self.offset.y + 10)
-        self.track_name_loc = (self.bg.width - 50, 50)
+        self.track_name_loc = (self.bg.width - 50, 20)
 
     def relative_rect(self, x, y, w, h):
         rect = pg.Rect(x, y, w, h)
