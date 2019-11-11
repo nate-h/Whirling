@@ -91,6 +91,8 @@ def parse_options():
     parser.add_argument('--use-cache', default=False, action='store_true',
          help='Load cached audio features stored as dnz files along side the '
               'original audio file.')
+    parser.add_argument('--move-window', default=False, action='store_true',
+         help='Moves window to my preferred location')
     args = parser.parse_args()
     return args
 
@@ -99,8 +101,10 @@ def main():
     display_width = 1280
     display_height = 960
 
-    # Position window in lower left corner.
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 300)
-
     args = parse_options()
+
+    if args.move_window:
+        # Position window in lower left corner.
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (1200, 1300)
+
     Whirling(display_width, display_height, use_cache=args.use_cache)
