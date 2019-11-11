@@ -5,13 +5,15 @@ import librosa
 import logging
 import sklearn
 import numpy as np
-
-version = '0.3'
+import pkg_resources  # part of setuptools
 
 
 ###############################################################################
 # Helpers.
 ###############################################################################
+
+def get_version():
+    return pkg_resources.require("Whirling")[0].version
 
 def timeit(method):
     def timed(*args, **kwargs):
@@ -85,7 +87,7 @@ def generate_features(track: str):
 
     data = {
         'metadata': {
-            'version': version,
+            'version': get_version(),
             'track': track,
             'sr': sr,
             'hop_length': hop_length,
