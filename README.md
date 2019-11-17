@@ -2,9 +2,25 @@
 
 ## How to get project up and running.
 ```console
-sudo apt-get install vlc
-sudo apt-get install ffmpeg # Needed for librosa
+
+# Needed for librosa
+sudo apt-get install vlc ffmpeg
+
+# Install env and activate it.
 virtualenv -p python3 Whirling
-# Now activate env
+source ./Whirling/bin/activate
+
+# Install python dependencies
 pip install -e .
+
+# Initialize data folder with sample tracks file.
+./bin/initialize_project.sh
+
+# Give it a whirl!
+run_whirling
+
+# Misc.
+# Audio features cache so start program with:
+run_whirling --use-cache --move-window
+
 ```
