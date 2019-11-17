@@ -8,6 +8,8 @@ from whirling.audio_controller import AudioController
 from whirling.audio_visualizer import AudioVisualizer
 from data.tracks import MUSIC_TRACKS
 
+DESIRED_FPS = 45
+
 
 ###############################################################################
 # Whirling
@@ -61,7 +63,7 @@ class Whirling(object):
 
             # Update display and clock last.
             pg.display.update()
-            self.clock.tick(60)
+            self.clock.tick(DESIRED_FPS)
 
     def handle_key_down(self, event):
         if event.key == pg.K_ESCAPE:
