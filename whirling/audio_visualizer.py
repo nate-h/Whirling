@@ -76,14 +76,14 @@ class AudioVisualizer(object):
 
     def draw_framed_features(self, window, curr_time):
         curr_frame = self.get_frame_number(curr_time)
-        print('%f    %d' % (curr_time, curr_frame))
+        #print('%f    %d' % (curr_time, curr_frame))
 
         if self.debug_visuals:
             self.draw_debug_visuals(window, curr_frame)
 
     def draw_debug_visuals(self, window, curr_frame):
         # Get number of frames to extract data from.
-        seconds_worth = 5
+        seconds_worth = 3
         num_frames = self.get_frame_number(seconds_worth)
 
         framed = self.curr_track_audio_features['framed']
@@ -100,6 +100,12 @@ class AudioVisualizer(object):
         r = 0.001
         row_w = 1 - 2*margin
 
+        # Function to convert data to x, y values.
+        def create_point_from(i, p):
+            x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
+            y = row*row_growth + margin + row_h * (1 - p) + text_height
+            return Point(x, y)
+
         for feature_name, data in framed.items():
             if feature_name == 'frame_times':
                 continue
@@ -110,13 +116,15 @@ class AudioVisualizer(object):
             # Draw feature name text.
             text_pos = Point(0.1, row*row_growth + margin + .01)
             self.draw_text(window, feature_name, text_pos, color)
+            last_p = None
 
             # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
-                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
-                y = row*row_growth + margin + row_h * (1 - p) + text_height
-                center = Point(x, y)
-                self.draw_circle(window, r, center, color)
+                if i != 0:
+                    p1 = create_point_from(i-1, last_p)
+                    p2 = create_point_from(i, p)
+                    self.draw_line(window, p1, p2, color)
+                last_p = p
             row += 1
 
         # Convert beat events to frames and then plot them.
@@ -135,10 +143,8 @@ class AudioVisualizer(object):
             # Draw points for subset of feature data.
             for i, p in enumerate(pnts):
                 r = 0.004 if p > 0 else 0
-                x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
-                y = row*row_growth + margin + row_h * (1 - p) + text_height
-                center = Point(x, y)
-                self.draw_circle(window, r, center, color)
+                point = create_point_from(i, p)
+                self.draw_circle(window, r, point, color)
             row += 1
 
     ####################################
@@ -173,6 +179,12 @@ class AudioVisualizer(object):
         center = (int(self.width*center.x), int(self.height*center.y))
         radius = int(self.width * radius)
         pg.draw.circle(window, color, center, radius)
+
+    def draw_line(self, window, p1=Point(.5, .5), p2=Point(.5, .5), color=(20, 20, 20)):
+        p1 = (int(self.width*p1.x), int(self.height*p1.y))
+        p2 = (int(self.width*p2.x), int(self.height*p2.y))
+        line_width = 2
+        pg.draw.line(window, color, p1, p2, line_width)
 
     def draw_text(self, window, text:str, text_pos=Point(.5, .5), color=(20, 20, 20)):
         text_pos = (int(self.width*text_pos.x), int(self.height*text_pos.y))

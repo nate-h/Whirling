@@ -98,8 +98,8 @@ def parse_options():
 
 def main():
     coloredlogs.install()
-    display_width = 1280
-    display_height = 960
+    display_width = 1440
+    display_height = 1050
 
     args = parse_options()
 
