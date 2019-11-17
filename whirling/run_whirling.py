@@ -89,6 +89,8 @@ def parse_options():
               'original audio file.')
     parser.add_argument('--move-window', default=False, action='store_true',
          help='Moves window to my preferred location')
+    parser.add_argument('--move-window2', default=False, action='store_true',
+         help='Moves window to my second preferred location')
     args = parser.parse_args()
     return args
 
@@ -102,5 +104,9 @@ def main():
     if args.move_window:
         # Position window in lower left corner.
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (1200, 1300)
+
+    if args.move_window2:
+        # Position window in lower left corner.
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 800)
 
     Whirling(display_width, display_height, use_cache=args.use_cache)
