@@ -5,5 +5,6 @@
 sudo apt-get install vlc
 sudo apt-get install ffmpeg # Needed for librosa
 virtualenv -p python3 Whirling
-run pip install -e .
+# Now activate env
+pip install -e .
 ```
