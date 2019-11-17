@@ -4,10 +4,9 @@
 
 1) onset detection
 2) onset strength
-3) harmonic separation
+3) harmonic separation   -> https://librosa.github.io/librosa_gallery/auto_examples/plot_hprss.html
 4) percussive separation
-5) Add space to pause/play track
-6) Add hotkey to switch between debug/real visuals
+5) Add hotkey to switch between debug/real visuals
 
 --------------------------------------------------------------------------------
 

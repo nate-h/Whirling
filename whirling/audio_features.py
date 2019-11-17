@@ -103,10 +103,14 @@ def generate_features(track: str):
                 get_spectral_flatness(**ingredients).tolist(),
             'zero_crossing_rates':
                 get_zero_crossing_rates(**ingredients).tolist(),
+            'onset_strength':
+                get_onset_strength(**ingredients).tolist(),
         },
         'events': {
             'beats':
                 get_beats(**ingredients).tolist(),
+            'onsets':
+                get_onsets(**ingredients).tolist(),
         },
     }
 
@@ -143,6 +147,16 @@ def get_beats(y, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return librosa.frames_to_time(beat_frames, sr=sr)
+
+@timeit
+def get_onsets(y, sr, hop_length):
+    onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
+    return librosa.frames_to_time(onsets, sr=sr)
+
+@timeit
+def get_onset_strength(y, sr, hop_length):
+    onset_strength = librosa.onset.onset_strength(y=y, sr=sr)
+    return normalize(onset_strength)
 
 @timeit
 def get_loudness(y, sr, hop_length):
