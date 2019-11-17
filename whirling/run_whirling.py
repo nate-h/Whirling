@@ -6,11 +6,7 @@ import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.audio_controller import AudioController
 from whirling.audio_visualizer import AudioVisualizer
-
-MUSIC_TRACKS = [
-    'data/Christian Löffler - Mare/Christian Löffler - Mare - 02 Haul (feat. Mohna).mp3',
-    'data/bensound-buddy.mp3',
-]
+from data.tracks import MUSIC_TRACKS
 
 
 ###############################################################################
