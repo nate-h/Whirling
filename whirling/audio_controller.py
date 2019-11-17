@@ -117,6 +117,10 @@ class AudioController():
         logging.info('Pause')
         self.player.pause()
 
+    def toggle_play(self):
+        logging.info('Toggle play')
+        self.play_button.perform_action()
+
     def prev(self):
         count = len(self.music_tracks)
         self.track_num = (self.track_num - 1 + count) % count

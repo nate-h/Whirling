@@ -66,6 +66,8 @@ class Whirling(object):
     def handle_key_down(self, event):
         if event.key == pg.K_ESCAPE:
             self.stopped = True
+        if event.key == pg.K_SPACE:
+            self.audio_controller.toggle_play()
 
     def render_fps(self):
         fps = self.font.render(str(int(self.clock.get_fps())), True, pg.Color('white'))
