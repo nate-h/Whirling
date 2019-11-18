@@ -19,6 +19,8 @@ setup(
         'sklearn',
         'librosa',
         'coloredlogs',
+        'jupyter',
+        'matplotlib'
     ],
     entry_points={
         'console_scripts': [
