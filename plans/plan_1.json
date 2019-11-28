@@ -1,0 +1,40 @@
+{
+    "music_tracks": [
+        "data/latch.mp3",
+        "data/exit_music.mp3"
+    ],
+    "metadata": {
+        "sr": 22050,
+        "hop_length": 512
+    },
+    "splits": [
+        {
+            "name": "full",
+            "description": "Operate on full song",
+            "settings": {
+                "n_fft": 2048,
+                "margin": 2
+            }
+        },
+        {
+            "name": "hpss",
+            "description": "Harmonic percussion source separation",
+            "settings": {
+                "n_fft": 2048,
+                "margin": 2
+            }
+        }
+    ],
+    "extracts": {
+        "framed": {
+            "frame_times": ["full"],
+            "rms": ["full"],
+            "spectral_centroid": ["full"],
+            "spectral_flatness": ["full"],
+            "zero_crossing_rates": ["full"]
+        },
+        "events": {
+            "beats": ["full"]
+        }
+    }
+}

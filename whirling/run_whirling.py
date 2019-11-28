@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import argparse
 import coloredlogs
@@ -6,7 +7,6 @@ import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.audio_controller import AudioController
 from whirling.audio_visualizer import AudioVisualizer
-from data.tracks import MUSIC_TRACKS
 
 DESIRED_FPS = 45
 
@@ -16,7 +16,7 @@ DESIRED_FPS = 45
 ###############################################################################
 
 class Whirling(object):
-    def __init__(self, displayw, displayh, use_cache=False):
+    def __init__(self, plan, displayw, displayh, use_cache=False):
 
         pg.init()
 
@@ -33,7 +33,7 @@ class Whirling(object):
         # Create audio controller.
         ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
         self.audio_controller = AudioController(
-            ac_rect, MUSIC_TRACKS, self.current_track)
+            ac_rect, plan['music_tracks'], self.current_track)
 
         # Create audio visualizer.
         v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
@@ -85,9 +85,19 @@ class Whirling(object):
 # Main and option handling.
 ###############################################################################
 
+def load_plan(plan_name):
+    full_plan_loc = 'plans/{}.json'.format(plan_name)
+    if not os.path.exists(full_plan_loc):
+        logging.error('Couldn\'t find plan %s', full_plan_loc)
+        quit()
+    with open(full_plan_loc, 'r') as f:
+        return json.load(f)
+
 def parse_options():
     description = 'A python music visualizer using audio feature extraction'
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--plan', type=load_plan,
+         help='A plan to generate data from a list of songs.')
     parser.add_argument('--use-cache', default=False, action='store_true',
          help='Load cached audio features stored as dnz files along side the '
               'original audio file.')
@@ -113,4 +123,7 @@ def main():
         # Position window in lower left corner.
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 800)
 
-    Whirling(display_width, display_height, use_cache=args.use_cache)
+    import pdb; pdb.set_trace()
+
+    Whirling(args.plan, display_width, display_height,
+             use_cache=args.use_cache)
