@@ -20,10 +20,9 @@ from whirling import audio_features
 
 class AudioVisualizer(object):
     def __init__(self, rect: pg.Rect, audio_controller: AudioController,
-                 current_track: BehaviorSubject, use_cache=False):
+                 current_track: BehaviorSubject):
         self.rect = rect
         self.audio_controller = audio_controller
-        self.use_cache=use_cache
         self.curr_track_audio_features = None
         self.debug_visuals = True
         self.font = pg.font.Font(None, 25)
@@ -152,11 +151,7 @@ class AudioVisualizer(object):
     ####################################
 
     def current_track_change(self, new_track):
-        cache_exists = audio_features.cache_exists(new_track)
-        if self.use_cache and cache_exists:
-            self.curr_track_audio_features = audio_features.load_features(new_track)
-        else:
-            self.curr_track_audio_features = audio_features.generate_features(new_track)
+        self.curr_track_audio_features = audio_features.load_features(new_track)
 
         # Post processing. Converts events to framed events.
         self.post_process_audio_features()

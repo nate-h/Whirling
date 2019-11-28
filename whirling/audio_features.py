@@ -70,54 +70,6 @@ def save_features(track: str, data):
 ###############################################################################
 
 @timeit
-def generate_features(track: str):
-    logging.info('Generating features for track: %s' % track)
-    sr=22050
-    hop_length = 512  # Note: may consider dropping this to 360 to get 60fps.
-                      # Right now this equates to a 43fps resolution.
-    y, sr = load_track(track, sr)
-
-    ingredients = {
-        'y': y,
-        'sr': sr,
-        'hop_length': hop_length,
-    }
-
-    get_loudness(**ingredients)
-
-    data = {
-        'metadata': {
-            'version': get_version(),
-            'track': track,
-            'sr': sr,
-            'hop_length': hop_length,
-        },
-        'framed': {
-            'frame_times':
-                get_frame_times(**ingredients).tolist(),
-            'rms':
-                get_volume_levels(**ingredients).tolist(),
-            'spectral_centroid':
-                get_spectral_centroids(**ingredients).tolist(),
-            'spectral_flatness':
-                get_spectral_flatness(**ingredients).tolist(),
-            'zero_crossing_rates':
-                get_zero_crossing_rates(**ingredients).tolist(),
-            'onset_strength':
-                get_onset_strength(**ingredients).tolist(),
-        },
-        'events': {
-            'beats':
-                get_beats(**ingredients).tolist(),
-            'onsets':
-                get_onsets(**ingredients).tolist(),
-        },
-    }
-
-    save_features(track, data)
-    return data
-
-@timeit
 def get_frame_times(y, sr, hop_length):
     return librosa.samples_to_time(range(0, len(y), hop_length))
 
@@ -164,3 +116,63 @@ def get_loudness(y, sr, hop_length):
     D = librosa.amplitude_to_db(S, ref=np.max)
     #import pdb; pdb.set_trace()
     pass
+
+
+###############################################################################
+# Gateway method.
+###############################################################################
+
+@timeit
+def generate_features(plan, music_tracks, use_cache):
+    for track in music_tracks:
+        if use_cache and cache_exists(track):
+            continue
+        run_plan(plan, track)
+
+
+def run_plan(plan:str, track: str):
+    logging.info('Generating features for track: %s' % track)
+    sr=22050
+    hop_length = 512  # Note: may consider dropping this to 360 to get 60fps.
+                      # Right now this equates to a 43fps resolution.
+    y, sr = load_track(track, sr)
+
+    ingredients = {
+        'y': y,
+        'sr': sr,
+        'hop_length': hop_length,
+    }
+
+    get_loudness(**ingredients)
+
+    data = {
+        'metadata': {
+            'version': get_version(),
+            'track': track,
+            'sr': sr,
+            'hop_length': hop_length,
+        },
+        'framed': {
+            'frame_times':
+                get_frame_times(**ingredients).tolist(),
+            'rms':
+                get_volume_levels(**ingredients).tolist(),
+            'spectral_centroid':
+                get_spectral_centroids(**ingredients).tolist(),
+            'spectral_flatness':
+                get_spectral_flatness(**ingredients).tolist(),
+            'zero_crossing_rates':
+                get_zero_crossing_rates(**ingredients).tolist(),
+            'onset_strength':
+                get_onset_strength(**ingredients).tolist(),
+        },
+        'events': {
+            'beats':
+                get_beats(**ingredients).tolist(),
+            'onsets':
+                get_onsets(**ingredients).tolist(),
+        },
+    }
+
+    save_features(track, data)
+    return data

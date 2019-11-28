@@ -7,6 +7,8 @@ import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.audio_controller import AudioController
 from whirling.audio_visualizer import AudioVisualizer
+from whirling import audio_features
+from data.tracks import MUSIC_TRACKS
 
 DESIRED_FPS = 45
 
@@ -30,15 +32,18 @@ class Whirling(object):
         self.is_playing = False
         self.current_track = BehaviorSubject('')
 
+        # Generate audio features.
+        audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)
+
         # Create audio controller.
         ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
         self.audio_controller = AudioController(
-            ac_rect, plan['music_tracks'], self.current_track)
+            ac_rect, MUSIC_TRACKS, self.current_track)
 
         # Create audio visualizer.
         v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
         self.visualizer = AudioVisualizer(v_rect, self.audio_controller,
-            self.current_track, use_cache)
+            self.current_track)
         self.Main()
 
     def Main(self):
@@ -122,8 +127,6 @@ def main():
     if args.move_window2:
         # Position window in lower left corner.
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 800)
-
-    import pdb; pdb.set_trace()
 
     Whirling(args.plan, display_width, display_height,
              use_cache=args.use_cache)

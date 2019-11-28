@@ -1,8 +1,4 @@
 {
-    "music_tracks": [
-        "data/latch.mp3",
-        "data/exit_music.mp3"
-    ],
     "metadata": {
         "sr": 22050,
         "hop_length": 512
