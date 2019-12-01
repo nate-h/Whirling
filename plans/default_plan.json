@@ -11,8 +11,7 @@
             },
             "extracts": {
                 "framed": [
-                    "rms", "spectral_centroid",
-                    "spectral_flatness", "zero_crossing_rates", "onset_strength"
+                    "rms"
                 ],
                 "events": [
                 ],

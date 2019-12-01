@@ -85,16 +85,18 @@ class AudioVisualizer(object):
 
         curr_frame = self.get_frame_number(curr_time)
 
-        # Get number of frames to extract data from.
+        # Establish frame info.
         seconds_worth = 3
         num_frames = self.get_frame_number(seconds_worth)
-
-        framed = self.track_audio_features['framed']
-        framed_events = self.track_audio_features['framed_events']
         oldest_frame = max(0, curr_frame - num_frames)
 
+
+        signals = self.track_audio_features['audio_signals']
+        sum_framed = sum([len(d['extracts']['framed']) for s,d in signals.items()])
+        sum_framed_events = sum([len(d['extracts']['framed_events']) for s,d in signals.items()])
+        num_rows = sum_framed + sum_framed_events
+
         # Plot properties.
-        num_rows = len(framed) + len(framed_events) - 1  # -1 to skip frame times plot
         margin = 0.05
         row = 0
         text_height = .04
@@ -109,44 +111,52 @@ class AudioVisualizer(object):
             y = row*row_growth + margin + row_h * (1 - p) + text_height
             return Point(x, y)
 
-        for feature_name, data in framed.items():
-            # Points spanning seconds_worth.
-            pnts = data[oldest_frame: curr_frame]
-            color = COLORS[row][1]
-
-            # Draw feature name text.
+        def row_title(text):
             text_pos = Point(0.1, row*row_growth + margin + .01)
-            self.draw_text(window, feature_name, text_pos, color)
-            last_p = None
+            self.draw_text(window, text, text_pos, color)
 
-            # Draw points for subset of feature data.
-            for i, p in enumerate(pnts):
-                if i != 0:
-                    p1 = create_point_from(i-1, last_p)
-                    p2 = create_point_from(i, p)
-                    self.draw_line(window, p1, p2, color)
-                last_p = p
-            row += 1
 
-        # Convert beat events to frames and then plot them.
-        for feature_name, data in framed_events.items():
-            beat_pnts = filter(lambda x: oldest_frame <= x <= curr_frame, data)
-            beat_pnts = [p - oldest_frame for p in beat_pnts]
-            pnts = np.zeros(curr_frame - oldest_frame + 1)
-            np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
+        for signal_name, signal_data in signals.items():
+            framed = signal_data['extracts']['framed']
+            framed_events = signal_data['extracts']['framed_events']
 
-            color = COLORS[row][1]
+            for feature_name, data in framed.items():
+                # Points spanning seconds_worth.
+                pnts = data[oldest_frame: curr_frame]
+                color = COLORS[row][1]
 
-            # Draw feature name text.
-            text_pos = Point(0.1, row*row_growth + margin + .01)
-            self.draw_text(window, feature_name, text_pos, color)
+                # Draw feature name text.
+                row_title(signal_name + ' - ' + feature_name)
+                last_p = None
 
-            # Draw points for subset of feature data.
-            for i, p in enumerate(pnts):
-                r = 0.004 if p > 0 else 0
-                point = create_point_from(i, p)
-                self.draw_circle(window, r, point, color)
-            row += 1
+                # Draw points for subset of feature data.
+                for i, p in enumerate(pnts):
+                    if i != 0:
+                        p1 = create_point_from(i-1, last_p)
+                        p2 = create_point_from(i, p)
+                        self.draw_line(window, p1, p2, color)
+                    last_p = p
+                row += 1
+
+            # Convert beat events to frames and then plot them.
+            for feature_name, data in framed_events.items():
+                beat_pnts = filter(
+                    lambda x: oldest_frame <= x <= curr_frame, data)
+                beat_pnts = [p - oldest_frame for p in beat_pnts]
+                pnts = np.zeros(curr_frame - oldest_frame + 1)
+                np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
+
+                color = COLORS[row][1]
+
+                # Draw feature name text.
+                row_title(signal_name + ' - ' + feature_name)
+
+                # Draw points for subset of feature data.
+                for i, p in enumerate(pnts):
+                    r = 0.004 if p > 0 else 0
+                    point = create_point_from(i, p)
+                    self.draw_circle(window, r, point, color)
+                row += 1
 
     ####################################
     # Load data.
