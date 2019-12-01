@@ -208,9 +208,6 @@ def run_plan(plan:str, track: str):
 
     save_features(track, data)
 
-    import pdb; pdb.set_trace()
-
-    return data
 
 def get_function_mappings():
     return {
