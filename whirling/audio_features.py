@@ -164,14 +164,21 @@ def run_plan(plan:str, track: str):
 
     # Establish basic properties.
     logging.info('Generating features for track: %s' % track)
-    sr=22050
-    n_fft = n_fft=2048
+    sr = 22050
+    n_fft = 2048
     hop_length = 512  # Note: may consider dropping this to 360 to get 60fps.
                       # Right now this equates to a 43fps resolution.
     y, sr = load_track(track, sr)
     D = librosa.stft(y, n_fft=n_fft)
     fn_mappings = get_function_mappings()
-    data = {}
+    data = {
+        "metadata": {
+            'sr': sr,
+            'hop_length': hop_length,
+            'track': track
+        },
+        "audio_signals": {}
+    }
 
     # Initialize store.
     store = {
@@ -196,14 +203,14 @@ def run_plan(plan:str, track: str):
         y = store['audio_signals'][signal_name]['y']
         D = store['audio_signals'][signal_name]['D']
 
-        data[signal_name] = {
+        data['audio_signals'][signal_name] = {
             'description': audio_signal_def['description'],
             'settings': settings,
             'extracts': {k: {} for k,_v in extracts.items()}
         }
         for event_type, event_list in extracts.items():
             for fn_name in event_list:
-                data[signal_name]['extracts'][event_type][fn_name] = \
+                data['audio_signals'][signal_name]['extracts'][event_type][fn_name] = \
                     fn_mappings[fn_name](y, D, sr, hop_length).tolist()
 
     save_features(track, data)

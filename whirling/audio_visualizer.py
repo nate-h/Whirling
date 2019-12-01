@@ -23,7 +23,7 @@ class AudioVisualizer(object):
                  current_track: BehaviorSubject):
         self.rect = rect
         self.audio_controller = audio_controller
-        self.curr_track_audio_features = None
+        self.track_audio_features = None
         self.debug_visuals = True
         self.font = pg.font.Font(None, 25)
 
@@ -44,11 +44,11 @@ class AudioVisualizer(object):
 
     @property
     def sr(self):
-        return self.curr_track_audio_features['metadata']['sr']
+        return self.track_audio_features['metadata']['sr']
 
     @property
     def hop_length(self):
-        return self.curr_track_audio_features['metadata']['hop_length']
+        return self.track_audio_features['metadata']['hop_length']
 
     def get_frame_number(self, time):
         return audio_features.get_frame_number(time, self.sr, self.hop_length)
@@ -67,26 +67,30 @@ class AudioVisualizer(object):
         if curr_time == -1:
             return
 
-        self.draw_framed_features(window, curr_time)
+        if self.debug_visuals:
+            self.draw_debug_visuals(window, curr_time)
+        else:
+            self.draw_framed_features(window, curr_time)
 
     ####################################
     # Visuals.
     ####################################
 
     def draw_framed_features(self, window, curr_time):
+        # curr_frame = self.get_frame_number(curr_time)
+        # print('%f    %d' % (curr_time, curr_frame))
+        pass
+
+    def draw_debug_visuals(self, window, curr_time):
+
         curr_frame = self.get_frame_number(curr_time)
-        #print('%f    %d' % (curr_time, curr_frame))
 
-        if self.debug_visuals:
-            self.draw_debug_visuals(window, curr_frame)
-
-    def draw_debug_visuals(self, window, curr_frame):
         # Get number of frames to extract data from.
         seconds_worth = 3
         num_frames = self.get_frame_number(seconds_worth)
 
-        framed = self.curr_track_audio_features['framed']
-        framed_events = self.curr_track_audio_features['framed_events']
+        framed = self.track_audio_features['framed']
+        framed_events = self.track_audio_features['framed_events']
         oldest_frame = max(0, curr_frame - num_frames)
 
         # Plot properties.
@@ -151,7 +155,7 @@ class AudioVisualizer(object):
     ####################################
 
     def current_track_change(self, new_track):
-        self.curr_track_audio_features = audio_features.load_features(new_track)
+        self.track_audio_features = audio_features.load_features(new_track)
 
         # Post processing. Converts events to framed events.
         self.post_process_audio_features()
@@ -160,10 +164,12 @@ class AudioVisualizer(object):
         # Post processing. Converts events to framed events.
         # The reason I do this is so everything operates as a frame since
         # since that's the fundamental thing librosa returns.
-        events = self.curr_track_audio_features['events']
-        self.curr_track_audio_features['framed_events'] = {
-            k: [self.get_frame_number(e) for e in v] for k, v in events.items()
-        }
+
+        for _, data in self.track_audio_features['audio_signals'].items():
+            events = data['extracts']['events']
+            data['extracts']['framed_events'] = {
+                k: [self.get_frame_number(e) for e in v] for k, v in events.items()
+            }
 
 
     ####################################
