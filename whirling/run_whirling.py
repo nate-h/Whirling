@@ -10,7 +10,7 @@ from whirling.audio_visualizer import AudioVisualizer
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
 
-DESIRED_FPS = 40
+DESIRED_FPS = 35
 
 
 ###############################################################################

@@ -83,10 +83,14 @@ class AudioVisualizer(object):
 
     def draw_debug_visuals(self, window, curr_time):
 
-        curr_frame = self.get_frame_number(curr_time)
+        # Establish what portions of the track to visualize.
+        seconds_past = 2
+        seconds_future = 1
+        seconds_worth = seconds_past + seconds_future
+
+        curr_frame = self.get_frame_number(curr_time + seconds_future)
 
         # Establish frame info.
-        seconds_worth = 3
         num_frames = self.get_frame_number(seconds_worth)
         oldest_frame = max(0, curr_frame - num_frames)
 
@@ -158,6 +162,14 @@ class AudioVisualizer(object):
                     self.draw_circle(window, r, point, color)
                 row += 1
 
+        # Render line at current time.
+        x = row_w*seconds_past/seconds_worth + margin
+        y1 = margin
+        y2 = 1 - margin
+        p1 = Point(x, y1)
+        p2 = Point(x, y2)
+        self.draw_line(window, p1, p2, (255, 255, 255), line_width=1)
+
     ####################################
     # Load data.
     ####################################
@@ -189,10 +201,10 @@ class AudioVisualizer(object):
         radius = int(self.width * radius)
         pg.draw.circle(window, color, center, radius)
 
-    def draw_line(self, window, p1=Point(.5, .5), p2=Point(.5, .5), color=(20, 20, 20)):
+    def draw_line(self, window, p1=Point(.5, .5), p2=Point(.5, .5),
+                  color=(20, 20, 20), line_width=2):
         p1 = (int(self.width*p1.x), int(self.height*p1.y))
         p2 = (int(self.width*p2.x), int(self.height*p2.y))
-        line_width = 2
         pg.draw.line(window, color, p1, p2, line_width)
 
     def draw_text(self, window, text:str, text_pos=Point(.5, .5), color=(20, 20, 20)):
