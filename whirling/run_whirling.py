@@ -101,7 +101,7 @@ def load_plan(plan_name):
 def parse_options():
     description = 'A python music visualizer using audio feature extraction'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--plan', type=load_plan,
+    parser.add_argument('--plan', type=load_plan, default='default_plan',
          help='A plan to generate data from a list of songs.')
     parser.add_argument('--use-cache', default=False, action='store_true',
          help='Load cached audio features stored as dnz files along side the '
