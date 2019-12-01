@@ -110,8 +110,6 @@ class AudioVisualizer(object):
             return Point(x, y)
 
         for feature_name, data in framed.items():
-            if feature_name == 'frame_times':
-                continue
             # Points spanning seconds_worth.
             pnts = data[oldest_frame: curr_frame]
             color = COLORS[row][1]
