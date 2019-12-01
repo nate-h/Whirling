@@ -103,32 +103,32 @@ def get_hpss_audio_signal(store, settings):
 
 @timeit
 def get_frame_times(y, D, sr, hop_length):
-    return librosa.samples_to_time(range(0, len(y), hop_length))
+    return librosa.samples_to_time(range(0, len(y), hop_length), sr=sr)
 
 @timeit
-def get_volume_levels(y, D, sr, hop_length):
-    rms = librosa.feature.rms(y)[0]
+def get_rms(y, D, sr, hop_length):
+    rms = librosa.feature.rms(y, hop_length=hop_length)[0]
     return normalize(rms)
 
 @timeit
 def get_spectral_centroids(y, D, sr, hop_length):
-    spectral_centroids = librosa.feature.spectral_centroid(y, sr)[0]
+    spectral_centroids = librosa.feature.spectral_centroid(y, sr=sr, hop_length=hop_length)[0]
     return normalize(spectral_centroids)
 
 @timeit
 def get_spectral_flatness(y, D, sr, hop_length):
-    spectral_flatness = librosa.feature.spectral_flatness(y)[0]
+    spectral_flatness = librosa.feature.spectral_flatness(y, hop_length=hop_length)[0]
     return normalize(spectral_flatness)
 
 @timeit
 def get_zero_crossing_rates(y, D, sr, hop_length):
     # Zero crossings are associated with percussive events.
-    zcr = librosa.feature.zero_crossing_rate(y, sr)[0]
+    zcr = librosa.feature.zero_crossing_rate(y, hop_length=hop_length)[0]
     return normalize(zcr)
 
 @timeit
 def get_beats(y, D, sr, hop_length):
-    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop_length)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return librosa.frames_to_time(beat_frames, sr=sr)
 
@@ -224,7 +224,7 @@ def get_function_mappings():
         'beats': get_beats,
         'onsets': get_onsets,
         'frame_times': get_frame_times,
-        'rms': get_volume_levels,
+        'rms': get_rms,
         'spectral_centroid': get_spectral_centroids,
         'spectral_flatness': get_spectral_flatness,
         'zero_crossing_rates': get_zero_crossing_rates,
