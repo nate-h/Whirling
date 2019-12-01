@@ -3,34 +3,58 @@
         "sr": 22050,
         "hop_length": 512
     },
-    "splits": [
+    "audio_signals": [
         {
             "name": "full",
             "description": "Operate on full song",
             "settings": {
-                "n_fft": 2048,
-                "margin": 2
+            },
+            "extracts": {
+                "framed": [
+                    "frame_times", "rms", "spectral_centroid",
+                    "spectral_flatness", "zero_crossing_rates", "onset_strength"
+                ],
+                "events": [
+                    "beats", "onsets"
+                ],
+                "complex": []
             }
         },
         {
-            "name": "hpss",
-            "description": "Harmonic percussion source separation",
+            "name": "harmonic",
+            "description": "Harmonic source separation",
             "settings": {
                 "n_fft": 2048,
                 "margin": 2
+            },
+            "extracts": {
+                "framed": [
+                    "frame_times", "rms", "spectral_centroid",
+                    "spectral_flatness", "zero_crossing_rates", "onset_strength"
+                ],
+                "events": [
+                    "beats", "onsets"
+                ],
+                "complex": []
+            }
+        },
+        {
+            "name": "percussive",
+            "description": "Percussive source separation",
+            "settings": {
+                "n_fft": 2048,
+                "margin": 2
+            },
+            "extracts": {
+                "framed": [
+                    "frame_times", "rms", "spectral_centroid",
+                    "spectral_flatness", "zero_crossing_rates", "onset_strength"
+                ],
+                "events": [
+                    "beats", "onsets"
+                ],
+                "complex": []
             }
         }
-    ],
-    "extracts": {
-        "framed": {
-            "frame_times": ["full"],
-            "rms": ["full"],
-            "spectral_centroid": ["full"],
-            "spectral_flatness": ["full"],
-            "zero_crossing_rates": ["full"]
-        },
-        "events": {
-            "beats": ["full"]
-        }
-    }
+    ]
 }

@@ -66,56 +66,86 @@ def save_features(track: str, data):
 
 
 ###############################################################################
+# Signal modifying.
+###############################################################################
+
+@timeit
+def get_full_audio_signal(store, settings):
+    """Full is the regular audio signal"""
+    store['audio_signals']['full'] = {
+        'y': store['y'],
+        'D': store['D'],
+    }
+
+@timeit
+def get_hpss_audio_signal(store, settings):
+    audio_signals = store['audio_signals']
+    if 'harmonic' in audio_signals and 'harmonic' in audio_signals:
+        return
+    """HPSS generates two audio signals. One for the harmonics and the
+    other for the percussives."""
+    DH, DP = librosa.decompose.hpss(store['D'], margin=settings['margin'])
+    audio_signals.update({
+        'harmonic': {
+            'y': librosa.istft(DH),
+            'D': DH,
+        },
+        'percussive': {
+            'y': librosa.istft(DP),
+            'D': DP,
+        }
+    })
+
+
+###############################################################################
 # Feature extracting.
 ###############################################################################
 
 @timeit
-def get_frame_times(y, sr, hop_length):
+def get_frame_times(y, D, sr, hop_length):
     return librosa.samples_to_time(range(0, len(y), hop_length))
 
 @timeit
-def get_volume_levels(y, sr, hop_length):
+def get_volume_levels(y, D, sr, hop_length):
     rms = librosa.feature.rms(y)[0]
     return normalize(rms)
 
 @timeit
-def get_spectral_centroids(y, sr, hop_length):
+def get_spectral_centroids(y, D, sr, hop_length):
     spectral_centroids = librosa.feature.spectral_centroid(y, sr)[0]
     return normalize(spectral_centroids)
 
 @timeit
-def get_spectral_flatness(y, sr, hop_length):
+def get_spectral_flatness(y, D, sr, hop_length):
     spectral_flatness = librosa.feature.spectral_flatness(y)[0]
     return normalize(spectral_flatness)
 
 @timeit
-def get_zero_crossing_rates(y, sr, hop_length):
+def get_zero_crossing_rates(y, D, sr, hop_length):
     # Zero crossings are associated with percussive events.
     zcr = librosa.feature.zero_crossing_rate(y, sr)[0]
     return normalize(zcr)
 
 @timeit
-def get_beats(y, sr, hop_length):
+def get_beats(y, D, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return librosa.frames_to_time(beat_frames, sr=sr)
 
 @timeit
-def get_onsets(y, sr, hop_length):
+def get_onsets(y, D, sr, hop_length):
     onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
     return librosa.frames_to_time(onsets, sr=sr)
 
 @timeit
-def get_onset_strength(y, sr, hop_length):
+def get_onset_strength(y, D, sr, hop_length):
     onset_strength = librosa.onset.onset_strength(y=y, sr=sr)
     return normalize(onset_strength)
 
 @timeit
-def get_loudness(y, sr, hop_length):
+def get_loudness(y, D, sr, hop_length):
     S = librosa.stft(y, hop_length=hop_length)
     D = librosa.amplitude_to_db(S, ref=np.max)
-    #import pdb; pdb.set_trace()
-    pass
 
 
 ###############################################################################
@@ -131,48 +161,68 @@ def generate_features(plan, music_tracks, use_cache):
 
 
 def run_plan(plan:str, track: str):
+
+    # Establish basic properties.
     logging.info('Generating features for track: %s' % track)
     sr=22050
+    n_fft = n_fft=2048
     hop_length = 512  # Note: may consider dropping this to 360 to get 60fps.
                       # Right now this equates to a 43fps resolution.
     y, sr = load_track(track, sr)
+    D = librosa.stft(y, n_fft=n_fft)
+    fn_mappings = get_function_mappings()
+    data = {}
 
-    ingredients = {
+    # Initialize store.
+    store = {
         'y': y,
         'sr': sr,
+        'D': D,
         'hop_length': hop_length,
+        'audio_signals': {}
     }
 
-    get_loudness(**ingredients)
+    # Generate all audio signals and their feature extractions.
+    # Note: certain defs may export 1+ audio signals like hpss.
+    for audio_signal_def in plan['audio_signals']:
+        signal_name = audio_signal_def['name']
+        settings = audio_signal_def['settings']
+        extracts = audio_signal_def['extracts']
 
-    data = {
-        'metadata': {
-            'version': get_version(),
-            'track': track,
-            'sr': sr,
-            'hop_length': hop_length,
-        },
-        'framed': {
-            'frame_times':
-                get_frame_times(**ingredients).tolist(),
-            'rms':
-                get_volume_levels(**ingredients).tolist(),
-            'spectral_centroid':
-                get_spectral_centroids(**ingredients).tolist(),
-            'spectral_flatness':
-                get_spectral_flatness(**ingredients).tolist(),
-            'zero_crossing_rates':
-                get_zero_crossing_rates(**ingredients).tolist(),
-            'onset_strength':
-                get_onset_strength(**ingredients).tolist(),
-        },
-        'events': {
-            'beats':
-                get_beats(**ingredients).tolist(),
-            'onsets':
-                get_onsets(**ingredients).tolist(),
-        },
-    }
+        # Generate audio signal.
+        fn_mappings[signal_name](store, settings)
+
+        # Get audio signal.
+        y = store['audio_signals'][signal_name]['y']
+        D = store['audio_signals'][signal_name]['D']
+
+        data[signal_name] = {
+            'description': audio_signal_def['description'],
+            'settings': settings,
+            'extracts': {k: {} for k,_v in extracts.items()}
+        }
+        for event_type, event_list in extracts.items():
+            for fn_name in event_list:
+                data[signal_name]['extracts'][event_type][fn_name] = \
+                    fn_mappings[fn_name](y, D, sr, hop_length).tolist()
 
     save_features(track, data)
+
+    import pdb; pdb.set_trace()
+
     return data
+
+def get_function_mappings():
+    return {
+        'full': get_full_audio_signal,
+        'harmonic': get_hpss_audio_signal,
+        'percussive': get_hpss_audio_signal,
+        'beats': get_beats,
+        'onsets': get_onsets,
+        'frame_times': get_frame_times,
+        'rms': get_volume_levels,
+        'spectral_centroid': get_spectral_centroids,
+        'spectral_flatness': get_spectral_flatness,
+        'zero_crossing_rates': get_zero_crossing_rates,
+        'onset_strength': get_onset_strength
+    }
