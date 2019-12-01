@@ -1,0 +1,24 @@
+{
+    "metadata": {
+        "sr": 22050,
+        "hop_length": 512
+    },
+    "audio_signals": [
+        {
+            "name": "full",
+            "description": "Operate on full song",
+            "settings": {
+            },
+            "extracts": {
+                "framed": [
+                    "frame_times", "rms", "spectral_centroid",
+                    "spectral_flatness", "zero_crossing_rates", "onset_strength"
+                ],
+                "events": [
+                    "beats", "onsets"
+                ],
+                "complex": []
+            }
+        }
+    ]
+}

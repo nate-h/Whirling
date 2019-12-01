@@ -11,11 +11,10 @@
             },
             "extracts": {
                 "framed": [
-                    "frame_times", "rms", "spectral_centroid",
+                    "rms", "spectral_centroid",
                     "spectral_flatness", "zero_crossing_rates", "onset_strength"
                 ],
                 "events": [
-                    "beats", "onsets"
                 ],
                 "complex": []
             }
@@ -29,11 +28,10 @@
             },
             "extracts": {
                 "framed": [
-                    "frame_times", "rms", "spectral_centroid",
+                    "rms", "spectral_centroid",
                     "spectral_flatness", "zero_crossing_rates", "onset_strength"
                 ],
                 "events": [
-                    "beats", "onsets"
                 ],
                 "complex": []
             }
@@ -47,7 +45,7 @@
             },
             "extracts": {
                 "framed": [
-                    "frame_times", "rms", "spectral_centroid",
+                    "rms", "spectral_centroid",
                     "spectral_flatness", "zero_crossing_rates", "onset_strength"
                 ],
                 "events": [
