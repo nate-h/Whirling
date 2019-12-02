@@ -144,8 +144,13 @@ def get_onset_strength(y, D, sr, hop_length):
 
 @timeit
 def get_loudness(y, D, sr, hop_length):
-    S = librosa.stft(y, hop_length=hop_length)
-    D = librosa.amplitude_to_db(S, ref=np.max)
+    n_fft=2048
+    S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
+    power = np.abs(S)**2
+    p_mean = np.sum(power, axis=0, keepdims=True)
+    p_ref = np.max(power)  # or whatever other reference power you want to use
+    loudness = librosa.amplitude_to_db(p_mean, ref=p_ref)[0]
+    return normalize(loudness)
 
 
 ###############################################################################
@@ -169,7 +174,7 @@ def run_plan(plan:str, track: str):
     hop_length = 512  # Note: may consider dropping this to 360 to get 60fps.
                       # Right now this equates to a 43fps resolution.
     y, sr = load_track(track, sr)
-    D = librosa.stft(y, n_fft=n_fft)
+    D = librosa.stft(y, n_fft=n_fft, hop_length=hop_length)
     fn_mappings = get_function_mappings()
     data = {
         "metadata": {
@@ -228,5 +233,6 @@ def get_function_mappings():
         'spectral_centroid': get_spectral_centroids,
         'spectral_flatness': get_spectral_flatness,
         'zero_crossing_rates': get_zero_crossing_rates,
-        'onset_strength': get_onset_strength
+        'onset_strength': get_onset_strength,
+        'loudness': get_loudness
     }
