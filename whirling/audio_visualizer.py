@@ -88,11 +88,11 @@ class AudioVisualizer(object):
         seconds_future = 1
         seconds_worth = seconds_past + seconds_future
 
-        curr_frame = self.get_frame_number(curr_time + seconds_future)
+        newest_frame = self.get_frame_number(curr_time + seconds_future)
 
         # Establish frame info.
         num_frames = self.get_frame_number(seconds_worth)
-        oldest_frame = max(0, curr_frame - num_frames)
+        oldest_frame = max(0, newest_frame - num_frames)
 
 
         signals = self.track_audio_features['audio_signals']
@@ -126,7 +126,7 @@ class AudioVisualizer(object):
 
             for feature_name, data in framed.items():
                 # Points spanning seconds_worth.
-                pnts = data[oldest_frame: curr_frame]
+                pnts = data[oldest_frame: newest_frame]
                 color = COLORS[row][1]
 
                 # Draw feature name text.
@@ -145,9 +145,9 @@ class AudioVisualizer(object):
             # Convert beat events to frames and then plot them.
             for feature_name, data in framed_events.items():
                 beat_pnts = filter(
-                    lambda x: oldest_frame <= x <= curr_frame, data)
+                    lambda x: oldest_frame <= x <= newest_frame, data)
                 beat_pnts = [p - oldest_frame for p in beat_pnts]
-                pnts = np.zeros(curr_frame - oldest_frame + 1)
+                pnts = np.zeros(newest_frame - oldest_frame + 1)
                 np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
 
                 color = COLORS[row][1]
