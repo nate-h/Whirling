@@ -10,7 +10,7 @@ from whirling.audio_visualizer import AudioVisualizer
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
 
-DESIRED_FPS = 35
+DESIRED_FPS = 60
 
 
 ###############################################################################
@@ -115,8 +115,8 @@ def parse_options():
 
 def main():
     coloredlogs.install()
-    display_width = 1440
-    display_height = 1050
+    display_width = 1920
+    display_height = 1500
 
     args = parse_options()
 

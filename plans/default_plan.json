@@ -31,6 +31,7 @@
                     "spectral_flatness", "zero_crossing_rates", "onset_strength"
                 ],
                 "events": [
+                    "onsets"
                 ],
                 "complex": []
             }

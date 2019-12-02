@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import librosa
 import pygame as pg
@@ -24,7 +25,11 @@ class AudioVisualizer(object):
         self.rect = rect
         self.audio_controller = audio_controller
         self.track_audio_features = None
+
         self.debug_visuals = True
+        self.debug_surface = pg.Surface((self.width, self.height))
+        self.debug_window_number = None
+
         self.font = pg.font.Font(None, 25)
 
         # Register function for track changes.
@@ -84,17 +89,40 @@ class AudioVisualizer(object):
     def draw_debug_visuals(self, window, curr_time):
 
         # Establish what portions of the track to visualize.
-        seconds_past = 2
-        seconds_future = 1
-        seconds_worth = seconds_past + seconds_future
+        seconds_worth = 10
+        curr_window_number = math.floor(curr_time/seconds_worth)
+        min_window_time = curr_window_number * seconds_worth
+        max_window_time = (curr_window_number + 1) * seconds_worth
+        min_window_frame = self.get_frame_number(min_window_time)
+        max_window_frame = self.get_frame_number(max_window_time)
 
-        newest_frame = self.get_frame_number(curr_time + seconds_future)
+        if self.debug_window_number != curr_window_number:
+            print('Update debug suface')
+            print('Time: {}, window: {}, min_window_time: {} max_window_time: {}'.format(
+                round(curr_time, 3), curr_window_number, min_window_time, max_window_time))
+            self.debug_window_number = curr_window_number
+            self.update_debug_visuals_surface(min_window_frame, max_window_frame)
 
-        # Establish frame info.
-        num_frames = self.get_frame_number(seconds_worth)
-        oldest_frame = max(0, newest_frame - num_frames)
+        # Render debug visuals surface.
+        window.blit(self.debug_surface, (0, 0))
 
+        # Render line at current time.
+        curr_percent = (curr_time-min_window_time) / seconds_worth
+        margin = 0.05
+        row_w = 1 - 2 * margin
+        x = row_w * curr_percent + margin
+        y1 = margin
+        y2 = 1 - margin
+        p1 = Point(x, y1)
+        p2 = Point(x, y2)
+        self.draw_line(window, p1, p2, (255, 255, 255), line_width=1)
 
+    def update_debug_visuals_surface(self, min_window_frame, max_window_frame):
+
+        # Reset surface.
+        self.debug_surface.fill((0, 0, 0))
+
+        num_frames = max_window_frame - min_window_frame
         signals = self.track_audio_features['audio_signals']
         sum_framed = sum([len(d['extracts']['framed']) for s,d in signals.items()])
         sum_framed_events = sum([len(d['extracts']['framed_events']) for s,d in signals.items()])
@@ -117,7 +145,7 @@ class AudioVisualizer(object):
 
         def row_title(text):
             text_pos = Point(0.1, row*row_growth + margin + .01)
-            self.draw_text(window, text, text_pos, color)
+            self.draw_text(self.debug_surface, text, text_pos, color)
 
 
         for signal_name, signal_data in signals.items():
@@ -126,7 +154,7 @@ class AudioVisualizer(object):
 
             for feature_name, data in framed.items():
                 # Points spanning seconds_worth.
-                pnts = data[oldest_frame: newest_frame]
+                pnts = data[min_window_frame: max_window_frame]
                 color = COLORS[row][1]
 
                 # Draw feature name text.
@@ -138,16 +166,16 @@ class AudioVisualizer(object):
                     if i != 0:
                         p1 = create_point_from(i-1, last_p)
                         p2 = create_point_from(i, p)
-                        self.draw_line(window, p1, p2, color)
+                        self.draw_line(self.debug_surface, p1, p2, color)
                     last_p = p
                 row += 1
 
             # Convert beat events to frames and then plot them.
             for feature_name, data in framed_events.items():
                 beat_pnts = filter(
-                    lambda x: oldest_frame <= x <= newest_frame, data)
-                beat_pnts = [p - oldest_frame for p in beat_pnts]
-                pnts = np.zeros(newest_frame - oldest_frame + 1)
+                    lambda x: min_window_frame <= x <= max_window_frame, data)
+                beat_pnts = [p - min_window_frame for p in beat_pnts]
+                pnts = np.zeros(max_window_frame - min_window_frame + 1)
                 np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
 
                 color = COLORS[row][1]
@@ -159,16 +187,8 @@ class AudioVisualizer(object):
                 for i, p in enumerate(pnts):
                     r = 0.004 if p > 0 else 0
                     point = create_point_from(i, p)
-                    self.draw_circle(window, r, point, color)
+                    self.draw_circle(self.debug_surface, r, point, color)
                 row += 1
-
-        # Render line at current time.
-        x = row_w*seconds_past/seconds_worth + margin
-        y1 = margin
-        y2 = 1 - margin
-        p1 = Point(x, y1)
-        p2 = Point(x, y2)
-        self.draw_line(window, p1, p2, (255, 255, 255), line_width=1)
 
     ####################################
     # Load data.
@@ -196,21 +216,21 @@ class AudioVisualizer(object):
     # Primitives.
     ####################################
 
-    def draw_circle(self, window, radius=0.1, center=Point(.5, .5), color=(20, 20, 20)):
+    def draw_circle(self, surface, radius=0.1, center=Point(.5, .5), color=(20, 20, 20)):
         center = (int(self.width*center.x), int(self.height*center.y))
         radius = int(self.width * radius)
-        pg.draw.circle(window, color, center, radius)
+        pg.draw.circle(surface, color, center, radius)
 
-    def draw_line(self, window, p1=Point(.5, .5), p2=Point(.5, .5),
+    def draw_line(self, surface, p1=Point(.5, .5), p2=Point(.5, .5),
                   color=(20, 20, 20), line_width=2):
         p1 = (int(self.width*p1.x), int(self.height*p1.y))
         p2 = (int(self.width*p2.x), int(self.height*p2.y))
-        pg.draw.line(window, color, p1, p2, line_width)
+        pg.draw.line(surface, color, p1, p2, line_width)
 
-    def draw_text(self, window, text:str, text_pos=Point(.5, .5), color=(20, 20, 20)):
+    def draw_text(self, surface, text:str, text_pos=Point(.5, .5), color=(20, 20, 20)):
         text_pos = (int(self.width*text_pos.x), int(self.height*text_pos.y))
         text = self.font.render(text, True, color)
-        window.blit(text, text_pos)
+        surface.blit(text, text_pos)
 
     def create_linear_envelope(self, times, peak, slope):
         pass
