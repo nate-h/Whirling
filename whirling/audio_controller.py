@@ -75,6 +75,7 @@ class AudioController():
         if is_playing:
             self.player.stop()
         self.player = vlc.MediaPlayer(new_track)
+        self.player.audio_set_volume(100)
         if is_playing:
             self.player.play()
 
@@ -120,6 +121,16 @@ class AudioController():
     def toggle_play(self):
         logging.info('Toggle play')
         self.play_button.perform_action()
+
+    def adjust_time_by(self, seconds):
+        if not self.is_playing:
+            return
+        logging.info('Adjusting time by %d seconds ', seconds)
+        curr_time = self.player.get_time()
+        proposed_time = curr_time + 1000*seconds
+        max_time = self.player.get_length()
+        realistic_proposed_time = min(max(proposed_time, 0), max_time)
+        self.player.set_time(realistic_proposed_time)
 
     def prev(self):
         count = len(self.music_tracks)
