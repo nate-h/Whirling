@@ -114,16 +114,28 @@ class AudioController():
         logging.info('Play')
         self.player.play()
 
+        # Save this out because poor resolution of vlc's get time.
+        # Check get_time for more info.
+        curr_time = self.player.get_time() * .001
+        self.last_play_time = curr_time
+        self.last_play_time_global = time.time()
+
     def pause(self):
         logging.info('Pause')
         self.player.pause()
+
+        # Save this out because poor resolution of vlc's get time.
+        # Check get_time for more info.
+        curr_time = self.player.get_time() * .001
+        self.last_play_time = curr_time
+        self.last_play_time_global = time.time()
 
     def toggle_play(self):
         logging.info('Toggle play')
         self.play_button.perform_action()
 
     def adjust_time_by(self, seconds):
-        if not self.is_playing:
+        if self.player is None:
             return
         logging.info('Adjusting time by %d seconds ', seconds)
         curr_time = self.player.get_time()
@@ -154,7 +166,7 @@ class AudioController():
         # TODO: Shouldn't short circuit here and need to rewrite time interpolation code so it returns
         #       the correct time when paused.
         if not self.is_playing:
-            return -1
+            return self.player.get_time() * .001
 
         curr_time = self.player.get_time() * .001
 

@@ -76,9 +76,9 @@ class Whirling(object):
         elif event.key == pg.K_SPACE:
             self.audio_controller.toggle_play()
         elif event.key == pg.K_LEFT:
-            self.audio_controller.adjust_time_by(-5)
+            self.audio_controller.adjust_time_by(-2)
         elif event.key == pg.K_RIGHT:
-            self.audio_controller.adjust_time_by(5)
+            self.audio_controller.adjust_time_by(2)
 
     def render_fps(self):
         fps = self.font.render(str(int(self.clock.get_fps())), True, pg.Color('white'))
