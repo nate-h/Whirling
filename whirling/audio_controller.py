@@ -162,14 +162,13 @@ class AudioController():
     def get_time(self):
         # This exists because vlcs default get time updates only a couple
         # of times per second.
-
-        # TODO: Shouldn't short circuit here and need to rewrite time interpolation code so it returns
-        #       the correct time when paused.
         if not self.is_playing:
             return self.player.get_time() * .001
 
         curr_time = self.player.get_time() * .001
 
+        # If player hasn't updated it's time, update an internal timer.
+        # Else reset that internal timer and return updated player time.
         if self.last_play_time == curr_time and self.last_play_time != 0:
             curr_time += time.time() - self.last_play_time_global
         else:
