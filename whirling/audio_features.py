@@ -66,7 +66,7 @@ def save_features(track: str, data):
 
 
 ###############################################################################
-# Signal modifying.
+# Track separation.
 ###############################################################################
 
 @timeit
@@ -95,6 +95,27 @@ def get_hpss_audio_signal(store, settings):
             'D': DP,
         }
     })
+
+@timeit
+def get_spleeter_audio_signal(store, settings):
+
+    # Establish what signals spleeter will parse.
+    spleeter_signals = {
+        'spleeter_' + f for f in ['vocals', 'drums', 'base', 'other']}
+
+    # Get full list of audio signals we've extracted already.
+    audio_signals = set(list(store['audio_signals'].keys()))
+
+    # Don't proceed if lists overlap at all.
+    if len(spleeter_signals & audio_signals) > 0:
+        return
+
+
+    """Use spleeter to seperate the track into 4 components:
+    Vocals, Drums, base, oter separation"""
+
+    pass
+
 
 
 ###############################################################################
