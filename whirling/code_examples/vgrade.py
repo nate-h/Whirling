@@ -57,14 +57,15 @@ def VertGrad3D(surf, topcolor, bottomcolor):
     diff = bottomcolor - topcolor
     width, height = surf.get_size()
     # create array from 0.0 to 1.0 triplets
-    column = np.arange(height, dtype=np.float64)/height
-    column = np.repeat(column[:, np.newaxis], [3], 1)
+    column = np.arange(height, dtype=np.float64)/height    # 0 -> 1
+    column = np.repeat(column[:, np.newaxis], [3], 1)      # Copy that array 3 time  shape=600x3
     # create a single column of gradient
-    column = topcolor + (diff * column).astype(np.int64)
+    column = topcolor + (diff * column).astype(np.int64)   # Linear interp from topcolor to bottom
+                                                           # color based on 0 -> 1 value shape=600x3
     # make the column a 3d image column by adding X
-    column = column.astype(np.uint8)[np.newaxis, :, :]
+    column = column.astype(np.uint8)[np.newaxis, :, :]     # 1x600x3
     #3d array into 2d array
-    column = pygame.surfarray.map_array(surf, column)
+    column = pygame.surfarray.map_array(surf, column)      # 1x600
     # stretch the column into a full image
     return np.resize(column, (width, height))
 
