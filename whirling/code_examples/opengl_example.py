@@ -20,12 +20,22 @@ def tick(i):
 
   # Draw Axis
   axis(i)
+  w = 100
+  h = 70
+  pnts_x = 40
+  pnts_y = 40
 
   # Draw sinewave
-  for x in range(200):
-    x = x/2.0
-    y = math.sin(math.radians(x+i) * 10) * 30 + 30
-    cquad((x, y, 0), 1, (y/60.0, 0, x/100.0))  #(center, diameter, color)
+  for i in range(pnts_x):
+    for j in range(pnts_y):
+        x = i/pnts_x * w
+        y = j/pnts_y * h
+        cquad((x, y, 0), 1, (y/60.0, 0, x/100.0))  #(center, diameter, color)
+
+    # for x in range(200):
+    #     x = x/2.0
+    #     y = math.sin(math.radians(x+i) * 10) * 30 + 30
+    #     cquad((x, y, 0), 1, (y/60.0, 0, x/100.0))  #(center, diameter, color)
 
 ###############################################################################
 # The rest of this is the bones that make it work
@@ -88,7 +98,7 @@ def main():
   display_width = 1920
   display_height = 1500
   pg.display.set_mode((display_width, display_height), pg.OPENGL|pg.DOUBLEBUF)
-  glEnable(GL_DEPTH_TEST)    #use our zbuffer
+  glDisable(GL_DEPTH_TEST)    # disable our zbuffer
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -103,10 +113,8 @@ def main():
   #glRotatef(-20, 1, 0, 0)             #orbit higher
 
   clock = pg.time.Clock()
-  nt = int(time.time() * 1000)
 
   for i in range(2**63):
-    nt += 1000//FPS_TARGET
 
     #check for quit'n events
     event = pg.event.poll()
