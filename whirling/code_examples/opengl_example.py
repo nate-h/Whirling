@@ -73,12 +73,21 @@ def cquad(point, size, color):
   glVertex3fv((x-s,y+s,z))
   glEnd()
 
+import OpenGL.GL as ogl
+def drawText(position, textString):
+    font = pg.font.Font (None, 64)
+    textSurface = font.render(textString, True, (255,255,255,255), (0,0,0,255))
+    textData = pg.image.tostring(textSurface, "RGBA", True)
+    glRasterPos3d(*position)
+    glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
 def main():
 
   #initialize pygame and setup an opengl display
   pg.init()
-  pg.display.set_mode((1200,800), pg.OPENGL|pg.DOUBLEBUF)
+  display_width = 1920
+  display_height = 1500
+  pg.display.set_mode((display_width, display_height), pg.OPENGL|pg.DOUBLEBUF)
   glEnable(GL_DEPTH_TEST)    #use our zbuffer
 
   glEnable(GL_BLEND);
@@ -93,7 +102,7 @@ def main():
   #glTranslatef(0, 0, -100)        #move back
   #glRotatef(-20, 1, 0, 0)             #orbit higher
 
-
+  clock = pg.time.Clock()
   nt = int(time.time() * 1000)
 
   for i in range(2**63):
@@ -108,13 +117,13 @@ def main():
 
     tick(i)
 
+    fps = str(int(clock.get_fps()))
+    drawText((0, 0, 0), fps)
+
     pg.display.flip()
 
-    ct = int(time.time() * 1000)
-    pg.time.wait(max(1, nt - ct))
-
-    if i % FPS_TARGET == 0:
-      print(nt-ct)
+    clock.tick(FPS_TARGET)
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
