@@ -20,7 +20,9 @@ setup(
         'librosa',
         'coloredlogs',
         'jupyter',
-        'matplotlib'
+        'matplotlib',
+        'PyOpenGL',
+        'PyOpenGL_accelerate'
     ],
     entry_points={
         'console_scripts': [
