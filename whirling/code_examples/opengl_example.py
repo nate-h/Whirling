@@ -62,7 +62,7 @@ def drawText(position, textString):
     font = pg.font.Font (None, 64)
     textSurface = font.render(textString, True, (255,255,255,255), (0,0,0,255))
     textData = pg.image.tostring(textSurface, "RGBA", True)
-    glRasterPos3d(*position)
+    glRasterPos2d(*position)
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
 def main():
@@ -72,12 +72,10 @@ def main():
   display_width = 1920
   display_height = 1500
   pg.display.set_mode((display_width, display_height), pg.OPENGL|pg.DOUBLEBUF)
+
+  # set opengl to 2d scene
   glDisable(GL_DEPTH_TEST)    # disable our zbuffer
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  #setup the camera
+  glDisable(GL_BLEND)
   glMatrixMode(GL_PROJECTION)
   glOrtho(-10, 110, -10, 70, -1, 1)
 
@@ -90,13 +88,13 @@ def main():
     if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
       break
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) # clear the screen
-    #glLoadIdentity()
+    # clear the screen
+    glClear(GL_COLOR_BUFFER_BIT)
 
     tick(i)
 
     fps = str(int(clock.get_fps()))
-    drawText((0, 0, 0), fps)
+    drawText((0, 0), fps)
 
     pg.display.flip()
 
