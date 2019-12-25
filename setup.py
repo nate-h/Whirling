@@ -21,8 +21,8 @@ setup(
         'coloredlogs',
         'jupyter',
         'matplotlib',
-        'PyOpenGL',
-        'PyOpenGL_accelerate'
+        'PyOpenGL'
+        #'PyOpenGL_accelerate'
     ],
     entry_points={
         'console_scripts': [
