@@ -15,8 +15,8 @@ def tick(i):
   axis(i)
   w = 100
   h = 70
-  pnts_x = 70
-  pnts_y = 50
+  pnts_x = 75
+  pnts_y = 60
 
   # Draw checkerboard.
   for i in range(pnts_x):
