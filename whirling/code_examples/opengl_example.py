@@ -17,11 +17,13 @@ def tick(i):
   pnts_y = 60
 
   # Draw checkerboard.
+  glBegin(GL_QUADS)
   for i in range(pnts_x):
     for j in range(pnts_y):
         x = i/pnts_x * w
         y = j/pnts_y * h
         draw_rect((x, y), 1, (y/60.0, 0, x/100.0))  #(center, diameter, color)
+  glEnd()
 
 
 def axis(i):
@@ -46,7 +48,6 @@ def axis(i):
   glEnd()
 
 def draw_rect(point, size, color):
-  glBegin(GL_QUADS)
   glColor3f(*color)
   x,y = point
   s = size/2.0
@@ -54,7 +55,6 @@ def draw_rect(point, size, color):
   glVertex2f(x+s, y-s)                           # bottom right point
   glVertex2f(x+s, y+s)                  # top right point
   glVertex2f(x-s, y+s)                          # top left point
-  glEnd()
 
 def drawText(position, textString):
     font = pg.font.Font (None, 64)
