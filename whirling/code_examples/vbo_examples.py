@@ -21,63 +21,99 @@ def main():
     glDisable(GL_DEPTH_TEST)    # disable our zbuffer
     glDisable(GL_BLEND)
     glMatrixMode(GL_PROJECTION)
+    glOrtho(-10, 110, -10, 70, -1, 1)
 
 
-    rectangle = [
-        # Positions         #Colors
-        -0.5, -0.5, 0.0,    1.0, 0.0, 0.0,
-        0.5, -0.5, 0.0,     0.0, 1.0, 0.0,
-        0.5, 0.5, 0.0,      0.0, 0.0, 1.0,
-        -0.5, 0.5, 0.0,      1.0, 1.0, 1.0
-    ]
+    # rectangle = [
+    #     # Positions         #Colors
+    #     -0.5, -0.5, 0.0,    1.0, 0.0, 0.0,
+    #     0.5, -0.5, 0.0,     0.0, 1.0, 0.0,
+    #     0.5, 0.5, 0.0,      0.0, 0.0, 1.0,
+    #     -0.5, 0.5, 0.0,      1.0, 1.0, 1.0
+    # ]
+
+    # Creating Indices
+    # indices = [
+    #     0, 1, 2,
+    #     2, 3, 0
+    # ]
+
+    w = 100
+    h = 70
+    pnts_x = 75
+    pnts_y = 60
+    s = 1/2.0
+    rectangle = []
+    indices = []
+    count = 0
+
+    for i in range(pnts_x):
+        for j in range(pnts_y):
+            x = i/pnts_x * w
+            y = j/pnts_y * h
+            x1 = x-s
+            x2 = x+s
+            y1 = y-s
+            y2 = y+s
+            rectangle.extend(
+                [
+                    x1, y1, 0.0,    y/60.0, 0, x/100.0,
+                    x2, y1, 0.0,    y/60.0, 0, x/100.0,
+                    x2, y2, 0.0,    y/60.0, 0, x/100.0,
+                    x1, y2, 0.0,    y/60.0, 0, x/100.0
+                ]
+            )
+            indices.extend(
+                [
+                    0 + 4*count, 1 + 4*count, 2 + 4*count,
+                    2 + 4*count, 3 + 4*count, 0 + 4*count
+                ]
+            )
+            count += 1
 
     # convert to 32bit float
     rectangle = np.array(rectangle, dtype=np.float32)
 
-    # Creating Indices
-    indices = [
-        0, 1, 2,
-        2, 3, 0
-    ]
-
     indices = np.array(indices, dtype=np.uint32)
 
     VERTEX_SHADER = """
- 
+
         #version 130
- 
+
         in vec3 position;
         in vec3 color;
         out vec3 newColor;
- 
+
         void main() {
- 
+
          gl_Position = vec4(position, 1.0);
          newColor = color;
- 
+
           }
- 
- 
+
+
     """
 
     FRAGMENT_SHADER = """
         #version 130
- 
+
         in vec3 newColor;
         out vec4 outColor;
- 
+
         void main() {
- 
+
           outColor = vec4(newColor, 1.0f);
- 
+
         }
- 
+
     """
 
     # Compile The Program and shaders
 
-    shader = OpenGL.GL.shaders.compileProgram(OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
-                                              OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER))
+    shader = OpenGL.GL.shaders.compileProgram(
+        OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
+        OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+    )
 
     # Create Buffer object in gpu
     VBO = glGenBuffers(1)
@@ -89,23 +125,23 @@ def main():
 
     # Bind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
-    glBufferData(GL_ARRAY_BUFFER, 96, rectangle, GL_STATIC_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, 24*count*4, rectangle, GL_STATIC_DRAW)
 
     # get the position from  shader
     position = glGetAttribLocation(shader, 'position')
     glVertexAttribPointer(position, 3, GL_FLOAT,
-                          GL_FALSE, 24, ctypes.c_void_p(0))
+                          GL_FALSE, 24*count, ctypes.c_void_p(0))
     glEnableVertexAttribArray(position)
 
     # get the color from  shader
     color = glGetAttribLocation(shader, 'color')
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                          24, ctypes.c_void_p(12))
+                          24*count, ctypes.c_void_p(12))
     glEnableVertexAttribArray(color)
 
     glUseProgram(shader)
 
-    glClearColor(0.0, 1.0, 0.0, 1.0)
+    glClearColor(1.0, 1.0, 1.0, 1.0)
 
     clock = pg.time.Clock()
     count = 0
@@ -119,7 +155,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT)
 
         # Draw Triangle
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,  None)
+        glDrawElements(GL_TRIANGLES, 6*count, GL_UNSIGNED_INT,  None)
 
         count += 1
         if count % 100 == 0:
