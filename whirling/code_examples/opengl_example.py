@@ -5,7 +5,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 
-FPS_TARGET = 50
+FPS_TARGET = 60
 
 
 def tick(i):
