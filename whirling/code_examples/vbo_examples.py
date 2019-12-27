@@ -11,7 +11,7 @@ FPS_TARGET = 55
 
 def main():
 
-    #initialize pygame and setup an opengl display
+    # initialize pygame and setup an opengl display
     pg.init()
     display_width = 1920
     display_height = 1500
@@ -109,7 +109,7 @@ def main():
     count = 0
 
     while True:
-        #check for quit'n events
+        # Check for quit'n events
         event = pg.event.poll()
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
             break
@@ -117,11 +117,8 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT)
 
         # Draw Triangle
-
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,  None)
 
-        #fps = str(int(clock.get_fps()))
-        #drawText((0, 0), fps)
         count += 1
         if count % 100 == 0:
             print(clock.get_fps())
