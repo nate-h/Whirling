@@ -6,7 +6,7 @@ import OpenGL.GL.shaders
 import numpy as np
 
 
-FPS_TARGET = 55
+FPS_TARGET = 65
 
 
 def main():
@@ -32,19 +32,19 @@ def main():
     ]
 
     # convert to 32bit float
-
     rectangle = np.array(rectangle, dtype=np.float32)
 
     # Creating Indices
-
-    indices = [0, 1, 2,
-               2, 3, 0]
+    indices = [
+        0, 1, 2,
+        2, 3, 0
+    ]
 
     indices = np.array(indices, dtype=np.uint32)
 
     VERTEX_SHADER = """
  
-        #version 330
+        #version 130
  
         in vec3 position;
         in vec3 color;
@@ -61,7 +61,7 @@ def main():
     """
 
     FRAGMENT_SHADER = """
-        #version 330
+        #version 130
  
         in vec3 newColor;
         out vec4 outColor;
