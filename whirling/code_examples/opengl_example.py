@@ -13,8 +13,8 @@ def tick(i):
   axis(i)
   w = 100
   h = 80
-  pnts_x = 70
-  pnts_y = 55
+  pnts_x = 75
+  pnts_y = 60
 
   # Draw checkerboard.
   glBegin(GL_QUADS)
@@ -29,21 +29,20 @@ def tick(i):
 def axis(i):
   glBegin(GL_LINES)
 
-  #x = red
-  #y = green
-  #z = blue
-
+  # Red for x.
   glColor3f(1, 0, 0)
   glVertex3fv((0, 0, 0))
-  glVertex3fv((1, 0, 0))
+  glVertex3fv((10, 0, 0))
 
+  # Green for y.
   glColor3f(0, 1, 0)
   glVertex3fv((0, 0, 0))
-  glVertex3fv((0, 1, 0))
+  glVertex3fv((0, 10, 0))
 
+  # Blue for z.
   glColor3f(0, 0, 1)
   glVertex3fv((0, 0, 0))
-  glVertex3fv((0, 0, 1))
+  glVertex3fv((0, 0, 10))
 
   glEnd()
 
@@ -51,10 +50,10 @@ def draw_rect(point, size, color):
   glColor3f(*color)
   x,y = point
   s = size/2.0
-  glVertex2f(x-s, y-s)                                   # bottom left point
-  glVertex2f(x+s, y-s)                           # bottom right point
-  glVertex2f(x+s, y+s)                  # top right point
-  glVertex2f(x-s, y+s)                          # top left point
+  glVertex2f(x-s, y-s)      # bottom left point
+  glVertex2f(x+s, y-s)      # bottom right point
+  glVertex2f(x+s, y+s)      # top right point
+  glVertex2f(x-s, y+s)      # top left point
 
 def drawText(position, textString):
     font = pg.font.Font (None, 64)

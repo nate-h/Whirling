@@ -5,6 +5,8 @@ from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
 
+from opengl_example import axis
+
 
 FPS_TARGET = 65
 
@@ -140,6 +142,9 @@ def main():
 
         # Draw Triangle.
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
+
+        # Draw axis.
+        #axis(None)
 
         count += 1
         if count % 100 == 0:
