@@ -10,14 +10,14 @@ FPS_TARGET = 65
 
 def main():
 
-    # initialize pygame and setup an opengl display
+    # Initialize pygame and setup an opengl display.
     pg.init()
     display_width = 1920
     display_height = 1500
     pg.display.set_mode((display_width, display_height), pg.OPENGL|pg.DOUBLEBUF)
 
-    # set opengl to 2d scene
-    glDisable(GL_DEPTH_TEST)    # disable our zbuffer
+    # Set opengl to 2d scene
+    glDisable(GL_DEPTH_TEST)
     glDisable(GL_BLEND)
     glMatrixMode(GL_PROJECTION)
 
@@ -29,7 +29,7 @@ def main():
     indices = []
     count = 0
 
-    # Generate rects.
+    # Generate rects and indices for triangles in rect.
     for i in range(pnts_x):
         for j in range(pnts_y):
             x = i * s - 1
@@ -39,14 +39,18 @@ def main():
             y1 = y
             y2 = y+s*0.9
 
+            # Add 2 triangles to create a rect.
             rectangle.extend(
                 [
+                    # Position      # Color
                     x1, y1, 0.0,    j/60.0, 0.0, i/75.0,
                     x2, y1, 0.0,    j/60.0, 0.0, i/75.0,
                     x2, y2, 0.0,    j/60.0, 0.0, i/75.0,
                     x1, y2, 0.0,    j/60.0, 0.0, i/75.0,
                 ]
             )
+
+            # Add 3 indexes for each triangle.
             indices.extend(
                 [
                     0 + 4*count, 1 + 4*count, 2 + 4*count,
@@ -55,7 +59,7 @@ def main():
             )
             count += 1
 
-    # convert to 32bit float
+    # Convert to 32bit float.
     rectangle = np.array(rectangle, dtype=np.float32)
     indices = np.array(indices, dtype=np.uint32)
 
@@ -91,31 +95,31 @@ def main():
 
     """
 
-    # Compile The Program and shaders
+    # Compile The Program and shaders.
     shader = OpenGL.GL.shaders.compileProgram(
         OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
         OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
     )
 
-    # Create Buffer object in gpu
+    # Create Buffer object in gpu.
     VBO = glGenBuffers(1)
 
-    # Create EBO
+    # Create EBO.
     EBO = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
 
-    # Bind the buffer
+    # Bind the buffer.
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
     glBufferData(GL_ARRAY_BUFFER, 4*len(rectangle), rectangle, GL_STATIC_DRAW)
 
-    # get the position from shader
+    # Get the position from shader.
     position = glGetAttribLocation(shader, 'position')
     glVertexAttribPointer(position, 3, GL_FLOAT,
                           GL_FALSE, 24, ctypes.c_void_p(0))
     glEnableVertexAttribArray(position)
 
-    # get the color from shader
+    # Get the color from shader.
     color = glGetAttribLocation(shader, 'color')
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
                           24, ctypes.c_void_p(12))
@@ -127,14 +131,14 @@ def main():
     count = 0
 
     while True:
-        # Check for quit'n events
+        # Check for quit'n events.
         event = pg.event.poll()
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
             break
 
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Draw Triangle
+        # Draw Triangle.
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
 
         count += 1
