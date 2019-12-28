@@ -12,9 +12,9 @@ def tick(i):
   # Draw Axis
   axis(i)
   w = 100
-  h = 70
-  pnts_x = 75
-  pnts_y = 60
+  h = 80
+  pnts_x = 70
+  pnts_y = 55
 
   # Draw checkerboard.
   glBegin(GL_QUADS)
@@ -75,7 +75,7 @@ def main():
   glDisable(GL_DEPTH_TEST)    # disable our zbuffer
   glDisable(GL_BLEND)
   glMatrixMode(GL_PROJECTION)
-  glOrtho(-10, 110, -10, 70, -1, 1)
+  glOrtho(0, 100, 0, 80, -1, 1)
 
   clock = pg.time.Clock()
 
