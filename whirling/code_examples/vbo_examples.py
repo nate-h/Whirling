@@ -9,6 +9,18 @@ import numpy as np
 FPS_TARGET = 65
 
 
+def debug_print(rectangle, indices, count):
+    print('................rectangle')
+    for i in np.split(rectangle, len(rectangle)/6):
+        print(i)
+
+    print('......... indices')
+    for i in np.split(indices, len(indices)/3):
+        print(i)
+    print('.........')
+    print(count)
+
+
 def main():
 
     # initialize pygame and setup an opengl display
@@ -21,7 +33,10 @@ def main():
     glDisable(GL_DEPTH_TEST)    # disable our zbuffer
     glDisable(GL_BLEND)
     glMatrixMode(GL_PROJECTION)
-    glOrtho(-10, 110, -10, 70, -1, 1)
+    #glLoadIdentity()
+    #glOrtho(-10, 110, -10, 70, -1, 1)
+    #glLoadIdentity()
+    glViewport (0, 0, 100, 60)
 
 
     # rectangle = [
@@ -40,8 +55,8 @@ def main():
 
     w = 100
     h = 70
-    pnts_x = 75
-    pnts_y = 60
+    pnts_x = 1
+    pnts_y = 1
     s = 1/2.0
     rectangle = []
     indices = []
@@ -55,12 +70,15 @@ def main():
             x2 = x+s
             y1 = y-s
             y2 = y+s
+
+            # color fn: y/60.0, 0, x/100.0
+
             rectangle.extend(
                 [
-                    x1, y1, 0.0,    y/60.0, 0, x/100.0,
-                    x2, y1, 0.0,    y/60.0, 0, x/100.0,
-                    x2, y2, 0.0,    y/60.0, 0, x/100.0,
-                    x1, y2, 0.0,    y/60.0, 0, x/100.0
+                    x1, y1, 0.0,    1.0, 1.0, 1.0,
+                    x2, y1, 0.0,    1.0, 1.0, 1.0,
+                    x2, y2, 0.0,    1.0, 1.0, 1.0,
+                    x1, y2, 0.0,    1.0, 1.0, 1.0,
                 ]
             )
             indices.extend(
@@ -73,8 +91,10 @@ def main():
 
     # convert to 32bit float
     rectangle = np.array(rectangle, dtype=np.float32)
-
     indices = np.array(indices, dtype=np.uint32)
+
+    # Debug print everything.
+    debug_print(rectangle, indices, count)
 
     VERTEX_SHADER = """
 
@@ -109,7 +129,6 @@ def main():
     """
 
     # Compile The Program and shaders
-
     shader = OpenGL.GL.shaders.compileProgram(
         OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
         OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
@@ -127,21 +146,19 @@ def main():
     glBindBuffer(GL_ARRAY_BUFFER, VBO)
     glBufferData(GL_ARRAY_BUFFER, 24*count*4, rectangle, GL_STATIC_DRAW)
 
-    # get the position from  shader
+    # get the position from shader
     position = glGetAttribLocation(shader, 'position')
     glVertexAttribPointer(position, 3, GL_FLOAT,
                           GL_FALSE, 24*count, ctypes.c_void_p(0))
     glEnableVertexAttribArray(position)
 
-    # get the color from  shader
+    # get the color from shader
     color = glGetAttribLocation(shader, 'color')
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
                           24*count, ctypes.c_void_p(12))
     glEnableVertexAttribArray(color)
 
     glUseProgram(shader)
-
-    glClearColor(1.0, 1.0, 1.0, 1.0)
 
     clock = pg.time.Clock()
     count = 0
@@ -161,7 +178,6 @@ def main():
         if count % 100 == 0:
             print(clock.get_fps())
 
-        #glfw.swap_buffers(window)
         pg.display.flip()
         clock.tick(FPS_TARGET)
 
