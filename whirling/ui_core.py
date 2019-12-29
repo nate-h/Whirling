@@ -55,11 +55,25 @@ class UIText(UIElement):
     def __init__(self, text_string, position, font_size=30, font_key='mono',
                  font_color=(255,255,255,255), font_bg=(0,0,0,255),
                  anchor_position=AnchorPositions.TOP_LEFT):
+        self.original_position = position
+        self.font_color = font_color
+        self.font_bg = font_bg
+        self.anchor_position = anchor_position
         self.font = pg.font.Font(self.fonts[font_key], font_size)
         self.text = text_string
-        self.text_surface = self.font.render(text_string, True, font_color, font_bg)
+
+    @property
+    def text(self):
+        return self.text_string
+
+    @text.setter
+    def text(self, text_string):
+        self.text_string = text_string
+        self.text_surface = self.font.render(
+            self.text_string, True, self.font_color, self.font_bg)
         self.text_data = pg.image.tostring(self.text_surface, "RGBA", True)
-        self.position = self.translate_position(position, anchor_position)
+        self.position = self.translate_position(
+            self.original_position, self.anchor_position)
 
     @property
     def width(self):

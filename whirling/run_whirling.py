@@ -17,7 +17,7 @@ from whirling.ui_core import axis
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
 
-DESIRED_FPS = 3
+DESIRED_FPS = 10
 
 
 ###############################################################################
@@ -76,6 +76,7 @@ class Whirling(object):
 
             # Update
             #self.audio_controller.update()
+            self.fps.text = str(int(self.clock.get_fps()))
 
             # Draw visuals
             self.draw()
