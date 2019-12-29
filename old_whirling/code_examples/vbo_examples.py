@@ -42,6 +42,7 @@ def main():
     glDisable(GL_DEPTH_TEST)
     glDisable(GL_BLEND)
     glMatrixMode(GL_PROJECTION)
+    glOrtho(0, 1, 0, 1, -1, 1)
 
     # Define plot parameters.
     pnts_x = 75
@@ -146,8 +147,6 @@ def main():
     glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
                           24, ctypes.c_void_p(12))
     glEnableVertexAttribArray(color)
-
-    glOrtho(0, 1, 0, 1, -1, 1)
 
     clock = pg.time.Clock()
     count = 0
