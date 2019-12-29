@@ -34,8 +34,8 @@ def main():
 
     # Initialize pygame and setup an opengl display.
     pg.init()
-    display_width = 1920
-    display_height = 1500
+    display_width = 1500
+    display_height = 1600
     pg.display.set_mode((display_width, display_height), pg.OPENGL|pg.DOUBLEBUF)
 
     # Set opengl to 2d scene
@@ -45,7 +45,7 @@ def main():
 
     # Define plot parameters.
     pnts_x = 75
-    pnts_y = 60
+    pnts_y = 75
     s = 2/80
     rectangle = []
     indices = []
@@ -65,10 +65,10 @@ def main():
             rectangle.extend(
                 [
                     # Position      # Color
-                    x1, y1, 0.0,    j/60.0, 0.0, i/75.0,
-                    x2, y1, 0.0,    j/60.0, 0.0, i/75.0,
-                    x2, y2, 0.0,    j/60.0, 0.0, i/75.0,
-                    x1, y2, 0.0,    j/60.0, 0.0, i/75.0,
+                    x1, y1, 0.0,    j/pnts_y, 0.0, i/pnts_x,
+                    x2, y1, 0.0,    j/pnts_y, 0.0, i/pnts_x,
+                    x2, y2, 0.0,    j/pnts_y, 0.0, i/pnts_x,
+                    x1, y2, 0.0,    j/pnts_y, 0.0, i/pnts_x,
                 ]
             )
 
