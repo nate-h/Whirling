@@ -5,10 +5,30 @@ from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
 
-from opengl_example import axis
-
 
 FPS_TARGET = 65
+
+
+def axis(i):
+  glBegin(GL_LINES)
+
+  # Red for x.
+  glColor3f(1, 0, 0)
+  glVertex3fv((0, 0.001, 0))
+  glVertex3fv((0.9, 0.001, 0))
+
+  # Green for y.
+  glColor3f(0, 1, 0)
+  glVertex3fv((0.001, 0, 0))
+  glVertex3fv((0.001, 0.9, 0))
+
+  # Blue for z.
+  glColor3f(0, 0, 1)
+  glVertex3fv((0, 0, 0))
+  glVertex3fv((0, 0, 10))
+
+  glEnd()
+
 
 def main():
 
@@ -127,7 +147,7 @@ def main():
                           24, ctypes.c_void_p(12))
     glEnableVertexAttribArray(color)
 
-    glUseProgram(shader)
+    glOrtho(0, 1, 0, 1, -1, 1)
 
     clock = pg.time.Clock()
     count = 0
@@ -140,11 +160,13 @@ def main():
 
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Draw Triangle.
+        # Draw rectangles.
+        glUseProgram(shader)
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
 
         # Draw axis.
-        #axis(None)
+        glUseProgram(0)
+        axis(None)
 
         count += 1
         if count % 100 == 0:

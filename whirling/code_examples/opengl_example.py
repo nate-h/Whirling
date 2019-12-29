@@ -22,7 +22,7 @@ def tick(i):
     for j in range(pnts_y):
         x = i/pnts_x * w
         y = j/pnts_y * h
-        draw_rect((x, y), 1, (y/60.0, 0, x/100.0))  #(center, diameter, color)
+        draw_rect((x, y), 1, (y/60.0, 0, x/100.0))
   glEnd()
 
 
