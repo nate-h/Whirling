@@ -4,6 +4,11 @@ import logging
 import argparse
 import coloredlogs
 import pygame as pg
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+import OpenGL.GL.shaders
+import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
 #from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
@@ -20,10 +25,16 @@ DESIRED_FPS = 45
 class Whirling(object):
     def __init__(self, plan, display_w, display_h, use_cache=False):
 
+        # Initialize window and pygame.
         pg.init()
-
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
         pg.display.set_caption('Whirling')
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_BLEND)
+        glMatrixMode(GL_PROJECTION)
+        glOrtho(0, 1, 0, 1, -1, 1)
+
+
         self.stopped = False
         self.dw = display_w
         self.dh = display_h
@@ -82,6 +93,7 @@ class Whirling(object):
         pass
 
     def draw(self):
+        glClear(GL_COLOR_BUFFER_BIT)
         pg.display.flip()
 
 ###############################################################################
