@@ -1,9 +1,11 @@
+from PIL import Image
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
+import numpy as np
 
 
 class AnchorPositions(Enum):
@@ -40,8 +42,6 @@ class UIElement():
         # Process anchor.
         if anchor_position == AnchorPositions.TOP_LEFT:
             y -= self.height/window_h
-
-        print(self.height/window_h)
 
         # return translated position.
         return (x, y, z)
@@ -84,10 +84,57 @@ class UIText(UIElement):
         return self.text_surface.get_height()
 
     def draw(self):
-        print(self.height)
         glRasterPos3d(*self.position)
         glDrawPixels(self.width, self.height,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.text_data)
+
+
+class UIImage(UIElement):
+    def __init__(self, image_location, position,
+                 anchor_position=AnchorPositions.TOP_LEFT):
+        self.original_position = position
+        self.anchor_position = anchor_position
+        self.image_location = image_location
+
+    @property
+    def image_location(self):
+        return self.image_location_string
+
+    @image_location.setter
+    def image_location(self, image_location):
+        self.image_location_string = image_location
+
+        textureSurface = pg.image.load(image_location)
+
+        textureData = pg.image.tostring(textureSurface, "RGBA", 1)
+
+        width = textureSurface.get_width()
+        height = textureSurface.get_height()
+
+        texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, texture)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE, textureData)
+
+        self.image_surface = texture
+
+        # self.position = self.translate_position(
+        #     self.original_position, self.anchor_position)
+        self.position = self.original_position
+
+        self.setup_shader()
+
+    @property
+    def width(self):
+        return self.image_surface.get_width()
+
+    @property
+    def height(self):
+        return self.image_surface.get_height()
+
+# https://community.khronos.org/t/textured-quad-will-not-draw/73992
 
 def axis():
   glBegin(GL_LINES)

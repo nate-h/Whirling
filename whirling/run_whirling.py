@@ -12,7 +12,8 @@ import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
 #from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
-from whirling.ui_core import UIText
+from whirling.ui_core import UIText, UIImage
+from whirling.test import DummyImage
 from whirling.ui_core import axis
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
@@ -37,8 +38,18 @@ class Whirling(object):
         glOrtho(0, 1, 0, 1, -1, 1)
 
 
-        #self.fps = UIText('FPS', (.05, 0.95, 0))
+        # set up texturing
+        glEnable(GL_TEXTURE_2D)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+
+        # UI element testing.
         self.fps = UIText('FPS', (0.02, 0.98, 0), font_size=50)
+        #self.next = UIImage('whirling/assets/next.png', (0.02, 0.98, 0))
+        self.next = DummyImage()
+
+
         self.stopped = False
         self.dw = display_w
         self.dh = display_h
@@ -98,9 +109,11 @@ class Whirling(object):
         pass
 
     def draw(self):
+        glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
         axis()
         self.fps.draw()
+        self.next.draw((0, 0), width=0.5, height=0.5)
         pg.display.flip()
 
 ###############################################################################
