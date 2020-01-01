@@ -1,4 +1,3 @@
-from PIL import Image
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -79,13 +78,12 @@ def render(layers):
         l.render()
 
 class GL_Texture:
-    def __init__(s, texname=None, texappend=".png"):
-        #filename = os.path.join('', texname)
-        filename = texname
+    def __init__(self, texname=None, texappend=".png"):
+        filename = os.path.join('whirling/assets', texname)
         filename += texappend
 
-        s.texture, s.width, s.height = loadImage(filename)
-        s.displaylist = createTexDL(s.texture, s.width, s.height)
+        self.texture, self.width, self.height = loadImage(filename)
+        self.displaylist = createTexDL(self.texture, self.width, self.height)
 
     def __del__(self):
         if self.texture != None:
@@ -95,25 +93,25 @@ class GL_Texture:
             delDL(self.displaylist)
             self.displaylist = None
 
-    def __repr__(s):
-        return s.texture.__repr__()
+    def __repr__(self):
+        return self.texture.__repr__()
 
 class Textureset:
     """Texturesets contain and name textures."""
 
-    def __init__(s):
-        s.textures = {}
-    def load(s, texname=None, texappend=".png"):
-        s.textures[texname] = GL_Texture(texname, texappend)
-    def set(s, texname, data):
-        s.textures[texname] = data
-    def delete(s, texname):
-        del s.textures[texname]
-    def __del__(s):
-        s.textures.clear()
-        del s.textures
-    def get(s, name):
-        return s.textures[name]
+    def __init__(self):
+        self.textures = {}
+    def load(self, texname=None, texappend=".png"):
+        self.textures[texname] = GL_Texture(texname, texappend)
+    def set(self, texname, data):
+        self.textures[texname] = data
+    def delete(self, texname):
+        del self.textures[texname]
+    def __del__(self):
+        self.textures.clear()
+        del self.textures
+    def get(self, name):
+        return self.textures[name]
 
 class GL_Image:
     def __init__(self, texset, texname):
@@ -172,7 +170,7 @@ class CImage:
     Cimage is fast but immutable - it has to recreate
     the display list to be changed."""
 
-    def __init__(s, ilist):
+    def __init__(self, ilist):
         newlist = glGenLists(1)
         glNewList(newlist,GL_COMPILE)
 
@@ -187,32 +185,32 @@ class CImage:
                 glTranslate(-i[1][0][0], -i[1][0][1],0)
 
         glEndList()
-        s.displaylist = newlist
+        self.displaylist = newlist
 
-    def __del__(s):
-        if s.displaylist != None:
-            delDL(s.displaylist)
-            s.displaylist = None
+    def __del__(self):
+        if self.displaylist != None:
+            delDL(self.displaylist)
+            self.displaylist = None
 
-    def draw(s, abspos=None,relpos=None):
+    def draw(self, abspos=None,relpos=None):
         if abspos:
             glLoadIdentity()
             glTranslate(abspos[0],abspos[1],0)
         elif relpos:
             glTranslate(relpos[0],relpos[1],0)
 
-        glCallList(s.displaylist)
+        glCallList(self.displaylist)
 
 class DCImage:
     """Dynamic Composite Image - elements are mutable, at the caveat of
     runtime performance."""
-    def __init__(s, ilist):
-        s.ilist = ilist
-    def draw(s, abspos):
+    def __init__(self, ilist):
+        self.ilist = ilist
+    def draw(self, abspos):
         glLoadIdentity()
         glTranslate(abspos[0],abspos[1],0)
 
-        for i in s.ilist:
+        for i in self.ilist:
             i[0].draw(i[1])
 
 class LDCImage:
@@ -221,22 +219,22 @@ class LDCImage:
     applications like text and tiles that don't need the features of DCImage.
 
     Remember not to mistake this for *LCD* Image!"""
-    def __init__(s, cache):
+    def __init__(self, cache):
         """cache format is: (texture ref, (absx, absy))"""
-        s.cache = cache
-    def draw(s, abspos):
+        self.cache = cache
+    def draw(self, abspos):
 
         glLoadIdentity()
         glTranslate(abspos[0],abspos[1],0)
 
-        for c in s.cache:
+        for c in self.cache:
             glTranslate(c[1][0], c[1][1],0)
             glCallList(c[0].displaylist)
             glTranslate(-c[1][0], -c[1][1],0)
 
 def DummyImage():
     tset = Textureset()
-    tset.load('whirling/assets/next','.png')
-    fooimage = GL_Image(tset, 'whirling/assets/next')
-    rawfootex = tset.get('whirling/assets/next')
+    tset.load('next','.png')
+    fooimage = GL_Image(tset, 'next')
+    rawfootex = tset.get('next')
     return fooimage
