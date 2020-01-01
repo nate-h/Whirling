@@ -25,23 +25,6 @@ def loadImage(image):
 
     return texture, width, height
 
-def SurfaceClip(surface, rect):
-    textureSurface = surface.subsurface(rect)
-
-    textureData = pg.image.tostring(textureSurface, "RGBA", 1)
-
-    width = textureSurface.get_width()
-    height = textureSurface.get_height()
-
-    texture = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, texture)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, textureData)
-
-    return texture, width, height
-
 
 def delTexture(texture):
     glDeleteTextures(texture)
@@ -163,74 +146,6 @@ class GL_Image:
             glTranslate(rotationCenter[0],rotationCenter[1],0)
             glRotate(-rotation,0,0,-1)
             glTranslate(-rotationCenter[0],-rotationCenter[1],0)
-
-class CImage:
-    """CImage is a "composed image" that refs multiple GLImages.
-    format is [(GLImage,argstoimage)...()..()]
-    Cimage is fast but immutable - it has to recreate
-    the display list to be changed."""
-
-    def __init__(self, ilist):
-        newlist = glGenLists(1)
-        glNewList(newlist,GL_COMPILE)
-
-        # see GL_Image.draw
-        for i in ilist:
-            if i[1][0] == None:
-                i[0].draw(i[1][0], i[1][1], i[1][2], i[1][3], i[1][4],
-                    i[1][5], i[1][6])
-            else: # absolute positioning normally resets the identity
-                i[0].draw(None,i[1][0], i[1][2], i[1][3], i[1][4], i[1][5],
-                    i[1][6])
-                glTranslate(-i[1][0][0], -i[1][0][1],0)
-
-        glEndList()
-        self.displaylist = newlist
-
-    def __del__(self):
-        if self.displaylist != None:
-            delDL(self.displaylist)
-            self.displaylist = None
-
-    def draw(self, abspos=None,relpos=None):
-        if abspos:
-            glLoadIdentity()
-            glTranslate(abspos[0],abspos[1],0)
-        elif relpos:
-            glTranslate(relpos[0],relpos[1],0)
-
-        glCallList(self.displaylist)
-
-class DCImage:
-    """Dynamic Composite Image - elements are mutable, at the caveat of
-    runtime performance."""
-    def __init__(self, ilist):
-        self.ilist = ilist
-    def draw(self, abspos):
-        glLoadIdentity()
-        glTranslate(abspos[0],abspos[1],0)
-
-        for i in self.ilist:
-            i[0].draw(i[1])
-
-class LDCImage:
-    """Limited Dynamic Composite Image. LDCImage uses only the
-    texture display lists for drawing, which makes it useful for simpler
-    applications like text and tiles that don't need the features of DCImage.
-
-    Remember not to mistake this for *LCD* Image!"""
-    def __init__(self, cache):
-        """cache format is: (texture ref, (absx, absy))"""
-        self.cache = cache
-    def draw(self, abspos):
-
-        glLoadIdentity()
-        glTranslate(abspos[0],abspos[1],0)
-
-        for c in self.cache:
-            glTranslate(c[1][0], c[1][1],0)
-            glCallList(c[0].displaylist)
-            glTranslate(-c[1][0], -c[1][1],0)
 
 def DummyImage():
     tset = Textureset()
