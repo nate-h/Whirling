@@ -102,29 +102,7 @@ class UIImage(UIElement):
 
     @image_location.setter
     def image_location(self, image_location):
-        self.image_location_string = image_location
-
-        textureSurface = pg.image.load(image_location)
-
-        textureData = pg.image.tostring(textureSurface, "RGBA", 1)
-
-        width = textureSurface.get_width()
-        height = textureSurface.get_height()
-
-        texture = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, texture)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-            GL_UNSIGNED_BYTE, textureData)
-
-        self.image_surface = texture
-
-        # self.position = self.translate_position(
-        #     self.original_position, self.anchor_position)
-        self.position = self.original_position
-
-        self.setup_shader()
+        pass
 
     @property
     def width(self):
