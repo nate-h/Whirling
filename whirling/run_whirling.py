@@ -33,12 +33,6 @@ class Whirling(object):
         pg.display.set_caption('Whirling')
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_BLEND)
-        glMatrixMode(GL_PROJECTION)
-        glOrtho(0, 1, 0, 1, -1, 1)
-
-        # set up texturing
-        glEnable(GL_TEXTURE_2D)
-        glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         # Initialize all whirling textures.
@@ -108,11 +102,16 @@ class Whirling(object):
         pass
 
     def draw(self):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(0, 1, 0, 1, -1, 1)
+
+        glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
         UIAxis()
         self.fps.draw()
-        self.next.draw((0, 0), width=0.5, height=0.5)
+        self.next.draw((0, 0), width=0.05, height=0.05)
         pg.display.flip()
 
 ###############################################################################

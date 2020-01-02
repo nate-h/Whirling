@@ -113,6 +113,8 @@ class UIImage(UIElement):
 
     def draw(self, abspos=None, relpos=None, width=None, height=None,
             color=None, rotation=None, rotationCenter=None):
+        glEnable(GL_TEXTURE_2D)
+        glEnable(GL_BLEND)
         if color==None:
             color = self.color
 
@@ -150,6 +152,9 @@ class UIImage(UIElement):
             glTranslate(rotationCenter[0],rotationCenter[1],0)
             glRotate(-1*rotation,0,0,-1)
             glTranslate(-rotationCenter[0],-rotationCenter[1],0)
+
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_BLEND)
 
 # https://community.khronos.org/t/textured-quad-will-not-draw/73992
 

@@ -14,7 +14,13 @@ from os.path import splitext
 # All textures in whirling are defined here.
 # Using a texture set ensures no wasted compute.
 IMAGES = {
-    'next.png'
+    'fw.png',
+    'next.png',
+    'pause.png',
+    'play.png',
+    'prev.png',
+    'rew.png',
+    'stop.png',
 }
 
 
@@ -37,7 +43,11 @@ def loadImage(image):
 
 
 def delTexture(texture):
-    glDeleteTextures(texture)
+    # glDeleteTextures(texture)
+    # TODO figure out why this doesn't work.
+    # The error I get is:
+    # TypeError: No array-type handler for type numpy.uint32 (value: 1) registered
+    pass
 
 
 def createTexDL(texture, width, height):
