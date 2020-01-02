@@ -5,8 +5,18 @@ import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
+from os.path import splitext
 
+# Code adapated from here:
 # https://www.pygame.org/wiki/SimpleOpenGL2dClasses
+
+
+# All textures in whirling are defined here.
+# Using a texture set ensures no wasted compute.
+IMAGES = {
+    'next.png'
+}
+
 
 def loadImage(image):
     textureSurface = pg.image.load(image)
@@ -64,7 +74,6 @@ class GL_Texture:
     def __init__(self, texname=None, texappend=".png"):
         filename = os.path.join('whirling/assets', texname)
         filename += texappend
-
         self.texture, self.width, self.height = loadImage(filename)
         self.displaylist = createTexDL(self.texture, self.width, self.height)
 
@@ -82,8 +91,11 @@ class GL_Texture:
 class Textureset:
     """Texturesets contain and name textures."""
 
-    def __init__(self):
+    def __init__(self, textures=[]):
         self.textures = {}
+        for texture in textures:
+            texname, texappend = splitext(texture)
+            self.load(texname=texname, texappend=texappend)
     def load(self, texname=None, texappend=".png"):
         self.textures[texname] = GL_Texture(texname, texappend)
     def set(self, texname, data):
@@ -96,60 +108,13 @@ class Textureset:
     def get(self, name):
         return self.textures[name]
 
-class GL_Image:
-    def __init__(self, texset, texname):
-        self.texture = texset.get(texname)
-        self.width = self.texture.width
-        self.height = self.texture.height
-        self.abspos=None
-        self.relpos=None
-        self.color=(1,1,1,1)
-        self.rotation=0
-        self.rotationCenter=None
-
-    def draw(self, abspos=None, relpos=None, width=None, height=None,
-            color=None, rotation=None, rotationCenter=None):
-        if color==None:
-            color = self.color
-
-        glColor4fv(color)
-
-        if abspos:
-            glLoadIdentity()
-            glTranslate(abspos[0],abspos[1],0)
-        elif relpos:
-            glTranslate(relpos[0],relpos[1],0)
-
-        if rotation==None:
-            rotation=self.rotation
-
-        if rotation != 0:
-                if rotationCenter == None:
-                    rotationCenter = (self.width / 2, self.height / 2)
-                # (w,h) = rotationCenter
-                glTranslate(rotationCenter[0],rotationCenter[1],0)
-                glRotate(rotation,0,0,-1)
-                glTranslate(-rotationCenter[0],-rotationCenter[1],0)
-
-        if width or height:
-            if not width:
-                width = self.width
-            elif not height:
-                height = self.height
-
-            glScalef(width/(self.width*1.0), height/(self.height*1.0), 1.0)
-
-
-        glCallList(self.texture.displaylist)
-
-        if rotation != 0: # reverse
-            glTranslate(rotationCenter[0],rotationCenter[1],0)
-            glRotate(-rotation,0,0,-1)
-            glTranslate(-rotationCenter[0],-rotationCenter[1],0)
-
-def DummyImage():
-    tset = Textureset()
-    tset.load('next','.png')
-    fooimage = GL_Image(tset, 'next')
-    rawfootex = tset.get('next')
-    return fooimage
+class WhirlingTextures:
+    class __OnlyOne(Textureset):
+        def __init__(self):
+            super().__init__(IMAGES)
+    instance = None
+    def __init__(self):
+        if not WhirlingTextures.instance:
+            WhirlingTextures.instance = WhirlingTextures.__OnlyOne()
+    def __getattr__(self, name):
+        return getattr(self.instance, name)

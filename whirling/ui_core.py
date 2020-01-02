@@ -89,31 +89,71 @@ class UIText(UIElement):
 
 
 class UIImage(UIElement):
-    def __init__(self, image_location, position,
-                 anchor_position=AnchorPositions.TOP_LEFT):
-        self.original_position = position
-        self.anchor_position = anchor_position
-        self.image_location = image_location
-
-    @property
-    def image_location(self):
-        return self.image_location_string
-
-    @image_location.setter
-    def image_location(self, image_location):
-        pass
+    def __init__(self, texset, texname):
+        print(texname)
+        self.texture = texset.get(texname)
+        self.abspos=None
+        self.relpos=None
+        self.color=(1,1,1,1)
+        self.rotation=0
+        self.rotationCenter=None
+    # def __init__(self, image_location, position,
+    #              anchor_position=AnchorPositions.TOP_LEFT):
+    #     self.original_position = position
+    #     self.anchor_position = anchor_position
+    #     self.image_location = image_location
 
     @property
     def width(self):
-        return self.image_surface.get_width()
+        return self.texture.width
 
     @property
     def height(self):
-        return self.image_surface.get_height()
+        return self.texture.height
+
+    def draw(self, abspos=None, relpos=None, width=None, height=None,
+            color=None, rotation=None, rotationCenter=None):
+        if color==None:
+            color = self.color
+
+        glColor4fv(color)
+
+        if abspos:
+            glLoadIdentity()
+            glTranslate(abspos[0],abspos[1],0)
+        elif relpos:
+            glTranslate(relpos[0],relpos[1],0)
+
+        if rotation==None:
+            rotation=self.rotation
+
+        if rotation != 0:
+                if rotationCenter == None:
+                    rotationCenter = (self.width / 2, self.height / 2)
+                # (w,h) = rotationCenter
+                glTranslate(rotationCenter[0],rotationCenter[1],0)
+                glRotate(rotation,0,0,-1)
+                glTranslate(-rotationCenter[0],-rotationCenter[1],0)
+
+        if width or height:
+            if not width:
+                width = self.width
+            elif not height:
+                height = self.height
+
+            glScalef(width/(self.width*1.0), height/(self.height*1.0), 1.0)
+
+
+        glCallList(self.texture.displaylist)
+
+        if rotation != 0: # reverse
+            glTranslate(rotationCenter[0],rotationCenter[1],0)
+            glRotate(-1*rotation,0,0,-1)
+            glTranslate(-rotationCenter[0],-rotationCenter[1],0)
 
 # https://community.khronos.org/t/textured-quad-will-not-draw/73992
 
-def axis():
+def UIAxis():
   glBegin(GL_LINES)
 
   # Red for x.
