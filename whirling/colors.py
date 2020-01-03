@@ -20,6 +20,9 @@ MAROON = (128,0,0)
 GREEN = (0,128,0)
 NAVY = (0,0,128)
 
+
+WHITE = (255,255,255)
+
 COLORS = {
     'RED': RED,
     'LIME': LIME,
