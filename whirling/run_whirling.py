@@ -106,9 +106,6 @@ class Whirling(object):
         elif event.key == pg.K_RIGHT:
             self.audio_controller.adjust_time_by(2)
 
-    def render_fps(self):
-        pass
-
     def draw(self):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()

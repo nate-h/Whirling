@@ -52,7 +52,7 @@ def delTexture(texture):
 
 def createTexDL(texture, width, height):
     newList = glGenLists(1)
-    glNewList(newList,GL_COMPILE);
+    glNewList(newList,GL_COMPILE)
     glBindTexture(GL_TEXTURE_2D, texture)
     glBegin(GL_QUADS)
 
