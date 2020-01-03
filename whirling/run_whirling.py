@@ -88,6 +88,10 @@ class Whirling(object):
             # Update display and clock last.
             self.clock.tick(DESIRED_FPS)
 
+        # If exit loop, quit pygame.
+        pg.quit()
+        quit()
+
     def handle_key_down(self, event):
         if event.key == pg.K_ESCAPE:
             self.stopped = True

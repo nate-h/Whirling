@@ -90,7 +90,6 @@ class UIText(UIElement):
 
 class UIImage(UIElement):
     def __init__(self, texset, texname):
-        print(texname)
         self.texture = texset.get(texname)
         self.abspos=None
         self.relpos=None
