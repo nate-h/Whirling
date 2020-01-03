@@ -5,7 +5,7 @@ import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
-from whirling.colors import RED, GREEN, BLUE
+from whirling.colors import RED, GREEN, BLUE, WHITE
 
 
 class AnchorPositions(Enum):
@@ -53,7 +53,7 @@ class UIText(UIElement):
         'mono' :'whirling/fonts/SourceCodePro-Regular.otf'
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=(255,255,255,255), font_bg=(0,0,0,255),
+                 font_color=(255, 255, 255, 255), font_bg=(0, 0, 0, 0),
                  anchor_position=AnchorPositions.TOP_LEFT):
         self.original_position = position
         self.font_color = font_color
@@ -71,6 +71,7 @@ class UIText(UIElement):
         self.text_string = text_string
         self.text_surface = self.font.render(
             self.text_string, True, self.font_color, self.font_bg)
+
         self.text_data = pg.image.tostring(self.text_surface, "RGBA", True)
         self.position = self.translate_position(
             self.original_position, self.anchor_position)
@@ -92,11 +93,11 @@ class UIText(UIElement):
 class UIImage(UIElement):
     def __init__(self, texset, texname):
         self.texture = texset.get(texname)
-        self.abspos=None
-        self.relpos=None
-        self.color=(1,1,1,1)
-        self.rotation=0
-        self.rotationCenter=None
+        self.abspos = None
+        self.relpos = None
+        self.color = (1,1,1,1)
+        self.rotation = 0
+        self.rotationCenter = None
     # def __init__(self, image_location, position,
     #              anchor_position=AnchorPositions.TOP_LEFT):
     #     self.original_position = position
@@ -156,7 +157,17 @@ class UIImage(UIElement):
         glDisable(GL_TEXTURE_2D)
         glDisable(GL_BLEND)
 
-# https://community.khronos.org/t/textured-quad-will-not-draw/73992
+
+class UIButton(UIText):
+    def __init__(self, text_string, position, font_size=30, font_key='mono',
+                 font_color=(255,255,255,255), font_bg=(0,0,0,255),
+                 anchor_position=AnchorPositions.TOP_LEFT):
+        super().__init__(text_string, position, font_size, font_key,
+            font_color, font_bg, anchor_position)
+
+    def draw(self):
+        super().draw()
+
 
 class UIAxis(UIElement):
     def __init__(self, size, offset):
