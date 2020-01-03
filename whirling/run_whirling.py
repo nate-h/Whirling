@@ -39,6 +39,7 @@ class Whirling(object):
         whirling_textures = WhirlingTextures()
 
         # UI element testing.
+        self.ui_axis = UIAxis(0.9, .001)
         self.fps = UIText('FPS', (0.02, 0.98, 0), font_size=50)
         self.next = UIImage(whirling_textures, 'next')
 
@@ -113,7 +114,7 @@ class Whirling(object):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
-        UIAxis()
+        self.ui_axis.draw()
         self.fps.draw()
         self.next.draw((0, 0), width=0.05, height=0.05)
         pg.display.flip()

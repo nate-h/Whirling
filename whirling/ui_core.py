@@ -5,6 +5,7 @@ import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
+from whirling.colors import RED, GREEN, BLUE
 
 
 class AnchorPositions(Enum):
@@ -157,22 +158,30 @@ class UIImage(UIElement):
 
 # https://community.khronos.org/t/textured-quad-will-not-draw/73992
 
-def UIAxis():
-  glBegin(GL_LINES)
+class UIAxis(UIElement):
+    def __init__(self, size, offset):
+        self.offset = offset
+        self.x_color = RED
+        self.y_color = GREEN
+        self.z_color = BLUE
+        self.size = size
 
-  # Red for x.
-  glColor3f(1, 0, 0)
-  glVertex3fv((0, 0.001, 0))
-  glVertex3fv((0.9, 0.001, 0))
+    def draw(self):
+        glBegin(GL_LINES)
 
-  # Green for y.
-  glColor3f(0, 1, 0)
-  glVertex3fv((0.001, 0, 0))
-  glVertex3fv((0.001, 0.9, 0))
+        # Red for x.
+        glColor3f(*self.x_color)
+        glVertex3fv((0, self.offset, 0))
+        glVertex3fv((self.size, self.offset, 0))
 
-  # Blue for z.
-  glColor3f(0, 0, 1)
-  glVertex3fv((0, 0, 0))
-  glVertex3fv((0, 0, 0.9))
+        # Green for y.
+        glColor3f(*self.y_color)
+        glVertex3fv((self.offset, 0, 0))
+        glVertex3fv((self.offset, self.size, 0))
 
-  glEnd()
+        # Blue for z.
+        glColor3f(*self.z_color)
+        glVertex3fv((0, 0, 0))
+        glVertex3fv((0, 0, self.size))
+
+        glEnd()

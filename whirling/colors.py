@@ -1,23 +1,45 @@
-COLORS = [
-    ['Red', (255,0,0)],
-    ['Lime', (0,255,0)],
-    ['Blue', (0,0,255)],
-    ['Yellow', (255,255,0)],
-    ['Silver', (192,192,192)],
-    ['Cyan Aqua', (0,255,255)],
-    ['Magenta Fuchsia', (255,0,255)],
-    ['Gold', (255,215,0)],
-    ['Chartreuse', (127,255,0)],
-    ['Orange Red', (255,69,0)],
-    ['Lawn Green', (124,252,0)],
-    ['Deep Sky Blue', (0,191,255)],
-    ['Violet', (238,130,238)],
-    ['Hot Pink', (255,20,147)],
-    ['Teal', (0,128,128)],
-    ['Purple', (128,0,128)],
-    ['Olive', (128,128,0)],
-    ['Gray', (128,128,128)],
-    ['Maroon', (128,0,0)],
-    ['Green', (0,128,0)],
-    ['Navy', (0,0,128)],
-]
+RED = (255,0,0)
+LIME = (0,255,0)
+BLUE = (0,0,255)
+YELLOW = (255,255,0)
+SILVER = (192,192,192)
+CYAN = (0,255,255)
+MAGENTA = (255,0,255)
+GOLD = (255,215,0)
+CHARTREUSE = (127,255,0)
+ORANGE_RED = (255,69,0)
+LAWN_GREEN = (124,252,0)
+DEEP_SKY_BLUE = (0,191,255)
+VIOLET = (238,130,238)
+HOT_PINK = (255,20,147)
+TEAL = (0,128,128)
+PURPLE = (128,0,128)
+OLIVE = (128,128,0)
+GRAY = (128,128,128)
+MAROON = (128,0,0)
+GREEN = (0,128,0)
+NAVY = (0,0,128)
+
+COLORS = {
+    'RED': RED,
+    'LIME': LIME,
+    'BLUE': BLUE,
+    'YELLOW': YELLOW,
+    'SILVER': SILVER,
+    'CYAN': CYAN,
+    'MAGENTA': MAGENTA,
+    'GOLD': GOLD,
+    'CHARTREUSE': CHARTREUSE,
+    'ORANGE_RED': ORANGE_RED,
+    'LAWN_GREEN': LAWN_GREEN,
+    'DEEP_SKY_BLUE': DEEP_SKY_BLUE,
+    'VIOLET': VIOLET,
+    'HOT_PINK': HOT_PINK,
+    'TEAL': TEAL,
+    'PURPLE': PURPLE,
+    'OLIVE': OLIVE,
+    'GRAY': GRAY,
+    'MAROON': MAROON,
+    'GREEN': GREEN,
+    'NAVY': NAVY,
+}
