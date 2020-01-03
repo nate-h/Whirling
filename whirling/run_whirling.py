@@ -12,7 +12,7 @@ import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
 #from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
-from whirling.ui_core import UIText, UIImage, UIAxis
+from whirling.ui_core import UIText, UIImage, UIAxis, UIButton
 from whirling.ui_textures import WhirlingTextures
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
@@ -32,15 +32,18 @@ class Whirling(object):
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
         pg.display.set_caption('Whirling')
         glDisable(GL_DEPTH_TEST)
-        glDisable(GL_BLEND)
+        glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         # Initialize all whirling textures.
         whirling_textures = WhirlingTextures()
 
         # UI element testing.
-        self.ui_axis = UIAxis(0.9, .001)
-        self.fps = UIText('FPS', (0.02, 0.98, 0), font_size=50)
+        self.ui_axis = UIAxis(90, .1)
+        self.fps = UIText('FPS', (5, 90, 0), font_size=50, font_bg=(0,0,0,10))
+        self.play = UIButton('Play', (7, 90, 0), font_size=50, font_bg=(100,100,0,0))
+        self.test = UIButton('test', (9, 90, 0), font_size=50, font_bg=(0,0,100,50))
+
         self.next = UIImage(whirling_textures, 'next')
 
 
@@ -109,14 +112,16 @@ class Whirling(object):
     def draw(self):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0, 1, 0, 1, -1, 1)
+        glOrtho(0, 100, 0, 100, -1, 1)
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
         self.ui_axis.draw()
         self.fps.draw()
-        self.next.draw((0, 0), width=0.05, height=0.05)
+        self.play.draw()
+        self.test.draw()
+        self.next.draw((0, 0), width=5, height=5)
         pg.display.flip()
 
 ###############################################################################
