@@ -5,7 +5,7 @@ import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
-from whirling.colors import RED, GREEN, BLUE, WHITE
+from whirling import colors
 
 
 class AnchorPositions(Enum):
@@ -53,11 +53,11 @@ class UIText(UIElement):
         'mono' :'whirling/fonts/SourceCodePro-Regular.otf'
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=(255, 255, 255, 255), font_bg=(0, 0, 0, 0),
+                 font_color=colors.WHITE, bg_color=colors.CLEAR,
                  anchor_position=AnchorPositions.TOP_LEFT):
         self.original_position = position
         self.font_color = font_color
-        self.font_bg = font_bg
+        self.bg_color = bg_color
         self.anchor_position = anchor_position
         self.font = pg.font.Font(self.fonts[font_key], font_size)
         self.text = text_string
@@ -70,9 +70,21 @@ class UIText(UIElement):
     def text(self, text_string):
         self.text_string = text_string
         self.text_surface = self.font.render(
-            self.text_string, True, self.font_color, self.font_bg)
+            self.text_string, True, colors.WHITE)
 
-        self.text_data = pg.image.tostring(self.text_surface, "RGBA", True)
+        # Add text color.
+        text_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
+        text_color_surf.fill(self.font_color)
+        self.text_surface.blit(text_color_surf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+
+        # Add background color.
+        bg_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
+        bg_color_surf.fill(self.bg_color)
+        bg_color_surf.blit(self.text_surface, (0, 0))
+        self.text_surface = bg_color_surf
+
+        # Convert surface to string buffer.
+        self.text_data = pg.image.tostring(self.text_surface, "RGBA", 1)
         self.position = self.translate_position(
             self.original_position, self.anchor_position)
 
@@ -85,6 +97,8 @@ class UIText(UIElement):
         return self.text_surface.get_height()
 
     def draw(self):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
         glRasterPos3d(*self.position)
         glDrawPixels(self.width, self.height,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.text_data)
@@ -160,10 +174,10 @@ class UIImage(UIElement):
 
 class UIButton(UIText):
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=(255,255,255,255), font_bg=(0,0,0,255),
+                 font_color=colors.WHITE, bg_color=colors.CLEAR,
                  anchor_position=AnchorPositions.TOP_LEFT):
         super().__init__(text_string, position, font_size, font_key,
-            font_color, font_bg, anchor_position)
+            font_color, bg_color, anchor_position)
 
     def draw(self):
         super().draw()
@@ -172,9 +186,9 @@ class UIButton(UIText):
 class UIAxis(UIElement):
     def __init__(self, size, offset):
         self.offset = offset
-        self.x_color = RED
-        self.y_color = GREEN
-        self.z_color = BLUE
+        self.x_color = colors.RED
+        self.y_color = colors.GREEN
+        self.z_color = colors.BLUE
         self.size = size
 
     def draw(self):

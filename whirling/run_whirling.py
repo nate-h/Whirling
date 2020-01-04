@@ -16,6 +16,7 @@ from whirling.ui_core import UIText, UIImage, UIAxis, UIButton
 from whirling.ui_textures import WhirlingTextures
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
+from whirling import colors
 
 DESIRED_FPS = 10
 
@@ -40,9 +41,9 @@ class Whirling(object):
 
         # UI element testing.
         self.ui_axis = UIAxis(90, .1)
-        self.fps = UIText('FPS', (5, 90, 0), font_size=50, font_bg=(0,0,0,10))
-        self.play = UIButton('Play', (7, 90, 0), font_size=50, font_bg=(100,100,0,0))
-        self.test = UIButton('test', (9, 90, 0), font_size=50, font_bg=(0,0,100,50))
+        self.fps = UIText('FPS', (5, 90, 0), font_size=50, bg_color=colors.RED)
+        self.play = UIButton('Play', (7, 90, 0), font_size=50)
+        self.test = UIButton('test', (9, 90, 0), font_size=50)
 
         self.next = UIImage(whirling_textures, 'next')
 
