@@ -1,3 +1,6 @@
+# Basic colors.
+WHITE = (255,255,255)
+BLACK = (0,0,0)
 RED = (255,0,0)
 LIME = (0,255,0)
 BLUE = (0,0,255)
@@ -20,9 +23,10 @@ MAROON = (128,0,0)
 GREEN = (0,128,0)
 NAVY = (0,0,128)
 
+# 4 channel colors.
+CLEAR = (0,0,0,0)
 
-WHITE = (255,255,255)
-
+# Convenient arrays to iterate on.
 COLORS = {
     'RED': RED,
     'LIME': LIME,
