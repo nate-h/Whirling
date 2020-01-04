@@ -44,12 +44,11 @@ class Whirling(object):
         whirling_textures = WhirlingTextures()
 
         # UI element testing.
-        offset_x = 0.01*self.width
-        offset_y = self.height - 0.01*self.width
+        offset_x = 0.01 * self.width
+        offset_y = self.height - 0.01 * self.width
         self.ui_axis = UIAxis(0.9*self.width, .1)
         self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50, anchor_position=UIAnchorPositions.TOP_LEFT)
         self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
-
         self.next = UIImage(whirling_textures, 'next')
 
 
@@ -117,8 +116,13 @@ class Whirling(object):
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
         self.ui_axis.draw()
+
         self.fps.draw()
-        self.play.draw()
+
+
+        #self.play.draw()
+
+
         self.next.draw((0, 0), width=5, height=5)
         pg.display.flip()
 

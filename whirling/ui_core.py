@@ -14,16 +14,48 @@ class UIAnchorPositions(Enum):
 
 
 class UIElement():
-    def __init__(self):
+    def __init__(self, bg_color=colors.CLEAR, border_color=colors.CLEAR,
+                 anchor_position=UIAnchorPositions.TOP_LEFT):
         # declare position
         self.position = (0, 0, 0)
-        self.anchor_position = UIAnchorPositions.TOP_LEFT
+        self.bg_color = bg_color
+        self.border_color = border_color
+        self.anchor_position = anchor_position
 
     def draw(self):
-        pass
+        self.draw_background()
+        self.draw_border()
 
     def update(self):
         pass
+
+    def draw_border(self):
+        # Don't proceed if clear border color.
+        if self.border_color is colors.CLEAR:
+            return
+        glColor3f(1, 1, 0)
+        glLoadIdentity()
+        glTranslate(*self.position)
+        glBegin(GL_LINE_LOOP)
+        glVertex2f(0, 0)
+        glVertex2f(0, self.height)
+        glVertex2f(self.width, self.height)
+        glVertex2f(self.width, 0)
+        glEnd()
+
+    def draw_background(self):
+        # Don't proceed if clear border color.
+        if self.bg_color is colors.CLEAR:
+            return
+        glColor4f(1, 0, 0, 0.2)
+        glLoadIdentity()
+        glTranslate(*self.position)
+        glBegin(GL_QUADS)
+        glVertex2f(0, 0)
+        glVertex2f(0, self.height)
+        glVertex2f(self.width, self.height)
+        glVertex2f(self.width, 0)
+        glEnd()
 
     @property
     def width(self):
@@ -59,12 +91,13 @@ class UIText(UIElement):
         'mono' :'whirling/fonts/SourceCodePro-Regular.otf'
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=colors.WHITE, bg_color=colors.CLEAR,
+                 font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR,
                  anchor_position=UIAnchorPositions.BOTTOM_LEFT):
+
+        super().__init__(bg_color, border_color, anchor_position)
+
         self.original_position = position
         self.font_color = font_color
-        self.bg_color = bg_color
-        self.anchor_position = anchor_position
         self.font = pg.font.Font(self.fonts[font_key], font_size)
         self.text = text_string
 
@@ -86,8 +119,22 @@ class UIText(UIElement):
         # Add background color.
         bg_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
         bg_color_surf.fill(self.bg_color)
+
+        # Add border color to background.
+        if self.border_color is not colors.CLEAR:
+            pg.draw.line(bg_color_surf, self.border_color,
+                (0, 0), (self.width, 0), 1)
+            pg.draw.line(bg_color_surf, self.border_color,
+                (self.width-1, 0), (self.width-1, self.height-1), 1)
+            pg.draw.line(bg_color_surf, self.border_color,
+                (self.width -1, self.height-1), (0, self.height-1), 1)
+            pg.draw.line(bg_color_surf, self.border_color,
+                (0, self.height-1), (0, 0), 1)
+
+        # Blend background into text.
         bg_color_surf.blit(self.text_surface, (0, 0))
         self.text_surface = bg_color_surf
+
 
         # Convert surface to string buffer.
         self.text_data = pg.image.tostring(self.text_surface, "RGBA", 1)
@@ -103,8 +150,8 @@ class UIText(UIElement):
         return self.text_surface.get_height()
 
     def draw(self):
-        glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        glLoadIdentity()
         glRasterPos3d(*self.position)
         glDrawPixels(self.width, self.height,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.text_data)
@@ -170,17 +217,17 @@ class UIImage(UIElement):
             glTranslate(-rotationCenter[0],-rotationCenter[1],0)
 
         glDisable(GL_TEXTURE_2D)
-        glDisable(GL_BLEND)
 
 
 class UIButton(UIText):
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=colors.WHITE, bg_color=colors.CLEAR,
+                 font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR,
                  anchor_position=UIAnchorPositions.TOP_LEFT):
 
         # Font size is calculated from height of button.
-        super().__init__(text_string, position, font_size, font_key,
-            font_color, bg_color, anchor_position)
+        super().__init__(text_string, position, font_size=font_size, font_key=font_key,
+            font_color=font_color, bg_color=bg_color, border_color=border_color,
+            anchor_position=anchor_position)
 
     def draw(self):
         super().draw()
