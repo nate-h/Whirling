@@ -40,7 +40,10 @@ class UIElement():
         x = position[0]
         y = position[1]
         z = position[2]
-        _window_w, window_h = pg.display.get_surface().get_size()
+
+        # If ever diverge from orthographic dims, will need to incorporate
+        # this with ratio of ortho dims.
+        #_window_w, window_h = pg.display.get_surface().get_size()
 
         # Process anchor.
         if anchor_position == UIAnchorPositions.TOP_LEFT:
