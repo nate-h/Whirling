@@ -12,7 +12,7 @@ import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
 #from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
-from whirling.ui_core import UIText, UIImage, UIAxis, UIButton
+from whirling.ui_core import UIText, UIImage, UIAxis, UIButton, UIAnchorPositions
 from whirling.ui_textures import WhirlingTextures
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
@@ -29,9 +29,13 @@ class Whirling(object):
     def __init__(self, plan, display_w, display_h, use_cache=False):
 
         # Initialize window and pygame.
+        self.width = display_w
+        self.height = display_h
         pg.init()
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
         pg.display.set_caption('Whirling')
+        glMatrixMode(GL_PROJECTION)
+        glOrtho(0, display_w, 0, display_h, -1, 1)
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -40,10 +44,11 @@ class Whirling(object):
         whirling_textures = WhirlingTextures()
 
         # UI element testing.
-        self.ui_axis = UIAxis(90, .1)
-        self.fps = UIText('FPS', (5, 90, 0), font_size=50, bg_color=colors.RED)
-        self.play = UIButton('Play', (7, 90, 0), font_size=50)
-        self.test = UIButton('test', (9, 90, 0), font_size=50)
+        offset_x = 0.01*self.width
+        offset_y = self.height - 0.01*self.width
+        self.ui_axis = UIAxis(0.9*self.width, .1)
+        self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50, anchor_position=UIAnchorPositions.TOP_LEFT)
+        self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
 
         self.next = UIImage(whirling_textures, 'next')
 
@@ -108,17 +113,12 @@ class Whirling(object):
             self.audio_controller.adjust_time_by(2)
 
     def draw(self):
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(0, 100, 0, 100, -1, 1)
-
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
         self.ui_axis.draw()
         self.fps.draw()
         self.play.draw()
-        self.test.draw()
         self.next.draw((0, 0), width=5, height=5)
         pg.display.flip()
 

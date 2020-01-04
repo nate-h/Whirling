@@ -8,7 +8,7 @@ import numpy as np
 from whirling import colors
 
 
-class AnchorPositions(Enum):
+class UIAnchorPositions(Enum):
     BOTTOM_LEFT = 0  # Anchor will be attached at bottom left of text
     TOP_LEFT = 1     # Anchor will be attached at top left of text
 
@@ -17,7 +17,7 @@ class UIElement():
     def __init__(self):
         # declare position
         self.position = (0, 0, 0)
-        self.anchor_position = AnchorPositions.TOP_LEFT
+        self.anchor_position = UIAnchorPositions.TOP_LEFT
 
     def draw(self):
         pass
@@ -34,14 +34,17 @@ class UIElement():
         pass
 
     def translate_position(self, position, anchor_position):
+        # This probably only works for text positioning.
+        # TODO: figure out how to standardize element positioning so this works
+        #       for all UI Elements.
         x = position[0]
         y = position[1]
         z = position[2]
         _window_w, window_h = pg.display.get_surface().get_size()
 
         # Process anchor.
-        if anchor_position == AnchorPositions.TOP_LEFT:
-            y -= self.height/window_h
+        if anchor_position == UIAnchorPositions.TOP_LEFT:
+            y -= self.height
 
         # return translated position.
         return (x, y, z)
@@ -54,7 +57,7 @@ class UIText(UIElement):
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
                  font_color=colors.WHITE, bg_color=colors.CLEAR,
-                 anchor_position=AnchorPositions.TOP_LEFT):
+                 anchor_position=UIAnchorPositions.BOTTOM_LEFT):
         self.original_position = position
         self.font_color = font_color
         self.bg_color = bg_color
@@ -112,11 +115,6 @@ class UIImage(UIElement):
         self.color = (1,1,1,1)
         self.rotation = 0
         self.rotationCenter = None
-    # def __init__(self, image_location, position,
-    #              anchor_position=AnchorPositions.TOP_LEFT):
-    #     self.original_position = position
-    #     self.anchor_position = anchor_position
-    #     self.image_location = image_location
 
     @property
     def width(self):
@@ -175,7 +173,9 @@ class UIImage(UIElement):
 class UIButton(UIText):
     def __init__(self, text_string, position, font_size=30, font_key='mono',
                  font_color=colors.WHITE, bg_color=colors.CLEAR,
-                 anchor_position=AnchorPositions.TOP_LEFT):
+                 anchor_position=UIAnchorPositions.TOP_LEFT):
+
+        # Font size is calculated from height of button.
         super().__init__(text_string, position, font_size, font_key,
             font_color, bg_color, anchor_position)
 
