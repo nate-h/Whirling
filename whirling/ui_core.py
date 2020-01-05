@@ -33,7 +33,7 @@ class UIElement():
         # Don't proceed if clear border color.
         if self.border_color is colors.CLEAR:
             return
-        glColor3f(1, 1, 0)
+        glColor3f(*self.border_color)
         glLoadIdentity()
         glTranslate(*self.position)
         glBegin(GL_LINE_LOOP)
@@ -47,7 +47,7 @@ class UIElement():
         # Don't proceed if clear border color.
         if self.bg_color is colors.CLEAR:
             return
-        glColor4f(1, 0, 0, 0.2)
+        glColor3f(*self.bg_color)
         glLoadIdentity()
         glTranslate(*self.position)
         glBegin(GL_QUADS)
@@ -60,6 +60,7 @@ class UIElement():
     @property
     def width(self):
         pass
+        # TODO: make this abstract method.
 
     @property
     def height(self):

@@ -10,13 +10,18 @@ from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
-#from whirling.audio_controller import AudioController
+from whirling.primitives import Rect
+from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
 from whirling.ui_core import UIText, UIImage, UIAxis, UIButton, UIAnchorPositions
 from whirling.ui_textures import WhirlingTextures
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
 from whirling import colors
+
+from whirling.ui_audio_controller import UIAudioController
+# from whirling.ui_audio_controller import UIVisualizer
+# from whirling.ui_audio_controller import UIVisualizerController
 
 DESIRED_FPS = 10
 
@@ -31,6 +36,28 @@ class Whirling(object):
         # Initialize window and pygame.
         self.width = display_w
         self.height = display_h
+
+        # Verify window height is much greater than window width.
+        if 1.05*display_w > display_h:
+            msg = 'Window height needs to greater than 1.05 * window width.\n'\
+                'This is so enough space is allocated for the bottom controls.'
+            logging.error(msg)
+            pg.quit()
+            quit()
+
+        # Define rects for main UI elements.
+        bottom_controls_h = display_h - display_w
+        ac_w = 0.6 * display_w
+        visualizer_rect = Rect(0, display_h, display_w, bottom_controls_h)
+        audio_controller_rect = Rect(
+            0, bottom_controls_h, ac_w, 0)
+        visualizer_controller_rect = Rect(
+            ac_w, bottom_controls_h, display_w - ac_w, 0)
+
+        # Initialize audio controller.
+        self.audio_controller = UIAudioController(rect=audio_controller_rect,
+            bg_color=colors.RED, border_color=colors.GREEN)
+
         pg.init()
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
         pg.display.set_caption('Whirling')
@@ -46,7 +73,6 @@ class Whirling(object):
         # UI element testing.
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.01 * self.width
-        self.ui_axis = UIAxis(0.9*self.width, .1)
         self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50, anchor_position=UIAnchorPositions.TOP_LEFT)
         self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
         self.next = UIImage(whirling_textures, 'next')
@@ -71,9 +97,9 @@ class Whirling(object):
         # v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
         # self.visualizer = AudioVisualizer(v_rect, self.audio_controller,
         #     self.current_track)
-        self.Main()
+        self.main_loop()
 
-    def Main(self):
+    def main_loop(self):
 
         while self.stopped is False:
 
@@ -115,7 +141,11 @@ class Whirling(object):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
-        self.ui_axis.draw()
+
+        # Draw debug axis.
+        UIAxis(0.9*self.width, .1).draw()
+
+        self.audio_controller.draw()
 
         self.fps.draw()
 
