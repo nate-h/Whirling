@@ -33,9 +33,10 @@ class UIElement():
         # Don't proceed if clear border color.
         if self.border_color is colors.CLEAR:
             return
-        glColor3f(*self.border_color)
+        glColor4f(*colors.color4f(self.border_color))
         glLoadIdentity()
         glTranslate(*self.position)
+        glTranslatef(.5,.5,0) # Get lines to fall on pixels.
         glBegin(GL_LINE_LOOP)
         glVertex2f(0, 0)
         glVertex2f(0, self.height)
@@ -47,7 +48,7 @@ class UIElement():
         # Don't proceed if clear border color.
         if self.bg_color is colors.CLEAR:
             return
-        glColor3f(*self.bg_color)
+        glColor4f(*colors.color4f(self.bg_color))
         glLoadIdentity()
         glTranslate(*self.position)
         glBegin(GL_QUADS)

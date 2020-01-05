@@ -50,3 +50,15 @@ COLORS = {
     'GREEN': GREEN,
     'NAVY': NAVY,
 }
+
+
+def color4f(color):
+    if len(color) not in [3, 4]:
+        print('Not valid color.')
+        return CLEAR
+    if len(color) == 4:
+        return color
+    new_color = [0,0,0,1]
+    for i, c in enumerate(color):
+        new_color[i] = c
+    return tuple(new_color)

@@ -19,4 +19,4 @@ class Rect:
 
     @property
     def position(self):
-        return (self.left, self.top, 0)
+        return (self.left, self.bottom, 0)

@@ -4,12 +4,12 @@ from whirling import colors
 class UIDock(UIElement):
     def __init__(self, rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
-        self.rect = rect
-        self.position = rect.position
-
         # Initialize base class.
         super().__init__(bg_color, border_color,
             anchor_position=UIAnchorPositions.BOTTOM_LEFT)
+
+        self.rect = rect
+        self.position = rect.position
 
     @property
     def width(self):

@@ -143,7 +143,7 @@ class Whirling(object):
         glClear(GL_COLOR_BUFFER_BIT)
 
         # Draw debug axis.
-        UIAxis(0.9*self.width, .1).draw()
+        # UIAxis(0.9*self.width, .1).draw()
 
         self.audio_controller.draw()
 
