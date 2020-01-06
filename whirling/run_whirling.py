@@ -54,6 +54,16 @@ class Whirling(object):
         visualizer_controller_rect = Rect(
             ac_w, bottom_controls_h, display_w, 0)
 
+        # Initialize pygame and opengl.
+        pg.init()
+        pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
+        pg.display.set_caption('Whirling')
+        glMatrixMode(GL_PROJECTION)
+        glOrtho(0, display_w, 0, display_h, -1, 1)
+        glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         # Initialize audio controller.
         self.audio_controller = UIAudioController(rect=audio_controller_rect,
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
@@ -65,15 +75,6 @@ class Whirling(object):
 
         # Initialize visualizer.
         self.visualizer = UIVisualizer(rect=visualizer_rect)
-
-        pg.init()
-        pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
-        pg.display.set_caption('Whirling')
-        glMatrixMode(GL_PROJECTION)
-        glOrtho(0, display_w, 0, display_h, -1, 1)
-        glDisable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         # UI element testing.
         offset_x = 0.01 * self.width

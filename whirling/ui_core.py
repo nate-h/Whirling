@@ -186,8 +186,6 @@ class UIImage(UIElement):
         self.rotation = 0
         self.rotationCenter = None
 
-        print(self.rect)
-
     @property
     def width(self):
         return self.rect.width
