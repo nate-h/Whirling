@@ -2,7 +2,7 @@ from whirling.ui_core import UIElement, UIAnchorPositions, UIDock
 from whirling import colors
 
 
-class UIAudioController(UIDock):
+class UIVisualizerController(UIDock):
     def __init__(self, rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.

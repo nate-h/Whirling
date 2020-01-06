@@ -15,12 +15,13 @@ class UIAnchorPositions(Enum):
 
 class UIElement():
     def __init__(self, bg_color=colors.CLEAR, border_color=colors.CLEAR,
-                 anchor_position=UIAnchorPositions.TOP_LEFT):
+                 anchor_position=UIAnchorPositions.TOP_LEFT, border_thickness=1):
         # declare position
         self.position = (0, 0, 0)
         self.bg_color = bg_color
         self.border_color = border_color
         self.anchor_position = anchor_position
+        self.border_thickness = border_thickness
 
     def draw(self):
         self.draw_background()
@@ -29,19 +30,33 @@ class UIElement():
     def update(self):
         pass
 
-    def draw_border(self):
+    def draw_border(self, left=True, top=True, right=True, bottom=True):
         # Don't proceed if clear border color.
         if self.border_color is colors.CLEAR:
             return
         glColor4f(*colors.color4f(self.border_color))
         glLoadIdentity()
         glTranslate(*self.position)
-        glTranslatef(.5,.5,0) # Get lines to fall on pixels.
-        glBegin(GL_LINE_LOOP)
-        glVertex2f(0, 0)
-        glVertex2f(0, self.height)
-        glVertex2f(self.width, self.height)
-        glVertex2f(self.width, 0)
+        glTranslatef(.5,.5,0)  # Get lines to fall on pixels.
+        glLineWidth(self.border_thickness)
+        glBegin(GL_LINES)
+
+        if left:
+            glVertex2f(0, 0)
+            glVertex2f(0, self.height)
+
+        if top:
+            glVertex2f(0, self.height)
+            glVertex2f(self.width, self.height)
+
+        if right:
+            glVertex2f(self.width, self.height)
+            glVertex2f(self.width, 0)
+
+        if bottom:
+            glVertex2f(self.width, 0)
+            glVertex2f(0, 0)
+
         glEnd()
 
     def draw_background(self):
@@ -262,3 +277,25 @@ class UIAxis(UIElement):
         glVertex3fv((0, 0, self.size))
 
         glEnd()
+
+
+class UIDock(UIElement):
+    def __init__(self, rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
+
+        # Initialize base class.
+        super().__init__(bg_color, border_color,
+            anchor_position=UIAnchorPositions.BOTTOM_LEFT)
+
+        self.rect = rect
+        self.position = rect.position
+
+    @property
+    def width(self):
+        return self.rect.width
+
+    @property
+    def height(self):
+        return self.rect.height
+
+    def draw(self):
+        super().draw()

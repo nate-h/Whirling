@@ -20,8 +20,8 @@ from data.tracks import MUSIC_TRACKS
 from whirling import colors
 
 from whirling.ui_audio_controller import UIAudioController
-# from whirling.ui_audio_controller import UIVisualizer
-# from whirling.ui_audio_controller import UIVisualizerController
+from whirling.ui_visualizer import UIVisualizer
+from whirling.ui_visualizer_controller import UIVisualizerController
 
 DESIRED_FPS = 10
 
@@ -52,11 +52,19 @@ class Whirling(object):
         audio_controller_rect = Rect(
             0, bottom_controls_h, ac_w, 0)
         visualizer_controller_rect = Rect(
-            ac_w, bottom_controls_h, display_w - ac_w, 0)
+            ac_w, bottom_controls_h, display_w, 0)
 
         # Initialize audio controller.
         self.audio_controller = UIAudioController(rect=audio_controller_rect,
-            bg_color=colors.RED, border_color=colors.GREEN)
+            bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
+
+        # Initialize visualizer controller.
+        self.visualizer_controller = UIVisualizerController(
+            rect=visualizer_controller_rect,
+            bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
+
+        # Initialize visualizer.
+        self.visualizer = UIVisualizer(rect=visualizer_rect)
 
         pg.init()
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
@@ -145,7 +153,9 @@ class Whirling(object):
         # Draw debug axis.
         # UIAxis(0.9*self.width, .1).draw()
 
+        self.visualizer.draw()
         self.audio_controller.draw()
+        self.visualizer_controller.draw()
 
         self.fps.draw()
 
