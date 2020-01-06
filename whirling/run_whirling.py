@@ -75,9 +75,6 @@ class Whirling(object):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        # Initialize all whirling textures.
-        whirling_textures = WhirlingTextures()
-
         # UI element testing.
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.01 * self.width
@@ -154,11 +151,6 @@ class Whirling(object):
 
         self.fps.draw()
 
-
-        #self.play.draw()
-
-
-        self.next.draw((0, 0), width=5, height=5)
         pg.display.flip()
 
 ###############################################################################

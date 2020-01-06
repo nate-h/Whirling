@@ -182,10 +182,11 @@ class UIImage(UIElement):
         self.rect = rect
         self.position = rect.position
         self.texture = texset.get(texname)
-        self.relpos = None
         self.color = (1,1,1,1)
         self.rotation = 0
         self.rotationCenter = None
+
+        print(self.rect)
 
     @property
     def width(self):
@@ -221,6 +222,7 @@ class UIImage(UIElement):
             self.height/(self.texture.height*1.0), 1.0)
 
 
+        print(self.texture.displaylist)
         glCallList(self.texture.displaylist)
 
         if rotation != 0: # reverse
