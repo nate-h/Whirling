@@ -1,6 +1,6 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
@@ -175,9 +175,13 @@ class UIText(UIElement):
 
 
 class UIImage(UIElement):
-    def __init__(self, texset, texname):
+    def __init__(self, texset, texname, rect):
+
+        super().__init__()
+
+        self.rect = rect
+        self.position = rect.position
         self.texture = texset.get(texname)
-        self.abspos = None
         self.relpos = None
         self.color = (1,1,1,1)
         self.rotation = 0
@@ -185,14 +189,13 @@ class UIImage(UIElement):
 
     @property
     def width(self):
-        return self.texture.width
+        return self.rect.width
 
     @property
     def height(self):
-        return self.texture.height
+        return self.rect.height
 
-    def draw(self, abspos=None, relpos=None, width=None, height=None,
-            color=None, rotation=None, rotationCenter=None):
+    def draw(self, color=None, rotation=None, rotationCenter=None):
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         if color==None:
@@ -200,11 +203,8 @@ class UIImage(UIElement):
 
         glColor4fv(color)
 
-        if abspos:
-            glLoadIdentity()
-            glTranslate(abspos[0],abspos[1],0)
-        elif relpos:
-            glTranslate(relpos[0],relpos[1],0)
+        glLoadIdentity()
+        glTranslate(*self.position)
 
         if rotation==None:
             rotation=self.rotation
@@ -217,13 +217,8 @@ class UIImage(UIElement):
                 glRotate(rotation,0,0,-1)
                 glTranslate(-rotationCenter[0],-rotationCenter[1],0)
 
-        if width or height:
-            if not width:
-                width = self.width
-            elif not height:
-                height = self.height
-
-            glScalef(width/(self.width*1.0), height/(self.height*1.0), 1.0)
+        glScalef(self.width/(self.texture.width*1.0),
+            self.height/(self.texture.height*1.0), 1.0)
 
 
         glCallList(self.texture.displaylist)

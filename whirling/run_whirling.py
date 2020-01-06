@@ -4,9 +4,9 @@ import logging
 import argparse
 import coloredlogs
 import pygame as pg
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 import OpenGL.GL.shaders
 import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
@@ -81,9 +81,8 @@ class Whirling(object):
         # UI element testing.
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.01 * self.width
-        self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50, anchor_position=UIAnchorPositions.TOP_LEFT)
-        self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
-        self.next = UIImage(whirling_textures, 'next')
+        self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50,
+            anchor_position=UIAnchorPositions.TOP_LEFT)
 
 
         self.stopped = False
@@ -97,14 +96,10 @@ class Whirling(object):
         audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)
 
         # Create audio controller.
-        # ac_rect = pg.Rect(0, self.dh*.9, self.dw, self.dh*.1)
-        # self.audio_controller = AudioController(
-        #     ac_rect, MUSIC_TRACKS, self.current_track)
+        # self.audio_controller = AudioController(ac_rect, MUSIC_TRACKS, self.current_track)
 
         # Create audio visualizer.
-        # v_rect = pg.Rect(0, 0, self.dw, self.dh*.9)
-        # self.visualizer = AudioVisualizer(v_rect, self.audio_controller,
-        #     self.current_track)
+        # self.visualizer = AudioVisualizer(v_rect, self.audio_controller, self.current_track)
         self.main_loop()
 
     def main_loop(self):

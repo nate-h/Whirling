@@ -20,3 +20,7 @@ class Rect:
     @property
     def position(self):
         return (self.left, self.bottom, 0)
+
+    def translate(self, dx, dy):
+        return Rect(self.left + dx, self.top + dy,
+            self.right + dx, self.bottom + dy)

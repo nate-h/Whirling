@@ -1,6 +1,6 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 import pygame as pg
 import OpenGL.GL as ogl
 from enum import Enum
