@@ -221,7 +221,6 @@ class UIImage(UIElement):
             self.height/(self.texture.height*1.0), 1.0)
 
 
-        print(self.texture.displaylist)
         glCallList(self.texture.displaylist)
 
         if rotation != 0: # reverse
