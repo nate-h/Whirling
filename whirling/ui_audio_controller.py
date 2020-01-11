@@ -18,12 +18,21 @@ class UIAudioController(UIDock):
         #self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
         button_w = 50
         button_h = 50
+        count = 0
+        margin_x = 20
+
         base_rect = Rect(0, button_h, button_w, 0)
-        self.next = UIImage(self.whirling_textures, 'next',
-            base_rect.translate(10, 10))
+        self.prev = UIImage(self.whirling_textures, 'prev',
+            base_rect.translate(10 + count*(button_w + margin_x), 10))
+        count += 1
+
+        self.play = UIImage(self.whirling_textures, 'play',
+            base_rect.translate(10 + count*(button_w + margin_x), 10))
+        count += 1
 
         self.elements = [
-            self.next
+            self.prev,
+            self.play
         ]
 
     def draw(self):

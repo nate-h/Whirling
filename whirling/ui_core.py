@@ -210,12 +210,12 @@ class UIImage(UIElement):
             rotation=self.rotation
 
         if rotation != 0:
-                if rotationCenter == None:
-                    rotationCenter = (self.width / 2, self.height / 2)
-                # (w,h) = rotationCenter
-                glTranslate(rotationCenter[0],rotationCenter[1],0)
-                glRotate(rotation,0,0,-1)
-                glTranslate(-rotationCenter[0],-rotationCenter[1],0)
+            if rotationCenter == None:
+                rotationCenter = (self.width / 2, self.height / 2)
+            # (w,h) = rotationCenter
+            glTranslate(rotationCenter[0],rotationCenter[1],0)
+            glRotate(rotation,0,0,-1)
+            glTranslate(-rotationCenter[0],-rotationCenter[1],0)
 
         glScalef(self.width/(self.texture.width*1.0),
             self.height/(self.texture.height*1.0), 1.0)
