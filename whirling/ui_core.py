@@ -126,26 +126,27 @@ class UIText(UIElement):
     def text(self, text_string):
         self.text_string = text_string
         self.text_surface = self.font.render(
-            self.text_string, True, colors.WHITE)
+            self.text_string, True, colors.as255(colors.WHITE))
 
         # Add text color.
         text_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
-        text_color_surf.fill(self.font_color)
+        text_color_surf.fill(colors.as255(self.font_color))
         self.text_surface.blit(text_color_surf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
 
         # Add background color.
         bg_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
-        bg_color_surf.fill(self.bg_color)
+        bg_color_surf.fill(colors.as255(self.bg_color))
 
         # Add border color to background.
+        b_color = colors.as255(self.border_color)
         if self.border_color is not colors.CLEAR:
-            pg.draw.line(bg_color_surf, self.border_color,
+            pg.draw.line(bg_color_surf, b_color,
                 (0, 0), (self.width, 0), 1)
-            pg.draw.line(bg_color_surf, self.border_color,
+            pg.draw.line(bg_color_surf, b_color,
                 (self.width-1, 0), (self.width-1, self.height-1), 1)
-            pg.draw.line(bg_color_surf, self.border_color,
+            pg.draw.line(bg_color_surf, b_color,
                 (self.width -1, self.height-1), (0, self.height-1), 1)
-            pg.draw.line(bg_color_surf, self.border_color,
+            pg.draw.line(bg_color_surf, b_color,
                 (0, self.height-1), (0, 0), 1)
 
         # Blend background into text.

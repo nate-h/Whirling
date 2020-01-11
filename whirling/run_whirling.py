@@ -80,7 +80,7 @@ class Whirling(object):
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.01 * self.width
         self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50,
-            anchor_position=UIAnchorPositions.TOP_LEFT)
+            anchor_position=UIAnchorPositions.TOP_LEFT, bg_color=colors.RED, border_color=colors.GREEN, font_color=colors.CYAN)
 
 
         self.stopped = False

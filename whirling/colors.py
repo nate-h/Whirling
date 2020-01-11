@@ -62,3 +62,13 @@ def color4f(color):
     for i, c in enumerate(color):
         new_color[i] = c
     return tuple(new_color)
+
+def as255(color):
+    """Converts 0 -> 1 color to 0 -> 255 color."""
+    if len(color) not in [3, 4]:
+        print('Not valid color.')
+        return CLEAR
+    new_color = []
+    for i, c in enumerate(color):
+        new_color.append(round(c*255))
+    return tuple(new_color)
