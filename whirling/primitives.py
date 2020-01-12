@@ -3,11 +3,13 @@ from collections import namedtuple
 Point = namedtuple('Point', ['x', 'y'])
 
 class Rect:
-    def __init__(self, left, top, right, bottom):
+    def __init__(self, left=0, top=0, right=0, bottom=0):
         self.left = left
         self.top = top
         self.right = right
         self.bottom = bottom
+        self.original_left = left
+        self.original_right = right
 
     @property
     def width(self):
@@ -16,6 +18,14 @@ class Rect:
     @property
     def height(self):
         return self.top - self.bottom
+
+    @width.setter
+    def width(self, width):
+        self.right = self.left + width
+
+    @height.setter
+    def height(self, height):
+        self.top = self.bottom + height
 
     @property
     def position(self):

@@ -1,4 +1,4 @@
-from whirling.ui_core import UIElement, UIAnchorPositions, UIDock
+from whirling.ui_core import UIElement, UIDock
 from whirling import colors
 
 

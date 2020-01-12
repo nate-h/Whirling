@@ -13,7 +13,7 @@ from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.primitives import Rect
 from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
-from whirling.ui_core import UIText, UIImage, UIAxis, UIButton, UIAnchorPositions
+from whirling.ui_core import UIText, UIImage, UIAxis
 from whirling.ui_textures import WhirlingTextures
 from whirling import audio_features
 from data.tracks import MUSIC_TRACKS
@@ -78,10 +78,8 @@ class Whirling(object):
 
         # UI element testing.
         offset_x = 0.01 * self.width
-        offset_y = self.height - 0.01 * self.width
-        self.fps = UIText('FPS', (offset_x, offset_y, 0), font_size=50,
-            anchor_position=UIAnchorPositions.TOP_LEFT)
-
+        offset_y = self.height - 0.05 * self.width
+        self.fps = UIText('FPS', (offset_x, offset_y), font_size=50)
 
         self.stopped = False
         self.dw = display_w

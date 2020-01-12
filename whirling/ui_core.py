@@ -6,21 +6,20 @@ import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
 from whirling import colors
-
-
-class UIAnchorPositions(Enum):
-    BOTTOM_LEFT = 0  # Anchor will be attached at bottom left of text
-    TOP_LEFT = 1     # Anchor will be attached at top left of text
+from whirling.primitives import Rect
 
 
 class UIElement():
-    def __init__(self, bg_color=colors.CLEAR, border_color=colors.CLEAR,
-                 anchor_position=UIAnchorPositions.TOP_LEFT, border_thickness=1):
-        # declare position
-        self.position = (0, 0, 0)
+    def __init__(
+        self, rect=Rect(), position=(0,0),
+        bg_color=colors.CLEAR, border_color=colors.CLEAR,
+        border_thickness=1
+    ):
+        # declare position and translate it.
+        self.rect = rect.translate(*position)
+
         self.bg_color = bg_color
         self.border_color = border_color
-        self.anchor_position = anchor_position
         self.border_thickness = border_thickness
 
     def draw(self):
@@ -36,7 +35,7 @@ class UIElement():
             return
         glColor4f(*colors.color4f(self.border_color))
         glLoadIdentity()
-        glTranslate(*self.position)
+        glTranslate(*self.rect.position)
         glTranslatef(.5,.5,0)  # Get lines to fall on pixels.
         glLineWidth(self.border_thickness)
         glBegin(GL_LINES)
@@ -65,7 +64,7 @@ class UIElement():
             return
         glColor4f(*colors.color4f(self.bg_color))
         glLoadIdentity()
-        glTranslate(*self.position)
+        glTranslate(*self.rect.position)
         glBegin(GL_QUADS)
         glVertex2f(0, 0)
         glVertex2f(0, self.height)
@@ -82,25 +81,6 @@ class UIElement():
     def height(self):
         pass
 
-    def translate_position(self, position, anchor_position):
-        # This probably only works for text positioning.
-        # TODO: figure out how to standardize element positioning so this works
-        #       for all UI Elements.
-        x = position[0]
-        y = position[1]
-        z = position[2]
-
-        # If ever diverge from orthographic dims, will need to incorporate
-        # this with ratio of ortho dims.
-        #_window_w, window_h = pg.display.get_surface().get_size()
-
-        # Process anchor.
-        if anchor_position == UIAnchorPositions.TOP_LEFT:
-            y -= self.height
-
-        # return translated position.
-        return (x, y, z)
-
 
 class UIText(UIElement):
     fonts = {
@@ -108,15 +88,18 @@ class UIText(UIElement):
         'mono' :'whirling/fonts/SourceCodePro-Regular.otf'
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR,
-                 anchor_position=UIAnchorPositions.BOTTOM_LEFT):
+            font_color=colors.WHITE, bg_color=colors.CLEAR,
+            border_color=colors.CLEAR
+        ):
 
-        super().__init__(bg_color, border_color, anchor_position)
+        super().__init__(
+            position=position, bg_color=bg_color, border_color=border_color
+        )
 
-        self.original_position = position
         self.font_color = font_color
         self.font = pg.font.Font(self.fonts[font_key], font_size)
         self.text = text_string
+
 
     @property
     def text(self):
@@ -128,13 +111,17 @@ class UIText(UIElement):
         self.text_surface = self.font.render(
             self.text_string, True, colors.as255(colors.WHITE))
 
+        # Update rect.
+        self.rect.width = self.text_surface.get_width()
+        self.rect.height = self.text_surface.get_height()
+
         # Add text color.
         text_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
         text_color_surf.fill(colors.as255(self.font_color))
         self.text_surface.blit(text_color_surf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
 
         # Add background color.
-        bg_color_surf = pg.Surface(self.text_surface.get_rect().size, pg.SRCALPHA)
+        bg_color_surf = pg.Surface((self.width, self.height), pg.SRCALPHA)
         bg_color_surf.fill(colors.as255(self.bg_color))
 
         # Add border color to background.
@@ -153,11 +140,8 @@ class UIText(UIElement):
         bg_color_surf.blit(self.text_surface, (0, 0))
         self.text_surface = bg_color_surf
 
-
         # Convert surface to string buffer.
         self.text_data = pg.image.tostring(self.text_surface, "RGBA", 1)
-        self.position = self.translate_position(
-            self.original_position, self.anchor_position)
 
     @property
     def width(self):
@@ -170,7 +154,10 @@ class UIText(UIElement):
     def draw(self):
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
         glLoadIdentity()
-        glRasterPos3d(*self.position)
+
+        print(self.rect.top)
+
+        glRasterPos3d(*self.rect.position)
         glDrawPixels(self.width, self.height,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.text_data)
 
@@ -178,10 +165,8 @@ class UIText(UIElement):
 class UIImage(UIElement):
     def __init__(self, texset, texname, rect):
 
-        super().__init__()
+        super().__init__(rect)
 
-        self.rect = rect
-        self.position = rect.position
         self.texture = texset.get(texname)
         self.color = (1,1,1,1)
         self.rotation = 0
@@ -204,7 +189,7 @@ class UIImage(UIElement):
         glColor4fv(color)
 
         glLoadIdentity()
-        glTranslate(*self.position)
+        glTranslate(*self.rect.position)
 
         if rotation==None:
             rotation=self.rotation
@@ -231,18 +216,25 @@ class UIImage(UIElement):
         glDisable(GL_TEXTURE_2D)
 
 
-class UIButton(UIText):
-    def __init__(self, text_string, position, font_size=30, font_key='mono',
-                 font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR,
-                 anchor_position=UIAnchorPositions.TOP_LEFT):
+# class UIButton(UIText):
+#     def __init__(self, rect, text_string, font_size=30, font_key='mono',
+#                  font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR
+#     ):
 
-        # Font size is calculated from height of button.
-        super().__init__(text_string, position, font_size=font_size, font_key=font_key,
-            font_color=font_color, bg_color=bg_color, border_color=border_color,
-            anchor_position=anchor_position)
+#         # Font size is calculated from height of button.
+#         super().__init__(text_string, rect.position, font_size=font_size, font_key=font_key,
+#             font_color=font_color, bg_color=bg_color, border_color=border_color)
 
-    def draw(self):
-        super().draw()
+#     @property
+#     def width(self):
+#         return self.rect.width
+
+#     @property
+#     def height(self):
+#         return self.rect.height
+
+#     def draw(self):
+#         super().draw()
 
 
 class UIAxis(UIElement):
@@ -278,11 +270,7 @@ class UIDock(UIElement):
     def __init__(self, rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
-        super().__init__(bg_color, border_color,
-            anchor_position=UIAnchorPositions.BOTTOM_LEFT)
-
-        self.rect = rect
-        self.position = rect.position
+        super().__init__(rect, bg_color=bg_color, border_color=border_color)
 
     @property
     def width(self):

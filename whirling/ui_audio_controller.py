@@ -1,4 +1,4 @@
-from whirling.ui_core import UIAnchorPositions, UIDock, UIButton, UIText, UIImage
+from whirling.ui_core import UIDock, UIText, UIImage #UIButton,
 from whirling.ui_textures import WhirlingTextures
 from whirling import colors
 from whirling.primitives import Rect
@@ -15,24 +15,28 @@ class UIAudioController(UIDock):
         self.initialize_elements()
 
     def initialize_elements(self):
-        #self.play = UIButton('Play', (offset_x, 85, 0), font_size=50)
         button_w = 50
         button_h = 50
         count = 0
         margin_x = 20
 
-        base_rect = Rect(0, button_h, button_w, 0)
-        self.prev = UIImage(self.whirling_textures, 'prev',
-            base_rect.translate(10 + count*(button_w + margin_x), 10))
+        def button_rect(i):
+            base_rect = Rect(0, button_h, button_w, 0)
+            return base_rect.translate(10 + count*(button_w + margin_x), 10)
+
+        self.prev = UIImage(self.whirling_textures, 'prev', button_rect(count))
         count += 1
 
-        self.play = UIImage(self.whirling_textures, 'play',
-            base_rect.translate(10 + count*(button_w + margin_x), 10))
+        self.play = UIImage(self.whirling_textures, 'play', button_rect(count))
         count += 1
+
+        # self.next = UIButton(button_rect(count), 'Next', font_size=50, border_color=colors.WHITE)
+        # count += 1
 
         self.elements = [
             self.prev,
-            self.play
+            self.play,
+            #self.next,
         ]
 
     def draw(self):
