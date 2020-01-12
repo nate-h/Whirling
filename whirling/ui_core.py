@@ -7,9 +7,10 @@ from enum import Enum
 import numpy as np
 from whirling import colors
 from whirling.primitives import Rect
+from abc import ABC, abstractmethod
 
 
-class UIElement():
+class UIElement(ABC):
     def __init__(
         self, rect=Rect(), position=(0,0),
         bg_color=colors.CLEAR, border_color=colors.CLEAR,
@@ -17,7 +18,6 @@ class UIElement():
     ):
         # declare position and translate it.
         self.rect = rect.translate(*position)
-
         self.bg_color = bg_color
         self.border_color = border_color
         self.border_thickness = border_thickness
@@ -73,11 +73,12 @@ class UIElement():
         glEnd()
 
     @property
+    @abstractmethod
     def width(self):
         pass
-        # TODO: make this abstract method.
 
     @property
+    @abstractmethod
     def height(self):
         pass
 
