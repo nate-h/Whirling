@@ -154,9 +154,6 @@ class UIText(UIElement):
     def draw(self):
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
         glLoadIdentity()
-
-        print(self.rect.top)
-
         glRasterPos3d(*self.rect.position)
         glDrawPixels(self.width, self.height,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.text_data)
