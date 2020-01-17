@@ -161,9 +161,9 @@ class UIText(UIElement):
 
 
 class UIImage(UIElement):
-    def __init__(self, texset, texname, rect):
+    def __init__(self, rect, texset, texname, **kwargs):
 
-        super().__init__(rect)
+        super().__init__(rect=rect, **kwargs)
 
         self.texture = texset.get(texname)
         self.color = (1,1,1,1)
@@ -214,25 +214,21 @@ class UIImage(UIElement):
         glDisable(GL_TEXTURE_2D)
 
 
-# class UIButton(UIText):
-#     def __init__(self, rect, text_string, font_size=30, font_key='mono',
-#                  font_color=colors.WHITE, bg_color=colors.CLEAR, border_color=colors.CLEAR
-#     ):
+class UIButton(UIImage):
+    def __init__(self, rect, action=None, **kwargs):
 
-#         # Font size is calculated from height of button.
-#         super().__init__(text_string, rect.position, font_size=font_size, font_key=font_key,
-#             font_color=font_color, bg_color=bg_color, border_color=border_color)
+        super().__init__(rect=rect, **kwargs)
 
-#     @property
-#     def width(self):
-#         return self.rect.width
+        self.action = action
+        self.action('hey!')
 
-#     @property
-#     def height(self):
-#         return self.rect.height
+    @property
+    def width(self):
+        return self.rect.width
 
-#     def draw(self):
-#         super().draw()
+    @property
+    def height(self):
+        return self.rect.height
 
 
 class UIAxis(UIElement):
