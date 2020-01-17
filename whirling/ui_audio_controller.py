@@ -38,8 +38,13 @@ class UIAudioController(UIDock):
         self.elements = [
             self.prev,
             self.play,
-            #self.next,
+            self.next,
         ]
+
+    def handle_event(self, event):
+        for e in self.elements:
+            if hasattr(e, 'handle_event') and callable(e.handle_event):
+                e.handle_event(event)
 
     def draw(self):
         self.draw_background()

@@ -39,3 +39,8 @@ class Rect:
         s = 'Left: %d, Top: %d, Right: %d, Bottom: %d Width: %d, Height: %d'
         return s % (self.left, self.top, self.right, self.bottom,
             self.width, self.height)
+
+    def contains_point(self, point):
+        x = point[0]
+        y = point[1]
+        return self.left <= x <= self.right and self.bottom <= y <= self.top

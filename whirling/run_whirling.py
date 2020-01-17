@@ -110,7 +110,7 @@ class Whirling(object):
                 elif event.type == pg.KEYDOWN:
                     self.handle_key_down(event)
 
-                #self.audio_controller.handle_event(event)
+                self.audio_controller.handle_event(event)
 
             # Update
             #self.audio_controller.update()

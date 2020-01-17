@@ -230,6 +230,21 @@ class UIButton(UIImage):
     def height(self):
         return self.rect.height
 
+    def handle_event(self, event):
+        w, h = pg.display.get_surface().get_size()
+        if event.type == pg.MOUSEBUTTONDOWN:
+            pass
+            # if self.rect.contains_point(event.pos):
+            #     self.image = self.image_hover
+            # else:
+            #     self.image = self.image_normal
+
+        # Clicking.
+        if event.type == pg.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            if self.rect.contains_point((x, -y+h)):
+                self.action('winning!')
+
 
 class UIAxis(UIElement):
     def __init__(self, size, offset):
