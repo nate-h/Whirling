@@ -230,8 +230,11 @@ class UIButton(UIImage):
     def height(self):
         return self.rect.height
 
+    def perform_action(self):
+        self.action()
+
     def handle_event(self, event):
-        w, h = pg.display.get_surface().get_size()
+        _w, h = pg.display.get_surface().get_size()
         if event.type == pg.MOUSEBUTTONDOWN:
             pass
             # if self.rect.contains_point(event.pos):
@@ -243,7 +246,7 @@ class UIButton(UIImage):
         if event.type == pg.MOUSEBUTTONDOWN:
             x, y = event.pos
             if self.rect.contains_point((x, -y+h)):
-                self.action()
+                self.perform_action()
 
 class UIToggleButton(UIButton):
     def __init__(self, rect, states, texset, **kwargs):

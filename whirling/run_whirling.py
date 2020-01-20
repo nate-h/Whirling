@@ -11,7 +11,6 @@ import OpenGL.GL.shaders
 import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.primitives import Rect
-from whirling.audio_controller import AudioController
 #from whirling.audio_visualizer import AudioVisualizer
 from whirling.ui_core import UIText, UIImage, UIAxis
 from whirling.ui_textures import WhirlingTextures

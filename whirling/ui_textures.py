@@ -14,12 +14,12 @@ from os.path import splitext
 # All textures in whirling are defined here.
 # Using a texture set ensures no wasted compute.
 IMAGES = {
-    'fw.png',
+    'ffw.png',
     'next.png',
     'pause.png',
     'play.png',
     'prev.png',
-    'rew.png',
+    'rw.png',
     'stop.png',
 }
 

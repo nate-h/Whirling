@@ -58,6 +58,11 @@ class UIAudioController(UIDock):
             base_rect = Rect(0, button_h, button_w, 0)
             return base_rect.translate(10 + count*(button_w + margin_x), 10)
 
+        self.rw_button = UIButton(button_rect(count), self.rw,
+            texset=self.whirling_textures, texname='rw',
+            border_color=colors.WHITE)
+        count += 1
+
         self.prev_button = UIButton(button_rect(count), self.prev,
             texset=self.whirling_textures, texname='prev',
             border_color=colors.WHITE)
@@ -72,10 +77,17 @@ class UIAudioController(UIDock):
             border_color=colors.WHITE)
         count += 1
 
+        self.ffw_button = UIButton(button_rect(count), self.ffw,
+            texset=self.whirling_textures, texname='ffw',
+            border_color=colors.WHITE)
+        count += 1
+
         self.elements = [
+            self.rw_button,
             self.prev_button,
             self.play_button,
             self.next_button,
+            self.ffw_button,
         ]
 
     def handle_event(self, event):
@@ -206,6 +218,12 @@ class UIAudioController(UIDock):
     def toggle_play(self):
         logging.info('Toggle play')
         self.play_button.perform_action()
+
+    def ffw(self):
+        self.adjust_time_by(2)
+
+    def rw(self):
+        self.adjust_time_by(-2)
 
     def adjust_time_by(self, seconds):
         if self.player is None:
