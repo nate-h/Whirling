@@ -65,7 +65,10 @@ class Whirling(object):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         # Initialize audio controller.
-        self.audio_controller = UIAudioController(rect=audio_controller_rect,
+        self.is_playing = False
+        self.current_track = BehaviorSubject('')
+        self.audio_controller = UIAudioController(
+            MUSIC_TRACKS, self. current_track, rect=audio_controller_rect,
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer controller.
@@ -85,8 +88,6 @@ class Whirling(object):
         self.dw = display_w
         self.dh = display_h
         self.clock = pg.time.Clock()
-        self.is_playing = False
-        self.current_track = BehaviorSubject('')
 
         # Generate audio features.
         audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)

@@ -215,12 +215,11 @@ class UIImage(UIElement):
 
 
 class UIButton(UIImage):
-    def __init__(self, rect, action=None, **kwargs):
+    def __init__(self, rect, action, texset, texname, **kwargs):
 
-        super().__init__(rect=rect, **kwargs)
+        super().__init__(rect=rect, texset=texset, texname=texname, **kwargs)
 
         self.action = action
-        self.action('hey!')
 
     @property
     def width(self):
@@ -243,7 +242,33 @@ class UIButton(UIImage):
         if event.type == pg.MOUSEBUTTONDOWN:
             x, y = event.pos
             if self.rect.contains_point((x, -y+h)):
-                self.action('winning!')
+                self.action()
+
+class UIToggleButton(UIButton):
+    def __init__(self, rect, states, texset, **kwargs):
+        self.states = states
+        self.state = self.get_next_state()
+        super().__init__(
+            rect=rect, action=self.state[1]['action'], texset=texset, texname=self.state[0], **kwargs)
+
+    def perform_action(self):
+        self.action()
+        self.toggle_state()
+
+    def get_next_state(self):
+        if not hasattr(self, 'state') or self.state is None:
+            return list(self.states.items())[0]
+        raw_index = list(self.states.keys()).index(self.state[0])
+        index = (raw_index + 1) % len(self.states)
+        return list(self.states.items())[index]
+
+    def toggle_state(self):
+        self.state = self.get_next_state()
+        self.msg = self.state[0]
+        self.action = self.state[1]['action']
+        
+        # Now change
+
 
 
 class UIAxis(UIElement):
