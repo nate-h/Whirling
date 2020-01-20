@@ -46,49 +46,38 @@ class UIAudioController(UIDock):
     def initialize_elements(self):
         button_w = 50
         button_h = 50
-        count = 0
         margin_x = 20
+        self.elements = []
 
         states = OrderedDict([
             ('play', {'action': self.play}),
             ('pause', {'action': self.pause})
         ])
 
-        def button_rect(i):
+        def button_rect():
+            count = len(self.elements)
             base_rect = Rect(0, button_h, button_w, 0)
-            return base_rect.translate(10 + count*(button_w + margin_x), 10)
+            x = 10 + count*(button_w + margin_x)
+            base_rect = base_rect.translate(x, 10)
+            return base_rect
 
-        self.rw_button = UIButton(button_rect(count), self.rw,
-            texset=self.whirling_textures, texname='rw',
-            border_color=colors.WHITE)
-        count += 1
+        def initialize_button(texname, action):
+            rect = button_rect()
+            button = UIButton(rect, self.rw,
+                texset=self.whirling_textures, texname=texname,
+                border_color=colors.WHITE)
+            self.elements.append(button)
+            return button
 
-        self.prev_button = UIButton(button_rect(count), self.prev,
-            texset=self.whirling_textures, texname='prev',
-            border_color=colors.WHITE)
-        count += 1
+        self.rw = initialize_button('rw', self.rw)
+        self.prev = initialize_button('prev', self.prev)
 
-        self.play_button = UIToggleButton(button_rect(count), states,
+        self.play_button = UIToggleButton(button_rect(), states,
             texset=self.whirling_textures, border_color=colors.WHITE)
-        count += 1
+        self.elements.append(self.play_button)
 
-        self.next_button = UIButton(button_rect(count), self.next,
-            texset=self.whirling_textures, texname='next',
-            border_color=colors.WHITE)
-        count += 1
-
-        self.ffw_button = UIButton(button_rect(count), self.ffw,
-            texset=self.whirling_textures, texname='ffw',
-            border_color=colors.WHITE)
-        count += 1
-
-        self.elements = [
-            self.rw_button,
-            self.prev_button,
-            self.play_button,
-            self.next_button,
-            self.ffw_button,
-        ]
+        self.next = initialize_button('next', self.next)
+        self.ffw = initialize_button('ffw', self.ffw)
 
     def handle_event(self, event):
         for e in self.elements:
@@ -270,9 +259,3 @@ class UIAudioController(UIDock):
 
     def update(self):
         pass
-
-    def handle_event(self, event):
-        self.prev_button.handle_event(event)
-        self.play_button.handle_event(event)
-        self.next_button.handle_event(event)
-
