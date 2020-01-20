@@ -39,17 +39,13 @@ class UIAudioController(UIDock):
         self.whirling_textures = WhirlingTextures()
         self.initialize_elements()
 
-        # Time string
-        # self.current_time_loc = (self.offset.x + 10, self.offset.y + 10)
-        # self.track_name_loc = (self.bg.width - 50, 20)
-
     def initialize_elements(self):
         button_w = 50
         button_h = 50
         margin_x = 20
         self.elements = []
 
-        states = OrderedDict([
+        play_states = OrderedDict([
             ('play', {'action': self.play}),
             ('pause', {'action': self.pause})
         ])
@@ -69,15 +65,18 @@ class UIAudioController(UIDock):
             self.elements.append(button)
             return button
 
-        self.rw = initialize_button('rw', self.rw)
-        self.prev = initialize_button('prev', self.prev)
-
-        self.play_button = UIToggleButton(button_rect(), states,
+        # Initialize buttons
+        self.rw_button = initialize_button('rw', self.rw)
+        self.prev_button = initialize_button('prev', self.prev)
+        self.play_button = UIToggleButton(button_rect(), play_states,
             texset=self.whirling_textures, border_color=colors.WHITE)
         self.elements.append(self.play_button)
+        self.next_button = initialize_button('next', self.next)
+        self.ffw_button = initialize_button('ffw', self.ffw)
 
-        self.next = initialize_button('next', self.next)
-        self.ffw = initialize_button('ffw', self.ffw)
+        # Initialize current time str.
+        self.current_time = UIText('0.00', (10, 60), font_size=30)
+        self.elements.append(self.current_time)
 
     def handle_event(self, event):
         for e in self.elements:
@@ -105,44 +104,6 @@ class UIAudioController(UIDock):
         self.last_play_time = 0
         self.last_play_time_global = 0
 
-        # Initialize pygame vars.
-        self.font = pg.font.Font(None, 30)
-        self.offset = Point(rect.left, rect.top)
-
-        # Initialize background and buttons.
-        self.bg_color = (20, 20, 20)
-        self.bg = self.relative_rect(0, 0, rect.width, rect.height)
-        self.initialize_buttons()
-
-        # Time string
-        self.current_time_loc = (self.offset.x + 10, self.offset.y + 10)
-        self.track_name_loc = (self.bg.width - 50, 20)
-
-    def initialize_buttons(self):
-        # Play button
-        states = OrderedDict([
-            ('play', {'action': self.play}),
-            ('pause', {'action': self.pause})
-        ])
-        ph = self.bg.height*0.6
-        pw = ph*2
-        x = self.bg.width/2 - pw/2
-        y = self.bg.height/2 - ph/2
-        play_rect = self.relative_rect(x, y, pw, ph)
-        self.play_button = ui_core.ToggleButton(states, play_rect)
-
-        # Prev/Next buttons
-        pnh = self.bg.height*0.5
-        pnw = pnh*2
-        x = self.bg.width/2
-        y = self.bg.height/2 - pnh/2
-        prev_offset_x = x - pw/2 - 20 - pnw
-        next_offset_x = x + pw/2 + 20
-        prev_rect = self.relative_rect(prev_offset_x, y, pnw, pnh)
-        next_rect = self.relative_rect(next_offset_x, y, pnw, pnh)
-        self.prev_button = ui_core.Button('Prev', self.prev, prev_rect)
-        self.next_button = ui_core.Button('Next', self.next, next_rect)
-
     def change_song(self, new_track):
         logging.info('New track: %s', new_track)
         is_playing = self.player and self.player.is_playing()
@@ -165,24 +126,11 @@ class UIAudioController(UIDock):
     def track_name(self):
         return os.path.basename(self.music_tracks[self.track_num])
 
-    def draw_current_time(self, window):
-        time_str = self.get_pretty_time_string()
-        text_surface = self.font.render(time_str, True, pg.Color('white'))
-        window.blit(text_surface, self.current_time_loc)
-
     def draw_song_name(self, window):
         text_surface = self.font.render(self.track_name, True, pg.Color('white'))
         loc = self.track_name_loc
         moved_track_name_loc = (loc[0] - text_surface.get_width(), loc[1])
         window.blit(text_surface, moved_track_name_loc)
-
-    # def draw(self, window):
-    #     pg.draw.rect(window, self.bg_color, self.bg)
-    #     self.prev_button.draw(window)
-    #     self.play_button.draw(window)
-    #     self.next_button.draw(window)
-    #     self.draw_current_time(window)
-    #     self.draw_song_name(window)
 
     def play(self):
         logging.info('Play')
@@ -258,4 +206,5 @@ class UIAudioController(UIDock):
         return curr_time
 
     def update(self):
-        pass
+        time_str = self.get_pretty_time_string()
+        self.current_time.text = time_str

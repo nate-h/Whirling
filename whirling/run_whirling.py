@@ -113,7 +113,7 @@ class Whirling(object):
                 self.audio_controller.handle_event(event)
 
             # Update
-            #self.audio_controller.update()
+            self.audio_controller.update()
             self.fps.text = str(int(self.clock.get_fps()))
 
             # Draw visuals
