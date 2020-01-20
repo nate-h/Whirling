@@ -165,7 +165,8 @@ class UIImage(UIElement):
 
         super().__init__(rect=rect, **kwargs)
 
-        self.texture = texset.get(texname)
+        self.texset = texset
+        self.texture = self.texset.get(texname)
         self.color = (1,1,1,1)
         self.rotation = 0
         self.rotationCenter = None
@@ -264,12 +265,9 @@ class UIToggleButton(UIButton):
 
     def toggle_state(self):
         self.state = self.get_next_state()
-        self.msg = self.state[0]
+        texname = self.state[0]
         self.action = self.state[1]['action']
-        
-        # Now change
-
-
+        self.texture = self.texset.get(texname)
 
 class UIAxis(UIElement):
     def __init__(self, size, offset):
