@@ -83,6 +83,10 @@ class UIAudioController(UIDock):
             if hasattr(e, 'handle_event') and callable(e.handle_event):
                 e.handle_event(event)
 
+    def update(self):
+        time_str = self.get_pretty_time_string()
+        self.current_time.text = time_str
+
     def draw(self):
         self.draw_background()
         self.draw_border(bottom=False, left=False, right=False)
@@ -91,21 +95,7 @@ class UIAudioController(UIDock):
         for e in self.elements:
             e.draw()
 
-    def x__init__(self, rect, music_tracks, current_track: BehaviorSubject):
-        # Setup player.
-        self.track_num = 0
-        self.player = None
-        self.current_track = current_track
-        self.music_tracks = music_tracks
-        self.current_track.on_next(self.music_tracks[self.track_num])
-        self.current_track.subscribe(self.change_song)
-
-        # Vars needed to track current time.
-        self.last_play_time = 0
-        self.last_play_time_global = 0
-
     def change_song(self, new_track):
-        logging.info('New track: %s', new_track)
         is_playing = self.player and self.player.is_playing()
         if is_playing:
             self.player.stop()
@@ -119,18 +109,8 @@ class UIAudioController(UIDock):
         return self.player and self.player.is_playing()
 
     @property
-    def center(self):
-        return Point(self.offset.x + self.bg.width/2, self.offset.y + self.bg.height/2)
-
-    @property
     def track_name(self):
         return os.path.basename(self.music_tracks[self.track_num])
-
-    def draw_song_name(self, window):
-        text_surface = self.font.render(self.track_name, True, pg.Color('white'))
-        loc = self.track_name_loc
-        moved_track_name_loc = (loc[0] - text_surface.get_width(), loc[1])
-        window.blit(text_surface, moved_track_name_loc)
 
     def play(self):
         logging.info('Play')
@@ -204,7 +184,3 @@ class UIAudioController(UIDock):
             self.last_play_time_global = time.time()
 
         return curr_time
-
-    def update(self):
-        time_str = self.get_pretty_time_string()
-        self.current_time.text = time_str

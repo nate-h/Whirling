@@ -78,10 +78,13 @@ class Whirling(object):
         # Initialize visualizer.
         self.visualizer = UIVisualizer(rect=visualizer_rect)
 
-        # UI element testing.
+        # Initialize text elements.
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.05 * self.width
         self.fps = UIText('FPS', (offset_x, offset_y), font_size=50)
+
+        self.current_track_str = UIText('', (0, 0), font_size=50)
+        self.current_track.subscribe(self.change_song)
 
         self.stopped = False
         self.dw = display_w
@@ -90,9 +93,6 @@ class Whirling(object):
 
         # Generate audio features.
         audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)
-
-        # Create audio controller.
-        # self.audio_controller = AudioController(ac_rect, MUSIC_TRACKS, self.current_track)
 
         # Create audio visualizer.
         # self.visualizer = AudioVisualizer(v_rect, self.audio_controller, self.current_track)
@@ -149,8 +149,16 @@ class Whirling(object):
         self.visualizer_controller.draw()
 
         self.fps.draw()
+        self.current_track_str.draw()
 
         pg.display.flip()
+
+    def change_song(self, new_track):
+        logging.info('New track: %s', new_track)
+        self.current_track_str.text = new_track
+        offset_x = 0.99 * self.width - self.current_track_str.width
+        offset_y = self.height - 0.05 * self.width
+        self.current_track_str.rect = Rect().translate(offset_x, offset_y)
 
 ###############################################################################
 # Main and option handling.
