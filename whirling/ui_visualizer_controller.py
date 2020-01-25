@@ -38,7 +38,6 @@ class UIVisualizerController(UIDock):
             base_rect = Rect(0, button_h, button_w, 0)
             x = 10 + count*(button_w + margin_x)
             base_rect = base_rect.translate(x, 10)
-            print(self.rect.left)
             base_rect = base_rect.translate(self.rect.left, self.rect.bottom)
             return base_rect
 
