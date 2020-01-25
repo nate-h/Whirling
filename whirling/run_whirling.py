@@ -19,7 +19,7 @@ from data.tracks import MUSIC_TRACKS
 from whirling import colors
 
 from whirling.ui_audio_controller import UIAudioController
-from whirling.ui_visualizer import UIVisualizer
+from whirling.ui_visualizer_switcher import UIVisualizerSwitcher
 from whirling.ui_visualizer_controller import UIVisualizerController
 
 DESIRED_FPS = 10
@@ -80,7 +80,8 @@ class Whirling(object):
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer.
-        self.visualizer = UIVisualizer(rect=visualizer_rect)
+        self.visualizer = UIVisualizerSwitcher(self.current_visualizer,
+            rect=visualizer_rect)
 
         # Initialize text elements.
         offset_x = 0.01 * self.width
