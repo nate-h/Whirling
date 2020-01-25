@@ -59,7 +59,7 @@ class UIAudioController(UIDock):
 
         def initialize_button(texname, action):
             rect = button_rect()
-            button = UIButton(rect, self.rw,
+            button = UIButton(rect, action,
                 texset=self.whirling_textures, texname=texname,
                 border_color=colors.WHITE)
             self.elements.append(button)

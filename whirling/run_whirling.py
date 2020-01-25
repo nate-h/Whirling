@@ -73,7 +73,7 @@ class Whirling(object):
         # Initialize visualizer controller.
         self.visualizer_controller = UIVisualizerController(
             rect=visualizer_controller_rect,
-            bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
+            bg_color=(0.12,0.12,0.12), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer.
         self.visualizer = UIVisualizer(rect=visualizer_rect)

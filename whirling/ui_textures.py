@@ -21,6 +21,8 @@ IMAGES = {
     'prev.png',
     'rw.png',
     'stop.png',
+    'next_arrow.png',
+    'previous_arrow.png',
 }
 
 
