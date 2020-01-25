@@ -14,8 +14,8 @@ from whirling.primitives import Point
 
 
 class UIVisualizerController(UIDock):
-    def __init__(self, rect: Rect, bg_color=colors.CLEAR,
-                 border_color=colors.BLACK):
+    def __init__(self, current_visualizer: BehaviorSubject, rect: Rect,
+                 bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
         super().__init__(rect=rect, bg_color=bg_color,
@@ -23,6 +23,8 @@ class UIVisualizerController(UIDock):
 
         # Initialize pygame vars.
         self.font = pg.font.Font(None, 30)
+
+        self.current_visualizer = current_visualizer
 
         self.whirling_textures = WhirlingTextures()
         self.initialize_elements()
@@ -53,10 +55,15 @@ class UIVisualizerController(UIDock):
         self.prev_button = initialize_button('previous_arrow', self.prev_visual)
         self.next_button = initialize_button('next_arrow', self.next_visual)
 
-        # Initialize current time str.
+        # Initialize current visualizer str.
         text_tup = (10 + self.rect.left, 60 + self.rect.bottom)
-        self.current_visual = UIText('Visual: Default', text_tup, font_size=30)
-        self.elements.append(self.current_visual)
+        self.visualizer_name = UIText('', text_tup, font_size=30)
+        self.current_visualizer.subscribe(self.change_visualizer_name)
+
+        self.elements.append(self.visualizer_name)
+
+    def change_visualizer_name(self, text):
+        self.visualizer_name.text = 'Visualizer: %s' % text
 
     def next_visual(self):
         print('Next visual')

@@ -63,15 +63,19 @@ class Whirling(object):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
+        # Initialize subjects.
+        self.current_track = BehaviorSubject('')
+        self.current_visualizer = BehaviorSubject('debug')
+
         # Initialize audio controller.
         self.is_playing = False
-        self.current_track = BehaviorSubject('')
         self.audio_controller = UIAudioController(
-            MUSIC_TRACKS, self. current_track, rect=audio_controller_rect,
+            MUSIC_TRACKS, self.current_track, rect=audio_controller_rect,
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer controller.
         self.visualizer_controller = UIVisualizerController(
+            self.current_visualizer,
             rect=visualizer_controller_rect,
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
