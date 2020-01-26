@@ -10,7 +10,9 @@ from whirling.ui_visualizer_base import UIVisualizerBase
 FPS_TARGET = 65
 
 class CheckerboardVisualizer(UIVisualizerBase):
-    pass
+    def __init__(self, rect, **kwargs):
+        # Initialize base class.
+        super().__init__(rect=rect, **kwargs)
 
 
 def main():
