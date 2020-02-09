@@ -136,5 +136,5 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT,  None)
         glUseProgram(0)
 
-        #glDeleteBuffers(1, VBO)
-        #glDeleteBuffers(1, EBO)
+        glDeleteBuffers(1, [VBO])
+        glDeleteBuffers(1, [EBO])
