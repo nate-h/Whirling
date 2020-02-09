@@ -64,7 +64,7 @@ class Whirling(object):
 
         # Initialize subjects.
         self.current_track = BehaviorSubject('')
-        self.current_visualizer = BehaviorSubject('debug')
+        self.current_visualizer = BehaviorSubject('checkerboard')
 
         # Initialize audio controller.
         self.is_playing = False

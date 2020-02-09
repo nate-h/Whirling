@@ -36,7 +36,7 @@ class UIVisualizerSwitcher(UIDock):
 
         self.visualizer.draw()
 
-    def change_visualizer(self, next_visualizer_name):
+    def change_visualizer(self, next_visualizer_name)   :
         print('Changing visualizer: %s ' % next_visualizer_name)
-        #self.visualizer = self.visualizers[next_visualizer_name]
-        self.visualizer = self.visualizers['checkerboard']
+        self.visualizer = self.visualizers[next_visualizer_name]
+        #self.visualizer = self.visualizers['checkerboard']

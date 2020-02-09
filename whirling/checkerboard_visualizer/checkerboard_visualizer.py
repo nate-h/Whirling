@@ -38,16 +38,14 @@ class CheckerboardVisualizer(UIVisualizerBase):
                 y1 = y
                 y2 = y+s*0.9
 
-                print(x)
-
                 # Add 2 triangles to create a rect.
                 rectangle.extend(
                     [
                         # Position      # Color
-                        x1, y1, 0.0,    j/pnts_y, 0.0, i/pnts_x,
-                        x2, y1, 0.0,    j/pnts_y, 0.0, i/pnts_x,
-                        x2, y2, 0.0,    j/pnts_y, 0.0, i/pnts_x,
-                        x1, y2, 0.0,    j/pnts_y, 0.0, i/pnts_x,
+                        self.rect.left, self.rect.top, 0.0,       1, 0.0, 1,
+                        self.rect.right, self.rect.top, 0.0,      1, 0.0, 1,
+                        self.rect.right, self.rect.bottom, 0.0,   1, 0.0, 1,
+                        self.rect.left, self.rect.bottom, 0.0,    1, 0.0, 1,
                     ]
                 )
 
@@ -74,8 +72,8 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
             void main() {
 
-            gl_Position = vec4(position, 1.0);
-            newColor = color;
+                gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
+                newColor = color;
 
             }
 
@@ -128,5 +126,6 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         # Draw rectangles.
         glUseProgram(shader)
+        glLoadIdentity()
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
         glUseProgram(0)
