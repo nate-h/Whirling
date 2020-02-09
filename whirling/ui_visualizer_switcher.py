@@ -2,8 +2,8 @@ from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core import UIElement, UIDock
 from whirling import colors
 from whirling.primitives import Rect
-from whirling.checkerboard_visualizer.checkerboard_visualizer import CheckerboardVisualizer
-from whirling.debug_visualizer.debug_visualizer import DebugVisualizer
+from whirling.VisualizationManager import visualizers
+
 
 
 class UIVisualizerSwitcher(UIDock):
@@ -22,13 +22,6 @@ class UIVisualizerSwitcher(UIDock):
             self.rect.right - padding,
             self.rect.bottom + padding
         )
-
-        self.visualizers = {
-            'debug': DebugVisualizer(
-                visualizer_rect, bg_color=colors.RED),
-            'checkerboard': CheckerboardVisualizer(
-                visualizer_rect),
-        }
         self.visualizer = None
 
         current_visualizer.subscribe(self.change_visualizer)
@@ -40,5 +33,5 @@ class UIVisualizerSwitcher(UIDock):
 
     def change_visualizer(self, next_visualizer_name)   :
         print('Changing visualizer: %s ' % next_visualizer_name)
-        self.visualizer = self.visualizers[next_visualizer_name]
+        self.visualizer = visualizers[next_visualizer_name]
         #self.visualizer = self.visualizers['checkerboard']

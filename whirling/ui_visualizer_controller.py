@@ -58,6 +58,7 @@ class UIVisualizerController(UIDock):
         # Initialize current visualizer str.
         text_tup = (10 + self.rect.left, 60 + self.rect.bottom)
         self.visualizer_name = UIText('', text_tup, font_size=30)
+
         self.current_visualizer.subscribe(self.change_visualizer_name)
 
         self.elements.append(self.visualizer_name)

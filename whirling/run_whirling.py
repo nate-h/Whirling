@@ -115,6 +115,7 @@ class Whirling(object):
                     self.handle_key_down(event)
 
                 self.audio_controller.handle_event(event)
+                self.visualizer_controller.handle_event(event)
 
             # Update
             self.audio_controller.update()
