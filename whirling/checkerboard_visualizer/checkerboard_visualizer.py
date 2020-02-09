@@ -12,8 +12,8 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, **kwargs)
 
-        self.pnts_x = 150
-        self.pnts_y = 150
+        self.pnts_x = 64
+        self.pnts_y = 64
         self.initialize_shader()
         self.create_vbo_data()
 
