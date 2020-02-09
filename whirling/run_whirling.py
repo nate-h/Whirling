@@ -64,7 +64,7 @@ class Whirling(object):
 
         # Initialize subjects.
         self.current_track = BehaviorSubject('')
-        self.current_visualizer = BehaviorSubject('checkerboard')
+        self.current_visualizer = BehaviorSubject('')
 
         # Initialize audio controller.
         self.is_playing = False
@@ -79,7 +79,7 @@ class Whirling(object):
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer.
-        self.visualizer = UIVisualizerSwitcher(self.current_visualizer,
+        self.visualizer_switcher = UIVisualizerSwitcher(self.current_visualizer,
             rect=visualizer_rect)
 
         # Initialize text elements.
@@ -98,8 +98,6 @@ class Whirling(object):
         # Generate audio features.
         audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)
 
-        # Create audio visualizer.
-        # self.visualizer = AudioVisualizer(v_rect, self.audio_controller, self.current_track)
         self.main_loop()
 
     def main_loop(self):
@@ -149,7 +147,7 @@ class Whirling(object):
         # Draw debug axis.
         # UIAxis(0.9*self.width, .1).draw()
 
-        self.visualizer.draw()
+        self.visualizer_switcher.draw()
         self.audio_controller.draw()
         self.visualizer_controller.draw()
 

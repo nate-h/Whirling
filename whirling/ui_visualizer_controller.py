@@ -1,16 +1,17 @@
-from collections import OrderedDict
 import os
 import vlc
 import time
-from typing import List
+import logging
 import pygame as pg
+from typing import List
+from collections import OrderedDict
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core import UIDock, UIText, UIImage, UIButton, UIToggleButton
 from whirling.ui_textures import WhirlingTextures
 from whirling import colors
 from whirling.primitives import Rect
-import logging
 from whirling.primitives import Point
+from whirling.VisualizationManager import visualizers
 
 
 class UIVisualizerController(UIDock):
@@ -24,7 +25,9 @@ class UIVisualizerController(UIDock):
         # Initialize pygame vars.
         self.font = pg.font.Font(None, 30)
 
+        # Switch to using the first visual.
         self.current_visualizer = current_visualizer
+        self.next_visual()
 
         self.whirling_textures = WhirlingTextures()
         self.initialize_elements()
@@ -67,10 +70,36 @@ class UIVisualizerController(UIDock):
         self.visualizer_name.text = 'Visualizer: %s' % text
 
     def next_visual(self):
-        print('Next visual')
+        # If no visuals, quit.
+        if len(visualizers) == 0:
+            pg.quit()
+            quit()
+
+        # If no visualizer set, set to first one in vis list.
+        current_visualizer = self.current_visualizer.value
+        if current_visualizer == "":
+            self.current_visualizer.on_next(visualizers[1][0])
+        # Else find next one.
+        else:
+            idx = [v[0] for v in visualizers].index(current_visualizer)
+            vis = visualizers[idx + 1 % len(visualizers)][0]
+            self.current_visualizer.on_next(vis)
 
     def prev_visual(self):
-        print('Prev visual')
+        # If no visuals, quit.
+        if len(visualizers) == 0:
+            pg.quit()
+            quit()
+
+        # If no visualizer set, set to first one in vis list.
+        current_visualizer = self.current_visualizer.value
+        if current_visualizer == "":
+            self.current_visualizer.on_next(visualizers[0][0])
+        # Else find next one.
+        else:
+            idx = [v[0] for v in visualizers].index(current_visualizer)
+            vis = visualizers[idx - 1 % len(visualizers)][0]
+            self.current_visualizer.on_next(vis)
 
     def draw(self):
         self.draw_background()

@@ -2,6 +2,6 @@ from whirling.checkerboard_visualizer.checkerboard_visualizer import Checkerboar
 from whirling.debug_visualizer.debug_visualizer import DebugVisualizer
 
 visualizers = [
-    DebugVisualizer,
-    CheckerboardVisualizer,
+    ('Debug', DebugVisualizer),
+    ('Checkerboard', CheckerboardVisualizer),
 ]

@@ -14,24 +14,29 @@ class UIVisualizerSwitcher(UIDock):
         super().__init__(rect=rect, bg_color=bg_color,
             border_color=border_color)
 
+        self.visualizer = None
+
+        current_visualizer.subscribe(self.change_visualizer)
+
+    def get_visualizer_rect(self):
         padding_percent = .05
         padding = self.rect.width * padding_percent
-        visualizer_rect = Rect(
+        return Rect(
             self.rect.left + padding,
             self.rect.top - padding,
             self.rect.right - padding,
             self.rect.bottom + padding
         )
-        self.visualizer = None
-
-        current_visualizer.subscribe(self.change_visualizer)
 
     def draw(self):
         super().draw()
 
         self.visualizer.draw()
 
-    def change_visualizer(self, next_visualizer_name)   :
-        print('Changing visualizer: %s ' % next_visualizer_name)
-        self.visualizer = visualizers[next_visualizer_name]
-        #self.visualizer = self.visualizers['checkerboard']
+    def find_visualizer_class(self, vis_name):
+        return list(filter(lambda x: x[0] == vis_name, visualizers))[0][1]
+
+    def change_visualizer(self, vis_name)   :
+        print('Changing visualizer: %s ' % vis_name)
+        rect = self.get_visualizer_rect()
+        self.visualizer = self.find_visualizer_class(vis_name)(rect)
