@@ -3,6 +3,7 @@ from whirling.ui_core import UIElement, UIDock
 from whirling import colors
 from whirling.primitives import Rect
 from whirling.checkerboard_visualizer.checkerboard_visualizer import CheckerboardVisualizer
+from whirling.debug_visualizer.debug_visualizer import DebugVisualizer
 
 
 class UIVisualizerSwitcher(UIDock):
@@ -23,9 +24,10 @@ class UIVisualizerSwitcher(UIDock):
         )
 
         self.visualizers = {
-            'debug': '',
-            'checkerboard': CheckerboardVisualizer(
+            'debug': DebugVisualizer(
                 visualizer_rect, bg_color=colors.RED),
+            'checkerboard': CheckerboardVisualizer(
+                visualizer_rect),
         }
         self.visualizer = None
 

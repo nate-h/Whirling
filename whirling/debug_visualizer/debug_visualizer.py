@@ -7,10 +7,10 @@ import numpy as np
 from whirling.ui_visualizer_base import UIVisualizerBase
 
 
-class CheckerboardVisualizer(UIVisualizerBase):
+class DebugVisualizer(UIVisualizerBase):
     def __init__(self, rect, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, **kwargs)
 
     def draw(self):
-        pass
+        super().draw()

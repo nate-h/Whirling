@@ -20,6 +20,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
     def create_vbo_data(self):
         sw = self.width / self.pnts_x
         sh = self.height / self.pnts_y
+        swl = 0.05 * sw
+        swr = 0.95 * sw
+        shl = 0.05 * sh
+        shr = 0.95 * sh
 
         # Define plot parameters.
         rectangle = []
@@ -31,10 +35,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
             for j in range(self.pnts_y):
                 x = i * sw
                 y = j * sh
-                x1 = self.rect.left   + x
-                x2 = self.rect.left   + x + 0.9 * sw
-                y1 = self.rect.bottom + y
-                y2 = self.rect.bottom + y + 0.9 * sh
+                x1 = round(self.rect.left   + x + swl)
+                x2 = round(self.rect.left   + x + swr)
+                y1 = round(self.rect.bottom + y + shl)
+                y2 = round(self.rect.bottom + y + shr)
 
                 # Add 2 triangles to create a rect.
                 rectangle.extend(
@@ -100,6 +104,8 @@ class CheckerboardVisualizer(UIVisualizerBase):
         )
 
     def draw(self):
+        super().draw()
+
         # Create Buffer object in gpu.
         VBO = glGenBuffers(1)
 
