@@ -7,45 +7,43 @@ import numpy as np
 from whirling.ui_visualizer_base import UIVisualizerBase
 
 
-FPS_TARGET = 65
-
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, **kwargs)
 
-    def draw(self):
-        h = self.height
-        w = self.width
+        self.pnts_x = 150
+        self.pnts_y = 150
+        self.initialize_shader()
+        self.create_vbo_data()
+
+    def create_vbo_data(self):
+        sw = self.width / self.pnts_x
+        sh = self.height / self.pnts_y
 
         # Define plot parameters.
-        pnts_x = 1
-        pnts_y = 1
-        sw = 2/80
-        sh = 2/80
-        s = 2/80
         rectangle = []
         indices = []
         count = 0
 
         # Generate rects and indices for triangles in rect.
-        for i in range(pnts_x):
-            for j in range(pnts_y):
-                x = i * s - 1
-                y = j * s - 1
-                x1 = x
-                x2 = x+s*0.9
-                y1 = y
-                y2 = y+s*0.9
+        for i in range(self.pnts_x):
+            for j in range(self.pnts_y):
+                x = i * sw
+                y = j * sh
+                x1 = self.rect.left   + x
+                x2 = self.rect.left   + x + 0.9 * sw
+                y1 = self.rect.bottom + y
+                y2 = self.rect.bottom + y + 0.9 * sh
 
                 # Add 2 triangles to create a rect.
                 rectangle.extend(
                     [
                         # Position      # Color
-                        self.rect.left, self.rect.top, 0.0,       1, 0.0, 1,
-                        self.rect.right, self.rect.top, 0.0,      1, 0.0, 1,
-                        self.rect.right, self.rect.bottom, 0.0,   1, 0.0, 1,
-                        self.rect.left, self.rect.bottom, 0.0,    1, 0.0, 1,
+                        x1, y1, 0.0,   1, 0.0, 1,
+                        x2, y1, 0.0,   1, 0.0, 1,
+                        x2, y2, 0.0,   1, 0.0, 1,
+                        x1, y2, 0.0,   1, 0.0, 1,
                     ]
                 )
 
@@ -59,9 +57,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
                 count += 1
 
         # Convert to 32bit float.
-        rectangle = np.array(rectangle, dtype=np.float32)
-        indices = np.array(indices, dtype=np.uint32)
+        self.rectangle = np.array(rectangle, dtype=np.float32)
+        self.indices = np.array(indices, dtype=np.uint32)
 
+    def initialize_shader(self):
         VERTEX_SHADER = """
 
             #version 130
@@ -95,37 +94,38 @@ class CheckerboardVisualizer(UIVisualizerBase):
         """
 
         # Compile The Program and shaders.
-        shader = OpenGL.GL.shaders.compileProgram(
+        self.shader = OpenGL.GL.shaders.compileProgram(
             OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
         )
 
+    def draw(self):
         # Create Buffer object in gpu.
         VBO = glGenBuffers(1)
 
         # Create EBO.
         EBO = glGenBuffers(1)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
 
         # Bind the buffer.
         glBindBuffer(GL_ARRAY_BUFFER, VBO)
-        glBufferData(GL_ARRAY_BUFFER, 4*len(rectangle), rectangle, GL_STATIC_DRAW)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(self.rectangle), self.rectangle, GL_STATIC_DRAW)
 
         # Get the position from shader.
-        position = glGetAttribLocation(shader, 'position')
+        position = glGetAttribLocation(self.shader, 'position')
         glVertexAttribPointer(position, 3, GL_FLOAT,
                               GL_FALSE, 24, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
 
         # Get the color from shader.
-        color = glGetAttribLocation(shader, 'color')
+        color = glGetAttribLocation(self.shader, 'color')
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
                               24, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
 
         # Draw rectangles.
-        glUseProgram(shader)
+        glUseProgram(self.shader)
         glLoadIdentity()
-        glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT,  None)
         glUseProgram(0)
