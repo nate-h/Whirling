@@ -78,7 +78,7 @@ class UIVisualizerController(UIDock):
         # If no visualizer set, set to first one in vis list.
         current_visualizer = self.current_visualizer.value
         if current_visualizer == "":
-            self.current_visualizer.on_next(visualizers[1][0])
+            self.current_visualizer.on_next(visualizers[0][0])
         # Else find next one.
         else:
             idx = [v[0] for v in visualizers].index(current_visualizer)

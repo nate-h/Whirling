@@ -21,7 +21,7 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_visualizer_switcher import UIVisualizerSwitcher
 from whirling.ui_visualizer_controller import UIVisualizerController
 
-DESIRED_FPS = 10
+DESIRED_FPS = 60
 
 
 ###############################################################################
@@ -80,7 +80,7 @@ class Whirling(object):
 
         # Initialize visualizer.
         self.visualizer_switcher = UIVisualizerSwitcher(self.current_visualizer,
-            rect=visualizer_rect)
+            self.current_track, self.audio_controller, rect=visualizer_rect)
 
         # Initialize text elements.
         offset_x = 0.01 * self.width

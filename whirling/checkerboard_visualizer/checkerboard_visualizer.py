@@ -5,12 +5,13 @@ from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
 from whirling.ui_visualizer_base import UIVisualizerBase
+from whirling.ui_audio_controller import UIAudioController
 
 
 class CheckerboardVisualizer(UIVisualizerBase):
-    def __init__(self, rect, **kwargs):
+    def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
-        super().__init__(rect=rect, **kwargs)
+        super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         self.pnts_x = 64
         self.pnts_y = 64
