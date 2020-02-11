@@ -43,8 +43,8 @@ class DebugVisualizer(UIVisualizerBase):
 
         # Plot properties.
         row_num = 0
-        row_height = 70
-        row_gap = 30
+        row_height = 50
+        row_gap = 50
 
         for signal_name, signal_data in signals.items():
             framed = signal_data['extracts']['framed']

@@ -84,10 +84,10 @@ class Whirling(object):
 
         # Initialize text elements.
         offset_x = 0.01 * self.width
-        offset_y = self.height - 0.045 * self.width
-        self.fps = UIText('FPS', (offset_x, offset_y), font_size=50)
+        offset_y = self.height - 0.025 * self.width
+        self.fps = UIText('FPS', (offset_x, offset_y), font_size=30)
 
-        self.current_track_str = UIText('', (0, 0), font_size=50)
+        self.current_track_str = UIText('', (0, 0), font_size=30)
         self.current_track.subscribe(self.change_song)
 
         self.stopped = False
@@ -160,7 +160,7 @@ class Whirling(object):
         logging.info('New track: %s', new_track)
         self.current_track_str.text = new_track
         offset_x = 0.99 * self.width - self.current_track_str.width
-        offset_y = self.height - 0.045 * self.width
+        offset_y = self.height - 0.025 * self.width
         self.current_track_str.rect = Rect().translate(offset_x, offset_y)
 
 ###############################################################################

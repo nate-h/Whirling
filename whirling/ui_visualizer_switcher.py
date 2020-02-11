@@ -25,7 +25,7 @@ class UIVisualizerSwitcher(UIDock):
         current_track.subscribe(self.current_track_change)
 
     def get_visualizer_rect(self):
-        padding_percent = .05
+        padding_percent = .03
         padding = self.rect.width * padding_percent
         return Rect(
             self.rect.left + padding,
