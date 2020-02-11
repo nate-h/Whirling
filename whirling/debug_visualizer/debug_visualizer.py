@@ -8,6 +8,7 @@ import numpy as np
 from whirling import colors
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
+from whirling.ui_core import UIText
 
 
 class DebugVisualizer(UIVisualizerBase):
@@ -42,8 +43,8 @@ class DebugVisualizer(UIVisualizerBase):
 
         # Plot properties.
         row_num = 0
-        row_height = 50
-        row_gap = 20
+        row_height = 70
+        row_gap = 30
 
         for signal_name, signal_data in signals.items():
             framed = signal_data['extracts']['framed']
@@ -56,11 +57,8 @@ class DebugVisualizer(UIVisualizerBase):
                 if len(pnts) == 0:
                     continue
 
-                # Draw feature name text.
-                #row_title(signal_name + ' - ' + feature_name)
-
                 # Draw points for subset of feature data.
-                self.plot_signal(pnts, row_num, row_height, row_gap)
+                self.plot_signal(pnts, row_num, row_height, row_gap, feature_name)
                 row_num += 1
 
 
@@ -84,16 +82,21 @@ class DebugVisualizer(UIVisualizerBase):
             #         self.draw_circle(self.debug_surface, r, point, color)
             #     row += 1
 
-    def plot_signal(self, signal_segment, row_num, row_height, row_gap):
+    def plot_signal(self, signal_segment, row_num, row_height, row_gap, title):
 
         dx = self.width/ len(signal_segment)
         dh = row_height
         pb = self.rect.bottom + row_num * (row_height+row_gap)
         pl = self.rect.left
+        color = list(colors.COLORS.values())[row_num]
+
+        # TODO: not memoized!
+        pos = (pl, pb + dh + row_gap/10)
+        UIText(title, pos, font_size=20, font_color=color).draw()
 
         # Draw checkerboard.
         glBegin(GL_LINES)
-        glColor3fv(colors.RED)
+        glColor3fv(color)
         for i, y1 in enumerate(signal_segment):
             x1 = i*dx
             x2 = (i+1)*dx
