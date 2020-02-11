@@ -22,6 +22,7 @@ class UIVisualizerBase(UIElement, ABC):
 
     def draw(self):
         self.draw_background()
+        self.draw_border()
 
     def update(self):
         pass

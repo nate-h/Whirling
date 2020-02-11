@@ -41,24 +41,9 @@ class DebugVisualizer(UIVisualizerBase):
         num_rows = sum_framed + sum_framed_events
 
         # Plot properties.
-        margin = 0.05
-        row = 0
-        text_height = .04
-        row_h = (1-2*margin - num_rows*text_height)/num_rows
-        row_growth = row_h + text_height
-        r = 0.001
-        row_w = 1 - 2*margin
-
-        # Function to convert data to x, y values.
-        # def create_point_from(i, p):
-        #     x = 1 - margin - (num_frames - i - 1)/ (num_frames - 1) * row_w
-        #     y = row*row_growth + margin + row_h * (1 - p) + text_height
-        #     return Point(x, y)
-
-        # def row_title(text):
-        #     text_pos = Point(0.1, row*row_growth + margin + .01)
-        #     self.draw_text(self.debug_surface, text, text_pos, color)
-
+        row_num = 0
+        row_height = 50
+        row_gap = 20
 
         for signal_name, signal_data in signals.items():
             framed = signal_data['extracts']['framed']
@@ -73,11 +58,10 @@ class DebugVisualizer(UIVisualizerBase):
 
                 # Draw feature name text.
                 #row_title(signal_name + ' - ' + feature_name)
-                last_p = None
 
                 # Draw points for subset of feature data.
-                self.plot_signal(pnts)
-                row += 1
+                self.plot_signal(pnts, row_num, row_height, row_gap)
+                row_num += 1
 
 
             # # Convert beat events to frames and then plot them.
@@ -100,11 +84,11 @@ class DebugVisualizer(UIVisualizerBase):
             #         self.draw_circle(self.debug_surface, r, point, color)
             #     row += 1
 
-    def plot_signal(self, signal_segment):
+    def plot_signal(self, signal_segment, row_num, row_height, row_gap):
 
         dx = self.width/ len(signal_segment)
-        dh = 50
-        pb = self.rect.bottom
+        dh = row_height
+        pb = self.rect.bottom + row_num * (row_height+row_gap)
         pl = self.rect.left
 
         # Draw checkerboard.

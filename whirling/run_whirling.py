@@ -21,7 +21,7 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_visualizer_switcher import UIVisualizerSwitcher
 from whirling.ui_visualizer_controller import UIVisualizerController
 
-DESIRED_FPS = 60
+DESIRED_FPS = 5
 
 
 ###############################################################################

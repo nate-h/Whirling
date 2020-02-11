@@ -57,6 +57,7 @@ class UIElement(ABC):
             glVertex2f(0, 0)
 
         glEnd()
+        glLoadIdentity()
 
     def draw_background(self):
         # Don't proceed if clear border color.
