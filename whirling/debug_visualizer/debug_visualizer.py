@@ -82,6 +82,19 @@ class DebugVisualizer(UIVisualizerBase):
             #         self.draw_circle(self.debug_surface, r, point, color)
             #     row += 1
 
+        self.draw_time_indicator(curr_time, min_window_time, max_window_time)
+
+    def draw_time_indicator(self, curr_time, min_time, max_time):
+        if max_time == 0:
+            return
+        fraction = (curr_time - min_time) / (max_time - min_time)
+        x = self.width * fraction + self.rect.left
+        glBegin(GL_LINES)
+        glColor3fv(colors.GRAY)
+        glVertex2f(x, self.rect.top)
+        glVertex2f(x, self.rect.bottom)
+        glEnd()
+
     def plot_signal(self, signal_segment, row_num, row_height, row_gap, title):
 
         dx = self.width/ len(signal_segment)
