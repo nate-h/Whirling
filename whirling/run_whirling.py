@@ -79,7 +79,7 @@ class Whirling(object):
             bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
 
         # Initialize visualizer.
-        self.visualizer_switcher = UIVisualizerSwitcher(self.current_visualizer,
+        self.visualizer_switcher = UIVisualizerSwitcher(plan, self.current_visualizer,
             self.current_track, self.audio_controller, rect=visualizer_rect)
 
         # Initialize text elements.
@@ -94,9 +94,6 @@ class Whirling(object):
         self.dw = display_w
         self.dh = display_h
         self.clock = pg.time.Clock()
-
-        # Generate audio features.
-        audio_features.generate_features(plan, MUSIC_TRACKS, use_cache)
 
         self.main_loop()
 
@@ -167,18 +164,10 @@ class Whirling(object):
 # Main and option handling.
 ###############################################################################
 
-def load_plan(plan_name):
-    full_plan_loc = 'plans/{}.json'.format(plan_name)
-    if not os.path.exists(full_plan_loc):
-        logging.error('Couldn\'t find plan %s', full_plan_loc)
-        quit()
-    with open(full_plan_loc, 'r') as f:
-        return json.load(f)
-
 def parse_options():
     description = 'A python music visualizer using audio feature extraction'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--plan', type=load_plan, default='default_plan',
+    parser.add_argument('--plan', type=str, default='default_plan',
          help='A plan to generate data from a list of songs.')
     parser.add_argument('--use-cache', default=False, action='store_true',
          help='Load cached audio features stored as dnz files along side the '

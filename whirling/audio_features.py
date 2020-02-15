@@ -6,6 +6,7 @@ import logging
 import sklearn
 import numpy as np
 import pkg_resources  # part of setuptools
+from whirling.plan import load_plan
 
 
 ###############################################################################
@@ -45,22 +46,24 @@ def load_track(new_track: str, sr:int=22500):
     y, sr = librosa.load(new_track, sr=sr)
     return y, sr
 
-def audio_to_feature_file(track: str):
-    return os.path.splitext(track)[0] + '.json'
+def audio_to_feature_file(track: str, plan: str):
+    return f'{os.path.splitext(track)[0]}_{plan}.json'
 
-def cache_exists(track: str):
-    return os.path.exists(audio_to_feature_file(track))
+def cache_exists(track: str, plan: str):
+    return os.path.exists(audio_to_feature_file(track, plan))
 
-def load_features(track: str):
+def load_features(track: str, plan: str):
     logging.info('Loading cached features for track: %s' % track)
-    if not cache_exists(track):
-        logging.error('No cache saved for this file.')
+    if not cache_exists(track, plan):
+        logging.info('No cache saved for this file. Generating features now.')
+        return run_plan(plan, track)
     else:
-        with open(audio_to_feature_file(track), 'r') as f:
+        with open(audio_to_feature_file(track, plan), 'r') as f:
             return json.load(f)
 
-def save_features(track: str, data):
-    feature_file = audio_to_feature_file(track)
+def save_features(track: str, data: any, plan: str):
+    feature_file = audio_to_feature_file(track, plan)
+    # TODO
     with open(feature_file, 'w') as f:
         json.dump(data, f, indent=4)
 
@@ -179,14 +182,9 @@ def get_loudness(y, D, sr, hop_length):
 ###############################################################################
 
 @timeit
-def generate_features(plan, music_tracks, use_cache):
-    for track in music_tracks:
-        if use_cache and cache_exists(track):
-            continue
-        run_plan(plan, track)
+def run_plan(plan_name:str, track: str):
 
-
-def run_plan(plan:str, track: str):
+    loaded_plan = load_plan(plan_name)
 
     # Establish basic properties.
     logging.info('Generating features for track: %s' % track)
@@ -217,7 +215,7 @@ def run_plan(plan:str, track: str):
 
     # Generate all audio signals and their feature extractions.
     # Note: certain defs may export 1+ audio signals like hpss.
-    for audio_signal_def in plan['audio_signals']:
+    for audio_signal_def in loaded_plan['audio_signals']:
         signal_name = audio_signal_def['name']
         settings = audio_signal_def['settings']
         extracts = audio_signal_def['extracts']
@@ -239,7 +237,8 @@ def run_plan(plan:str, track: str):
                 data['audio_signals'][signal_name]['extracts'][event_type][fn_name] = \
                     fn_mappings[fn_name](y, D, sr, hop_length).tolist()
 
-    save_features(track, data)
+    save_features(track, data, plan_name)
+    return data
 
 
 def get_function_mappings():

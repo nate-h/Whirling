@@ -8,7 +8,7 @@ from whirling import audio_features
 
 
 class UIVisualizerSwitcher(UIDock):
-    def __init__(self, current_visualizer: BehaviorSubject,
+    def __init__(self, plan, current_visualizer: BehaviorSubject,
                  current_track: BehaviorSubject, audio_controller: UIAudioController,
                  rect: Rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
@@ -19,6 +19,7 @@ class UIVisualizerSwitcher(UIDock):
         self.visualizer = None
         self.track_audio_features = None
         self.audio_controller = audio_controller
+        self.plan = plan
 
         current_visualizer.subscribe(self.change_visualizer)
 
@@ -65,7 +66,8 @@ class UIVisualizerSwitcher(UIDock):
             self.visualizer.track_audio_features = self.track_audio_features
 
     def current_track_change(self, new_track):
-        self.track_audio_features = audio_features.load_features(new_track)
+        self.track_audio_features = audio_features.load_features(
+            new_track, self.plan)
 
         # Post processing. Converts events to framed events.
         self.post_process_audio_features()
