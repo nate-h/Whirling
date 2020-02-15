@@ -23,6 +23,8 @@ IMAGES = {
     'stop.png',
     'next_arrow.png',
     'previous_arrow.png',
+    'up_arrow.png',
+    'down_arrow.png',
 }
 
 

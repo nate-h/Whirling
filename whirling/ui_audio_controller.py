@@ -22,6 +22,7 @@ class UIAudioController(UIDock):
             border_color=border_color)
 
         # Setup player.
+        self.volume = 50
         self.track_num = 0
         self.player = None
         self.current_track = current_track
@@ -43,6 +44,7 @@ class UIAudioController(UIDock):
         button_w = 50
         button_h = 50
         margin_x = 20
+        gap = 0
         self.elements = []
 
         play_states = OrderedDict([
@@ -53,7 +55,7 @@ class UIAudioController(UIDock):
         def button_rect():
             count = len(self.elements)
             base_rect = Rect(0, button_h, button_w, 0)
-            x = 10 + count*(button_w + margin_x)
+            x = 10 + count*(button_w + margin_x) + gap
             base_rect = base_rect.translate(x, 10)
             return base_rect
 
@@ -73,6 +75,14 @@ class UIAudioController(UIDock):
         self.elements.append(self.play_button)
         self.next_button = initialize_button('next', self.next)
         self.ffw_button = initialize_button('ffw', self.ffw)
+
+        # Add volume buttons and text.
+        gap += 50
+        self.volume_up_button = initialize_button('up_arrow', self.volume_up)
+        self.volume_down_button = initialize_button('down_arrow', self.volume_down)
+        self.volume_text = UIText('Volume: %s' % self.volume, (
+            self.volume_up_button.rect.left, 60), font_size=30)
+        self.elements.append(self.volume_text)
 
         # Initialize current time str.
         self.current_time = UIText('0.00', (10, 60), font_size=30)
@@ -100,9 +110,20 @@ class UIAudioController(UIDock):
         if is_playing:
             self.player.stop()
         self.player = vlc.MediaPlayer(new_track)
-        self.player.audio_set_volume(100)
+        self.player.audio_set_volume(self.volume)
         if is_playing:
             self.player.play()
+
+    def volume_up(self):
+        self.set_volume(self.volume + 10)
+
+    def volume_down(self):
+        self.set_volume(self.volume - 10)
+
+    def set_volume(self, volume):
+        self.volume = max(min(volume, 100), 0)
+        self.player.audio_set_volume(self.volume)
+        self.volume_text.text = 'Volume: %s' % self.volume
 
     @property
     def is_playing(self):
