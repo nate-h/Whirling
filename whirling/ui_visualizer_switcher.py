@@ -17,6 +17,7 @@ class UIVisualizerSwitcher(UIDock):
             border_color=border_color)
 
         self.visualizer = None
+        self.track_audio_features = None
         self.audio_controller = audio_controller
 
         current_visualizer.subscribe(self.change_visualizer)
@@ -58,6 +59,10 @@ class UIVisualizerSwitcher(UIDock):
         rect = self.get_visualizer_rect()
         self.visualizer = self.find_visualizer_class(vis_name)(
             rect, self.audio_controller) #, border_color=colors.RED)
+
+        # Copy audio features over to visualizer.
+        if self.visualizer:
+            self.visualizer.track_audio_features = self.track_audio_features
 
     def current_track_change(self, new_track):
         self.track_audio_features = audio_features.load_features(new_track)
