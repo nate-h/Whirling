@@ -82,7 +82,7 @@ class UIVisualizerController(UIDock):
         # Else find next one.
         else:
             idx = [v[0] for v in visualizers].index(current_visualizer)
-            vis = visualizers[idx + 1 % len(visualizers)][0]
+            vis = visualizers[(idx + 1) % len(visualizers)][0]
             self.current_visualizer.on_next(vis)
 
     def prev_visual(self):
@@ -98,7 +98,7 @@ class UIVisualizerController(UIDock):
         # Else find next one.
         else:
             idx = [v[0] for v in visualizers].index(current_visualizer)
-            vis = visualizers[idx - 1 % len(visualizers)][0]
+            vis = visualizers[(idx - 1) % len(visualizers)][0]
             self.current_visualizer.on_next(vis)
 
     def draw(self):
