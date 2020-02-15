@@ -15,6 +15,7 @@ class DebugVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
+        self.text_elements = {}
 
     def draw(self):
         super().draw()
@@ -97,9 +98,9 @@ class DebugVisualizer(UIVisualizerBase):
         pl = self.rect.left
         color = list(colors.COLORS.values())[row_num]
 
-        # TODO: not memoized!
+        # Generate text if doesn't exist then render it.
         pos = (pl, pb + dh + row_gap/10)
-        UIText(title, pos, font_size=20, font_color=color).draw()
+        self.render_text(title, pos, color)
 
         # Draw checkerboard.
         glBegin(GL_LINES)
@@ -122,9 +123,9 @@ class DebugVisualizer(UIVisualizerBase):
         pl = self.rect.left
         color = list(colors.COLORS.values())[row_num]
 
-        # TODO: not memoized!
+        # Generate text if doesn't exist then render it.
         pos = (pl, pb + dh + row_gap/10)
-        UIText(title, pos, font_size=20, font_color=color).draw()
+        self.render_text(title, pos, color)
 
         # Draw checkerboard.
         glPointSize(5)
@@ -135,3 +136,10 @@ class DebugVisualizer(UIVisualizerBase):
                 x1 = i*dx
                 glVertex2f(pl + x1, pb + y1*dh*0.7)
         glEnd()
+
+    def render_text(self, title, pos, color):
+        # Generate text if doesn't exist then render it.
+        if title not in self.text_elements:
+            self.text_elements[title] = UIText(
+                title, pos, font_size=20, font_color=color)
+        self.text_elements[title].draw()
