@@ -21,7 +21,8 @@ setup(
         'coloredlogs',
         'jupyter',
         'matplotlib',
-        'PyOpenGL'
+        'PyOpenGL',
+        'spleeter'
     ],
     entry_points={
         'console_scripts': [

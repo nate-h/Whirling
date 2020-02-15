@@ -114,8 +114,8 @@ def get_spleeter_audio_signal(store, settings):
         return
 
 
-    """Use spleeter to seperate the track into 4 components:
-    Vocals, Drums, base, oter separation"""
+    """Use spleeter to separate the track into 4 components:
+    Vocals, Drums, base, other separation"""
 
     pass
 
