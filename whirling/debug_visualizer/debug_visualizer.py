@@ -127,10 +127,11 @@ class DebugVisualizer(UIVisualizerBase):
         UIText(title, pos, font_size=20, font_color=color).draw()
 
         # Draw checkerboard.
-        glPointSize(10.0)
+        glPointSize(5)
         glBegin(GL_POINTS)
         glColor3fv(color)
         for i, y1 in enumerate(points):
-            x1 = i*dx
-            glVertex2f(pl + x1, pb + y1*dh)
+            if y1 > 0:
+                x1 = i*dx
+                glVertex2f(pl + x1, pb + y1*dh*0.7)
         glEnd()
