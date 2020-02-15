@@ -35,6 +35,9 @@ class DebugVisualizer(UIVisualizerBase):
         min_window_frame = self.get_frame_number(min_window_time)
         max_window_frame = self.get_frame_number(max_window_time)
 
+        if max_window_frame == 0:
+            return
+
         num_frames = max_window_frame - min_window_frame
         signals = self.track_audio_features['audio_signals']
         sum_framed = sum([len(d['extracts']['framed']) for s,d in signals.items()])
@@ -53,9 +56,6 @@ class DebugVisualizer(UIVisualizerBase):
             for feature_name, data in framed.items():
                 # Points spanning seconds_worth.
                 pnts = data[min_window_frame: max_window_frame]
-
-                if len(pnts) == 0:
-                    continue
 
                 # Draw points for subset of feature data.
                 title = "%s - %s" % (signal_name, feature_name)
