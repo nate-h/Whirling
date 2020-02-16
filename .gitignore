@@ -5,3 +5,4 @@ data/*
 .vscode
 *.egg-info/
 .ipynb_checkpoints
+pretrained_models/
