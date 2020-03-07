@@ -10,6 +10,8 @@ import numpy as np
 from whirling import colors
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
+from matplotlib import cm
+from whirling import viridis
 
 
 class SpectrogramVisualizer(UIVisualizerBase):
@@ -32,15 +34,15 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if self.spec_window == math.floor(curr_time / self.seconds_worth):
             return
 
+        t0 = time.time()
         self.spec_window = math.floor(curr_time / self.seconds_worth)
 
         self.log_db_s = self.create_db_spectrogram()
         self.pnts_x, self.pnts_y = self.log_db_s.shape
 
-        print(f'w, h: {self.pnts_x, self.pnts_y}')
-
         self.initialize_shader()
         self.create_vbo_data()
+        print(f'Total time: {time.time() - t0}')
 
     def create_vbo_data(self):
         h = self.height/3
@@ -62,6 +64,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
                 x = i * sw
                 y = j * sh
                 signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
+                c = viridis.get_color(signal_strength)
 
                 x1 = round(self.rect.left   + x + swl)
                 x2 = round(self.rect.left   + x + swr)
@@ -71,11 +74,11 @@ class SpectrogramVisualizer(UIVisualizerBase):
                 # Add 2 triangles to create a rect.
                 rectangle.extend(
                     [
-                        # Position      # Color
-                        x1, y1, 0.0,   signal_strength, 0.0, signal_strength,
-                        x2, y1, 0.0,   signal_strength, 0.0, signal_strength,
-                        x2, y2, 0.0,   signal_strength, 0.0, signal_strength,
-                        x1, y2, 0.0,   signal_strength, 0.0, signal_strength,
+                        # Position     # Color
+                        x1, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y2, 0.0,   c[0], c[1], c[2],
+                        x1, y2, 0.0,   c[0], c[1], c[2],
                     ]
                 )
 
