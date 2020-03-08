@@ -61,7 +61,7 @@ class Spectrogram():
 
         return log_db_s
 
-    def draw():
+    def draw(self):
         # Create Buffer object in gpu.
         VBO = glGenBuffers(1)
 
