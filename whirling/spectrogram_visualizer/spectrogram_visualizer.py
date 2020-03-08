@@ -13,7 +13,8 @@ from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from matplotlib import cm
 from whirling import viridis
-from whirling.spectrogram_visualizer.spectrogram import initialize_shader
+from whirling.spectrogram_visualizer import spectrogram.initialize_shader
+from whirling.spectrogram_visualizer import spectrogram.create_spectrogram
 
 
 class SpecState(Enum):
@@ -32,13 +33,8 @@ class SpectrogramVisualizer(UIVisualizerBase):
         # What clip of full spectrogram we are looking at.
         self.spec_window = None
 
-        # length of the windowed signal after padding with zeros
-        self.n_fft = 2048
-
         # If the current spec has been loaded.
         self.curr_spec_state = None
-
-        self.shader = initialize_shader
 
     def initialize_spectrogram(self):
 
@@ -51,7 +47,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         self.spec_window = math.floor(curr_time / self.seconds_worth)
 
         # FIXME: yo.
-        create_spectrogram()
+        spectrogram.create_spectrogram()
 
         self.curr_spec_state = SpecState.LOADING
         print(f'Total time: {time.time() - t0}')

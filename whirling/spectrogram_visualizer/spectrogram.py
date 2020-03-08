@@ -13,168 +13,174 @@ from matplotlib import cm
 from whirling import viridis
 
 
-def create_spectrogram(self):
-    log_db_s = create_db_spectrogram()
-    pnts_x, pnts_y = log_db_s.shape
-    create_vbo_data()
+class Spectrogram():
+    def __init__(self, parent_rect):
 
-def create_db_spectrogram(self):
-    # Extract 8s clip from signal y and run a stft on it.
-    timer_start = time.time()
-    curr_time = self.audio_controller.get_time()
-    curr_window_number = math.floor(curr_time/self.seconds_worth)
-    min_window_time = curr_window_number * self.seconds_worth
-    max_window_time = (curr_window_number + 1) * self.seconds_worth
+        # length of the windowed signal after padding with zeros
+        self.n_fft = 2048
 
-    # start_y = librosa.time_to_samples([min_window_time], sr=self.sr)[0]
-    # end_y = librosa.time_to_samples([max_window_time], sr=self.sr)[0]
+        self.log_db_s = self.create_log_db_spectrogram()
+        self.pnts_x, self.pnts_y = self.log_db_s.shape
+        self.create_vbo_data()
+        self.shader = self.initialize_shader()
 
-    #import pdb; pdb.set_trace()
-    # FIXME: GET ACTUAL SONG.
-    y_sample, _sr = librosa.load('data/latch.mp3', sr=self.sr,
-        offset=min_window_time, duration=max_window_time-min_window_time)
+    def create_log_db_spectrogram(self):
+        # Extract 8s clip from signal y and run a stft on it.
+        timer_start = time.time()
+        curr_time = self.audio_controller.get_time()
+        curr_window_number = math.floor(curr_time/self.seconds_worth)
+        min_window_time = curr_window_number * self.seconds_worth
+        max_window_time = (curr_window_number + 1) * self.seconds_worth
 
-    n_fft=2048
-    D = librosa.stft(y_sample, n_fft=n_fft)
+        # start_y = librosa.time_to_samples([min_window_time], sr=self.sr)[0]
+        # end_y = librosa.time_to_samples([max_window_time], sr=self.sr)[0]
 
-    # Convert amplitude spec to DB spec.
-    db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+        #import pdb; pdb.set_trace()
+        # FIXME: GET ACTUAL SONG.
+        y_sample, _sr = librosa.load('data/latch.mp3', sr=self.sr,
+            offset=min_window_time, duration=max_window_time-min_window_time)
 
-    # Take our n frequency bins D has and logarithmically chunk them up.
-    # Each chunk is exponentially larger than the last.
-    # Each chunk of frequency bins then gets there values averaged.
-    max_power = int(math.log(db_s.shape[0] - 1, 2))
-    idxs = [(int(math.pow(2, (i-1)/12)), int(math.pow(2, i/12))) for i in range(max_power*12 + 1)
-            if int(math.pow(2, (i-1)/12)) != int(math.pow(2, i/12))]
-    log_db_s = np.array([
-        [np.average(db_s[idx1: idx2, j]) for idx1, idx2 in idxs]
-        for j in range(db_s.shape[1])
-    ])
-    print(f'log_db_s.shape: {log_db_s.shape}')
-    print(f'Total time for create_db_spectrogram: {time.time() - timer_start}')
+        n_fft=2048
+        D = librosa.stft(y_sample, n_fft=n_fft)
 
-    return log_db_s
+        # Convert amplitude spec to DB spec.
+        db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
 
-def draw_spectrogram(shader, indices, rectangle):
-    # Create Buffer object in gpu.
-    VBO = glGenBuffers(1)
+        # Take our n frequency bins D has and logarithmically chunk them up.
+        # Each chunk is exponentially larger than the last.
+        # Each chunk of frequency bins then gets there values averaged.
+        max_power = int(math.log(db_s.shape[0] - 1, 2))
+        idxs = [(int(math.pow(2, (i-1)/12)), int(math.pow(2, i/12))) for i in range(max_power*12 + 1)
+                if int(math.pow(2, (i-1)/12)) != int(math.pow(2, i/12))]
+        log_db_s = np.array([
+            [np.average(db_s[idx1: idx2, j]) for idx1, idx2 in idxs]
+            for j in range(db_s.shape[1])
+        ])
+        print(f'log_db_s.shape: {log_db_s.shape}')
+        print(f'Total time for create_db_spectrogram: {time.time() - timer_start}')
 
-    # Create EBO.
-    EBO = glGenBuffers(1)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW)
+        return log_db_s
 
-    # Bind the buffer.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO)
-    glBufferData(GL_ARRAY_BUFFER, 4*len(rectangle), rectangle, GL_STATIC_DRAW)
+    def draw():
+        # Create Buffer object in gpu.
+        VBO = glGenBuffers(1)
 
-    # Get the position from shader.
-    position = glGetAttribLocation(shader, 'position')
-    glVertexAttribPointer(position, 3, GL_FLOAT,
-                            GL_FALSE, 24, ctypes.c_void_p(0))
-    glEnableVertexAttribArray(position)
+        # Create EBO.
+        EBO = glGenBuffers(1)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
 
-    # Get the color from shader.
-    color = glGetAttribLocation(shader, 'color')
-    glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                            24, ctypes.c_void_p(12))
-    glEnableVertexAttribArray(color)
+        # Bind the buffer.
+        glBindBuffer(GL_ARRAY_BUFFER, VBO)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(self.rectangle), self.rectangle, GL_STATIC_DRAW)
 
-    # Draw rectangles.
-    glUseProgram(shader)
-    glLoadIdentity()
-    glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT,  None)
-    glUseProgram(0)
+        # Get the position from shader.
+        position = glGetAttribLocation(self.shader, 'position')
+        glVertexAttribPointer(position, 3, GL_FLOAT,
+                                GL_FALSE, 24, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(position)
 
-    glDeleteBuffers(1, [VBO])
-    glDeleteBuffers(1, [EBO])
+        # Get the color from shader.
+        color = glGetAttribLocation(self.shader, 'color')
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
+                                24, ctypes.c_void_p(12))
+        glEnableVertexAttribArray(color)
 
-def create_vbo_data(self):
-    h = self.height/3
-    sw = self.width / self.pnts_x
-    sh = h / self.pnts_y
-    swl = 0.0 * sw
-    swr = 1.0 * sw
-    shl = 0.0 * sh
-    shr = 1.0 * sh
+        # Draw rectangles.
+        glUseProgram(self.shader)
+        glLoadIdentity()
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT,  None)
+        glUseProgram(0)
 
-    # Define plot parameters.
-    rectangle = []
-    indices = []
-    count = 0
+        glDeleteBuffers(1, [VBO])
+        glDeleteBuffers(1, [EBO])
 
-    # Generate rects and indices for triangles in rect.
-    for i in range(self.pnts_x):
-        for j in range(self.pnts_y):
-            x = i * sw
-            y = j * sh
-            signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
-            c = viridis.get_color(signal_strength)
+    def create_vbo_data(self):
+        h = self.height/3
+        sw = self.width / self.pnts_x
+        sh = h / self.pnts_y
+        swl = 0.0 * sw
+        swr = 1.0 * sw
+        shl = 0.0 * sh
+        shr = 1.0 * sh
 
-            x1 = round(self.rect.left   + x + swl)
-            x2 = round(self.rect.left   + x + swr)
-            y1 = round(self.rect.bottom + y + shl)
-            y2 = round(self.rect.bottom + y + shr)
+        # Define plot parameters.
+        rectangle = []
+        indices = []
+        count = 0
 
-            # Add 2 triangles to create a rect.
-            rectangle.extend(
-                [
-                    # Position     # Color
-                    x1, y1, 0.0,   c[0], c[1], c[2],
-                    x2, y1, 0.0,   c[0], c[1], c[2],
-                    x2, y2, 0.0,   c[0], c[1], c[2],
-                    x1, y2, 0.0,   c[0], c[1], c[2],
-                ]
-            )
+        # Generate rects and indices for triangles in rect.
+        for i in range(self.pnts_x):
+            for j in range(self.pnts_y):
+                x = i * sw
+                y = j * sh
+                signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
+                c = viridis.get_color(signal_strength)
 
-            # Add 3 indexes for each triangle.
-            indices.extend(
-                [
-                    0 + 4*count, 1 + 4*count, 2 + 4*count,
-                    2 + 4*count, 3 + 4*count, 0 + 4*count
-                ]
-            )
-            count += 1
+                x1 = round(self.rect.left   + x + swl)
+                x2 = round(self.rect.left   + x + swr)
+                y1 = round(self.rect.bottom + y + shl)
+                y2 = round(self.rect.bottom + y + shr)
 
-    # Convert to 32bit float.
-    self.rectangle = np.array(rectangle, dtype=np.float32)
-    self.indices = np.array(indices, dtype=np.uint32)
+                # Add 2 triangles to create a rect.
+                rectangle.extend(
+                    [
+                        # Position     # Color
+                        x1, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y2, 0.0,   c[0], c[1], c[2],
+                        x1, y2, 0.0,   c[0], c[1], c[2],
+                    ]
+                )
 
-def initialize_shader():
-    VERTEX_SHADER = """
+                # Add 3 indexes for each triangle.
+                indices.extend(
+                    [
+                        0 + 4*count, 1 + 4*count, 2 + 4*count,
+                        2 + 4*count, 3 + 4*count, 0 + 4*count
+                    ]
+                )
+                count += 1
 
-        #version 130
+        # Convert to 32bit float.
+        self.rectangle = np.array(rectangle, dtype=np.float32)
+        self.indices = np.array(indices, dtype=np.uint32)
 
-        in vec3 position;
-        in vec3 color;
-        out vec3 newColor;
+    def initialize_shader(self):
+        VERTEX_SHADER = """
 
-        void main() {
+            #version 130
 
-            gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
-            newColor = color;
+            in vec3 position;
+            in vec3 color;
+            out vec3 newColor;
 
-        }
+            void main() {
+
+                gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
+                newColor = color;
+
+            }
 
 
-    """
+        """
 
-    FRAGMENT_SHADER = """
-        #version 130
+        FRAGMENT_SHADER = """
+            #version 130
 
-        in vec3 newColor;
-        out vec4 outColor;
+            in vec3 newColor;
+            out vec4 outColor;
 
-        void main() {
+            void main() {
 
-        outColor = vec4(newColor, 1.0f);
+            outColor = vec4(newColor, 1.0f);
 
-        }
+            }
 
-    """
+        """
 
-    # Compile The Program and shaders.
-    return OpenGL.GL.shaders.compileProgram(
-        OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
-        OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
-    )
+        # Compile The Program and shaders.
+        return OpenGL.GL.shaders.compileProgram(
+            OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+        )
