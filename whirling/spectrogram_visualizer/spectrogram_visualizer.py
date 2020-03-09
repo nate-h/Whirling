@@ -9,12 +9,12 @@ from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
 from whirling import colors
+from whirling.primitives import Rect
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from matplotlib import cm
 from whirling import viridis
-from whirling.spectrogram_visualizer import spectrogram.initialize_shader
-from whirling.spectrogram_visualizer import spectrogram.create_spectrogram
+from whirling.spectrogram_visualizer import spectrogram
 
 
 class SpecState(Enum):
@@ -46,10 +46,13 @@ class SpectrogramVisualizer(UIVisualizerBase):
         t0 = time.time()
         self.spec_window = math.floor(curr_time / self.seconds_worth)
 
-        # FIXME: yo.
-        spectrogram.create_spectrogram()
+        # Create the spectrogram.
+        top = self.height/3  + self.rect.bottom
+        spec_rect = Rect(self.rect.left, top, self.rect.right, self.rect.bottom)
+        self.spec = spectrogram.Spectrogram(spec_rect, 'data/latch.mp3',
+            self.sr, curr_time, self.seconds_worth)
 
-        self.curr_spec_state = SpecState.LOADING
+        self.curr_spec_state = SpecState.LOADED
         print(f'Total time: {time.time() - t0}')
 
     def draw(self):
@@ -59,7 +62,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         self.initialize_spectrogram()
 
         if self.curr_spec_state == SpecState.LOADED:
-            self.draw_spectrogram()
+            self.spec.draw()
 
         # Draw time indicator.
         curr_time = self.audio_controller.get_time()

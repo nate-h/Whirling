@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
+from whirling.ui_core import UIElement
 from whirling import colors
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
@@ -13,31 +14,38 @@ from matplotlib import cm
 from whirling import viridis
 
 
-class Spectrogram():
-    def __init__(self, parent_rect):
+class Spectrogram(UIElement):
+    def __init__(self, rect, track: str, sr:int, offset: float, duration: float, **kwargs):
+
+        super().__init__(rect=rect, **kwargs)
 
         # length of the windowed signal after padding with zeros
         self.n_fft = 2048
 
-        self.log_db_s = self.create_log_db_spectrogram()
+        self.log_db_s = self.create_log_db_spectrogram(
+            track, sr, offset, duration)
         self.pnts_x, self.pnts_y = self.log_db_s.shape
         self.create_vbo_data()
         self.shader = self.initialize_shader()
 
-    def create_log_db_spectrogram(self):
+    @property
+    def width(self):
+        return self.rect.width
+
+    @property
+    def height(self):
+        return self.rect.height
+
+    def create_log_db_spectrogram(self, track: str, sr:int, offset: float, duration: float):
         # Extract 8s clip from signal y and run a stft on it.
         timer_start = time.time()
-        curr_time = self.audio_controller.get_time()
-        curr_window_number = math.floor(curr_time/self.seconds_worth)
-        min_window_time = curr_window_number * self.seconds_worth
-        max_window_time = (curr_window_number + 1) * self.seconds_worth
-
-        # start_y = librosa.time_to_samples([min_window_time], sr=self.sr)[0]
-        # end_y = librosa.time_to_samples([max_window_time], sr=self.sr)[0]
+        curr_window_number = math.floor(offset/duration)
+        min_window_time = curr_window_number * duration
+        max_window_time = (curr_window_number + 1) * duration
 
         #import pdb; pdb.set_trace()
         # FIXME: GET ACTUAL SONG.
-        y_sample, _sr = librosa.load('data/latch.mp3', sr=self.sr,
+        y_sample, _sr = librosa.load(track, sr=sr,
             offset=min_window_time, duration=max_window_time-min_window_time)
 
         n_fft=2048
@@ -96,9 +104,8 @@ class Spectrogram():
         glDeleteBuffers(1, [EBO])
 
     def create_vbo_data(self):
-        h = self.height/3
         sw = self.width / self.pnts_x
-        sh = h / self.pnts_y
+        sh = self.height / self.pnts_y
         swl = 0.0 * sw
         swr = 1.0 * sw
         shl = 0.0 * sh
@@ -156,13 +163,9 @@ class Spectrogram():
             out vec3 newColor;
 
             void main() {
-
                 gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
                 newColor = color;
-
             }
-
-
         """
 
         FRAGMENT_SHADER = """
@@ -172,11 +175,8 @@ class Spectrogram():
             out vec4 outColor;
 
             void main() {
-
-            outColor = vec4(newColor, 1.0f);
-
+                outColor = vec4(newColor, 1.0f);
             }
-
         """
 
         # Compile The Program and shaders.
