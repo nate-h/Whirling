@@ -10,7 +10,6 @@ from whirling.ui_core import UIElement
 from whirling import colors
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from matplotlib import cm
 from whirling import viridis
 
 
@@ -85,19 +84,19 @@ class Spectrogram(UIElement):
         # Get the position from shader.
         position = glGetAttribLocation(self.shader, 'position')
         glVertexAttribPointer(position, 3, GL_FLOAT,
-                                GL_FALSE, 24, ctypes.c_void_p(0))
+                              GL_FALSE, 24, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
 
         # Get the color from shader.
         color = glGetAttribLocation(self.shader, 'color')
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                                24, ctypes.c_void_p(12))
+                              24, ctypes.c_void_p(12))
         glEnableVertexAttribArray(color)
 
         # Draw rectangles.
         glUseProgram(self.shader)
         glLoadIdentity()
-        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT,  None)
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
         glUseProgram(0)
 
         glDeleteBuffers(1, [VBO])
@@ -130,23 +129,19 @@ class Spectrogram(UIElement):
                 y2 = round(self.rect.bottom + y + shr)
 
                 # Add 2 triangles to create a rect.
-                rectangle.extend(
-                    [
-                        # Position     # Color
-                        x1, y1, 0.0,   c[0], c[1], c[2],
-                        x2, y1, 0.0,   c[0], c[1], c[2],
-                        x2, y2, 0.0,   c[0], c[1], c[2],
-                        x1, y2, 0.0,   c[0], c[1], c[2],
-                    ]
-                )
+                rectangle.extend([
+                    # Position     # Color
+                    x1, y1, 0.0,   c[0], c[1], c[2],
+                    x2, y1, 0.0,   c[0], c[1], c[2],
+                    x2, y2, 0.0,   c[0], c[1], c[2],
+                    x1, y2, 0.0,   c[0], c[1], c[2],
+                ])
 
                 # Add 3 indexes for each triangle.
-                indices.extend(
-                    [
-                        0 + 4*count, 1 + 4*count, 2 + 4*count,
-                        2 + 4*count, 3 + 4*count, 0 + 4*count
-                    ]
-                )
+                indices.extend([
+                    0 + 4*count, 1 + 4*count, 2 + 4*count,
+                    2 + 4*count, 3 + 4*count, 0 + 4*count
+                ])
                 count += 1
 
         # Convert to 32bit float.

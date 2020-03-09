@@ -12,8 +12,6 @@ from whirling import colors
 from whirling.primitives import Rect
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from matplotlib import cm
-from whirling import viridis
 from whirling.spectrogram_visualizer import spectrogram
 
 
