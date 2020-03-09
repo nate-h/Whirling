@@ -2,7 +2,6 @@ import time
 import math
 import librosa
 import pygame as pg
-from enum import Enum
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -15,11 +14,6 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.spectrogram_visualizer import spectrogram
 
 
-class SpecState(Enum):
-    LOADING = 0
-    LOADED = 1
-    LOADED_NEXT = 2
-
 class SpectrogramVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
@@ -31,8 +25,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         # What clip of full spectrogram we are looking at.
         self.spec_window = None
 
-        # If the current spec has been loaded.
-        self.curr_spec_state = None
+        self.spec = None
 
     def initialize_spectrogram(self):
 
@@ -40,7 +33,6 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if self.spec_window == math.floor(curr_time / self.seconds_worth):
             return
 
-        self.curr_spec_state = SpecState.LOADING
         t0 = time.time()
         self.spec_window = math.floor(curr_time / self.seconds_worth)
 
@@ -50,7 +42,6 @@ class SpectrogramVisualizer(UIVisualizerBase):
         self.spec = spectrogram.Spectrogram(spec_rect, 'data/latch.mp3',
             self.sr, curr_time, self.seconds_worth)
 
-        self.curr_spec_state = SpecState.LOADED
         print(f'Total time: {time.time() - t0}')
 
     def draw(self):
@@ -59,7 +50,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         # Create spectrogram if it doesn't exist for this spec window.
         self.initialize_spectrogram()
 
-        if self.curr_spec_state == SpecState.LOADED:
+        if self.spec and self.spec.state == spectrogram.SpecState.LOADED:
             self.spec.draw()
 
         # Draw time indicator.

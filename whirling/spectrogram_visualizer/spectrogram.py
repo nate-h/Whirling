@@ -1,6 +1,7 @@
 import time
 import math
 import librosa
+from enum import Enum
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -11,6 +12,12 @@ from whirling import colors
 from whirling.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling import viridis
+from whirling.CodeTimer import CodeTimer
+
+
+class SpecState(Enum):
+    LOADING = 0
+    LOADED = 1
 
 
 class Spectrogram(UIElement):
@@ -21,11 +28,20 @@ class Spectrogram(UIElement):
         # length of the windowed signal after padding with zeros
         self.n_fft = 2048
 
-        self.log_db_s = self.create_log_db_spectrogram(
-            track, sr, offset, duration)
-        self.pnts_x, self.pnts_y = self.log_db_s.shape
-        self.create_vbo_data()
+        # A nice way to keep track of loading state.
+        self.state = SpecState.LOADING
+
+        with CodeTimer('Load_track'):
+            signal = self.load_track(track, sr, offset, duration)
+        db_s = self.load_spectrogram(signal)
+        with CodeTimer('create_db_spec'):
+            self.log_db_s = self.create_log_db_spectrogram(db_s)
+            self.pnts_x, self.pnts_y = self.log_db_s.shape
+        with CodeTimer('create_vbo'):
+            self.create_vbo_data()
         self.shader = self.initialize_shader()
+
+        self.state = SpecState.LOADED
 
     @property
     def width(self):
@@ -35,9 +51,8 @@ class Spectrogram(UIElement):
     def height(self):
         return self.rect.height
 
-    def create_log_db_spectrogram(self, track: str, sr:int, offset: float, duration: float):
+    def load_track(self, track: str, sr:int, offset: float, duration: float):
         # Extract 8s clip from signal y and run a stft on it.
-        timer_start = time.time()
         curr_window_number = math.floor(offset/duration)
         min_window_time = curr_window_number * duration
         max_window_time = (curr_window_number + 1) * duration
@@ -46,13 +61,17 @@ class Spectrogram(UIElement):
         # FIXME: GET ACTUAL SONG.
         y_sample, _sr = librosa.load(track, sr=sr,
             offset=min_window_time, duration=max_window_time-min_window_time)
+        return y_sample
 
+    def load_spectrogram(self, signal):
         n_fft=2048
-        D = librosa.stft(y_sample, n_fft=n_fft)
+        D = librosa.stft(signal, n_fft=n_fft)
 
         # Convert amplitude spec to DB spec.
         db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+        return db_s
 
+    def create_log_db_spectrogram(self, db_s):
         # Take our n frequency bins D has and logarithmically chunk them up.
         # Each chunk is exponentially larger than the last.
         # Each chunk of frequency bins then gets there values averaged.
@@ -63,9 +82,6 @@ class Spectrogram(UIElement):
             [np.average(db_s[idx1: idx2, j]) for idx1, idx2 in idxs]
             for j in range(db_s.shape[1])
         ])
-        print(f'log_db_s.shape: {log_db_s.shape}')
-        print(f'Total time for create_db_spectrogram: {time.time() - timer_start}')
-
         return log_db_s
 
     def draw(self):
