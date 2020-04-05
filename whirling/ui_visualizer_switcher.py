@@ -4,7 +4,7 @@ from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
 from whirling.visualization_manager import visualizers
 from whirling.ui_audio_controller import UIAudioController
-from whirling import audio_features
+from whirling.signal_transformers import audio_features
 
 
 class UIVisualizerSwitcher(UIDock):

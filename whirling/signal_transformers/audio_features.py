@@ -1,6 +1,5 @@
 import os
 import json
-import time
 import librosa
 import logging
 import sklearn
@@ -15,16 +14,6 @@ from whirling.plan import load_plan
 
 def get_version():
     return pkg_resources.require("Whirling")[0].version
-
-def timeit(method):
-    def timed(*args, **kwargs):
-        ts = time.time()
-        result = method(*args, **kwargs)
-        te = time.time()
-        logging.info('Method `%s` took %f seconds to run' % (
-            method.__name__, (te-ts)))
-        return result
-    return timed
 
 def get_events_at_time(current_track_audio_features, curr_time):
     beats = current_track_audio_features['beats']
@@ -72,7 +61,6 @@ def save_features(track: str, data: any, plan: str):
 # Track separation.
 ###############################################################################
 
-@timeit
 def get_full_audio_signal(store, settings):
     """Full is the regular audio signal"""
     store['audio_signals']['full'] = {
@@ -80,7 +68,6 @@ def get_full_audio_signal(store, settings):
         'D': store['D'],
     }
 
-@timeit
 def get_hpss_audio_signal(store, settings):
     audio_signals = store['audio_signals']
     if 'harmonic' in audio_signals and 'harmonic' in audio_signals:
@@ -99,7 +86,6 @@ def get_hpss_audio_signal(store, settings):
         }
     })
 
-@timeit
 def get_spleeter_audio_signal(store, settings):
 
     # Establish what signals spleeter will parse.
@@ -125,48 +111,39 @@ def get_spleeter_audio_signal(store, settings):
 # Feature extracting.
 ###############################################################################
 
-@timeit
 def get_frame_times(y, D, sr, hop_length):
     return librosa.samples_to_time(range(0, len(y), hop_length), sr=sr)
 
-@timeit
 def get_rms(y, D, sr, hop_length):
     rms = librosa.feature.rms(y, hop_length=hop_length)[0]
     return normalize(rms)
 
-@timeit
 def get_spectral_centroids(y, D, sr, hop_length):
     spectral_centroids = librosa.feature.spectral_centroid(y, sr=sr, hop_length=hop_length)[0]
     return normalize(spectral_centroids)
 
-@timeit
 def get_spectral_flatness(y, D, sr, hop_length):
     spectral_flatness = librosa.feature.spectral_flatness(y, hop_length=hop_length)[0]
     return normalize(spectral_flatness)
 
-@timeit
 def get_zero_crossing_rates(y, D, sr, hop_length):
     # Zero crossings are associated with percussive events.
     zcr = librosa.feature.zero_crossing_rate(y, hop_length=hop_length)[0]
     return normalize(zcr)
 
-@timeit
 def get_beats(y, D, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop_length)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return librosa.frames_to_time(beat_frames, sr=sr)
 
-@timeit
 def get_onsets(y, D, sr, hop_length):
     onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
     return librosa.frames_to_time(onsets, sr=sr)
 
-@timeit
 def get_onset_strength(y, D, sr, hop_length):
     onset_strength = librosa.onset.onset_strength(y=y, sr=sr)
     return normalize(onset_strength)
 
-@timeit
 def get_loudness(y, D, sr, hop_length):
     n_fft=2048
     S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
@@ -181,7 +158,6 @@ def get_loudness(y, D, sr, hop_length):
 # Gateway method.
 ###############################################################################
 
-@timeit
 def run_plan(plan_name:str, track: str):
 
     loaded_plan = load_plan(plan_name)

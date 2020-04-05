@@ -11,7 +11,7 @@ from whirling.ui_core import colors
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_core import viridis
-from whirling.code_timer import CodeTimer
+from whirling.tools.code_timer import CodeTimer
 
 
 class SpecState(Enum):

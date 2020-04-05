@@ -9,7 +9,7 @@ from whirling.ui_core.primitives import Rect
 
 class UIElement(ABC):
     def __init__(
-        self, rect=Rect(), position=(0,0),
+        self, rect=Rect(), position=(0, 0),
         bg_color=colors.CLEAR, border_color=colors.CLEAR,
         border_thickness=1
     ):
@@ -33,7 +33,7 @@ class UIElement(ABC):
         glColor4f(*colors.color4f(self.border_color))
         glLoadIdentity()
         glTranslate(*self.rect.position)
-        glTranslatef(.5,.5,0)  # Get lines to fall on pixels.
+        glTranslatef(.5, .5, 0)  # Get lines to fall on pixels.
         glLineWidth(self.border_thickness)
         glBegin(GL_LINES)
 
@@ -82,6 +82,7 @@ class UIElement(ABC):
 
 
 class UIText(UIElement):
+    """A class to create text elements."""
     fonts = {
         'roboto' :'whirling/assets/fonts/Roboto-Black.ttf',
         'mono' :'whirling/assets/fonts/SourceCodePro-Regular.otf'
@@ -127,13 +128,13 @@ class UIText(UIElement):
         b_color = colors.as255(self.border_color)
         if self.border_color is not colors.CLEAR:
             pg.draw.line(bg_color_surf, b_color,
-                (0, 0), (self.width, 0), 1)
+                         (0, 0), (self.width, 0), 1)
             pg.draw.line(bg_color_surf, b_color,
-                (self.width-1, 0), (self.width-1, self.height-1), 1)
+                         (self.width-1, 0), (self.width-1, self.height-1), 1)
             pg.draw.line(bg_color_surf, b_color,
-                (self.width -1, self.height-1), (0, self.height-1), 1)
+                         (self.width -1, self.height-1), (0, self.height-1), 1)
             pg.draw.line(bg_color_surf, b_color,
-                (0, self.height-1), (0, 0), 1)
+                         (0, self.height-1), (0, 0), 1)
 
         # Blend background into text.
         bg_color_surf.blit(self.text_surface, (0, 0))
@@ -151,7 +152,7 @@ class UIText(UIElement):
         return self.text_surface.get_height()
 
     def draw(self):
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glLoadIdentity()
         glRasterPos3d(*self.rect.position)
         glDrawPixels(self.width, self.height,
@@ -159,13 +160,14 @@ class UIText(UIElement):
 
 
 class UIImage(UIElement):
+    """A class to create image elements."""
     def __init__(self, rect, texset, texname, **kwargs):
 
         super().__init__(rect=rect, **kwargs)
 
         self.texset = texset
         self.texture = self.texset.get(texname)
-        self.color = (1,1,1,1)
+        self.color = (1, 1, 1, 1)
         self.rotation = 0
         self.rotationCenter = None
 
@@ -180,7 +182,7 @@ class UIImage(UIElement):
     def draw(self, color=None, rotation=None, rotationCenter=None):
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
-        if color==None:
+        if color == None:
             color = self.color
 
         glColor4fv(color)
@@ -214,6 +216,7 @@ class UIImage(UIElement):
 
 
 class UIButton(UIImage):
+    """A class to create button elements."""
     def __init__(self, rect, action, texset, texname, **kwargs):
 
         super().__init__(rect=rect, texset=texset, texname=texname, **kwargs)
@@ -246,7 +249,9 @@ class UIButton(UIImage):
             if self.rect.contains_point((x, -y+h)):
                 self.perform_action()
 
+
 class UIToggleButton(UIButton):
+    """A class to create toggleable button elements."""
     def __init__(self, rect, states, texset, **kwargs):
         self.states = states
         self.state = self.get_next_state()
@@ -270,7 +275,10 @@ class UIToggleButton(UIButton):
         self.action = self.state[1]['action']
         self.texture = self.texset.get(texname)
 
+
 class UIAxis(UIElement):
+    """A class to create an axis on the screen to show current position and
+    scale in world."""
     def __init__(self, size, offset):
         self.offset = offset
         self.x_color = colors.RED
@@ -300,6 +308,7 @@ class UIAxis(UIElement):
 
 
 class UIDock(UIElement):
+    """A class to help group ui elements."""
     def __init__(self, rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
