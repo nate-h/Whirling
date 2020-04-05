@@ -4,7 +4,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
-from whirling.ui_visualizer_base import UIVisualizerBase
+from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 
 

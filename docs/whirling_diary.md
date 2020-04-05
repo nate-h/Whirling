@@ -43,4 +43,7 @@ more mathy stuff
 Don't blame the lib or framework, blame your bad code
 
 
+Viridis slowness
+----------------
 
+Had to recreate viridis because using cmaps was slow.

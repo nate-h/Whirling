@@ -104,4 +104,5 @@ viridis = np.array([
 ])
 
 def get_color(value0to1):
+    """Convert 0->1 float info 3f color vector."""
     return viridis[int(value0to1 * 99)]

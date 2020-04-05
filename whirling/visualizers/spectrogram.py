@@ -1,18 +1,17 @@
-import time
 import math
-import librosa
 from enum import Enum
+import numpy as np
+import librosa
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
-import numpy as np
-from whirling.ui_core import UIElement
-from whirling import colors
-from whirling.ui_visualizer_base import UIVisualizerBase
+from whirling.ui_core.ui_core import UIElement
+from whirling.ui_core import colors
+from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling import viridis
-from whirling.CodeTimer import CodeTimer
+from whirling.ui_core import viridis
+from whirling.code_timer import CodeTimer
 
 
 class SpecState(Enum):
@@ -59,8 +58,8 @@ class Spectrogram(UIElement):
 
         #import pdb; pdb.set_trace()
         # FIXME: GET ACTUAL SONG.
-        y_sample, _sr = librosa.load(track, sr=sr,
-            offset=min_window_time, duration=max_window_time-min_window_time)
+        y_sample, _sr = librosa.load(track, sr=sr, offset=min_window_time,
+                                     duration=max_window_time-min_window_time)
         return y_sample
 
     def load_spectrogram(self, signal):

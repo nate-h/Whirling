@@ -1,17 +1,17 @@
 import math
+import numpy as np
 import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import OpenGL.GL.shaders
-import numpy as np
-from whirling import colors
-from whirling.ui_visualizer_base import UIVisualizerBase
+from whirling.ui_core import colors
+from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.ui_core import UIText
+from whirling.ui_core.ui_core import UIText
 
 
 class DebugVisualizer(UIVisualizerBase):
+    """A visualizer to view feature extractions for signals."""
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
@@ -138,7 +138,7 @@ class DebugVisualizer(UIVisualizerBase):
         glEnd()
 
     def render_text(self, title, pos, color):
-        # Generate text if doesn't exist then render it.
+        """Generate text if doesn't exist then render it."""
         if title not in self.text_elements:
             self.text_elements[title] = UIText(
                 title, pos, font_size=20, font_color=color)

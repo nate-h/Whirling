@@ -1,17 +1,14 @@
 import time
 import math
-import librosa
-import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
-import numpy as np
-from whirling import colors
-from whirling.primitives import Rect
-from whirling.ui_visualizer_base import UIVisualizerBase
+from whirling.ui_core import colors
+from whirling.ui_core.primitives import Rect
+from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.spectrogram_visualizer import spectrogram
+from whirling.visualizers import spectrogram
 
 
 class SpectrogramVisualizer(UIVisualizerBase):

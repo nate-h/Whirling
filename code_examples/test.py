@@ -2,7 +2,6 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import pygame as pg
-import OpenGL.GL as ogl
 from enum import Enum
 import numpy as np
 

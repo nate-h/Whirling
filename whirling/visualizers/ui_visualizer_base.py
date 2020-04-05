@@ -1,16 +1,11 @@
+from abc import ABC
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
-import pygame as pg
-import OpenGL.GL as ogl
-from enum import Enum
-import numpy as np
-from abc import ABC, abstractmethod
-from whirling import colors
-from whirling.primitives import Rect
-from whirling.ui_core import UIElement
-from whirling import audio_features
+from whirling.ui_core.primitives import Rect
+from whirling.ui_core.ui_core import UIElement
 from whirling.ui_audio_controller import UIAudioController
+from whirling import audio_features
 
 
 class UIVisualizerBase(UIElement, ABC):

@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 import argparse
 import coloredlogs
@@ -7,15 +6,10 @@ import pygame as pg
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
-import OpenGL.GL.shaders
-import numpy as np
 from rx.subject.behaviorsubject import BehaviorSubject
-from whirling.primitives import Rect
-from whirling.ui_core import UIText, UIImage, UIAxis
-from whirling.ui_textures import WhirlingTextures
-from whirling import audio_features
+from whirling.ui_core.primitives import Rect
+from whirling.ui_core.ui_core import UIText
 from data.tracks import MUSIC_TRACKS
-from whirling import colors
 
 from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_visualizer_switcher import UIVisualizerSwitcher
@@ -70,13 +64,13 @@ class Whirling(object):
         self.is_playing = False
         self.audio_controller = UIAudioController(
             MUSIC_TRACKS, self.current_track, rect=audio_controller_rect,
-            bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
+            bg_color=(0.1, 0.1, 0.1), border_color=(0.15, 0.15, 0.15))
 
         # Initialize visualizer controller.
         self.visualizer_controller = UIVisualizerController(
             self.current_visualizer,
             rect=visualizer_controller_rect,
-            bg_color=(0.1,0.1,0.1), border_color=(0.15,0.15,0.15))
+            bg_color=(0.1, 0.1, 0.1), border_color=(0.15, 0.15, 0.15))
 
         # Initialize visualizer.
         self.visualizer_switcher = UIVisualizerSwitcher(plan, self.current_visualizer,
@@ -168,14 +162,14 @@ def parse_options():
     description = 'A python music visualizer using audio feature extraction'
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--plan', type=str, default='default_plan',
-         help='A plan to generate data from a list of songs.')
+                        help='A plan to generate data from a list of songs.')
     parser.add_argument('--use-cache', default=False, action='store_true',
-         help='Load cached audio features stored as dnz files along side the '
-              'original audio file.')
+                        help='Load cached audio features stored as dnz files'
+                        ' along side the original audio file.')
     parser.add_argument('--move-window', default=False, action='store_true',
-         help='Moves window to my preferred location')
+                        help='Moves window to my preferred location')
     parser.add_argument('--move-window2', default=False, action='store_true',
-         help='Moves window to my second preferred location')
+                        help='Moves window to my second preferred location')
     args = parser.parse_args()
     return args
 

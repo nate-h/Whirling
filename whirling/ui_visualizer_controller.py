@@ -1,17 +1,10 @@
-import os
-import vlc
-import time
-import logging
 import pygame as pg
-from typing import List
-from collections import OrderedDict
 from rx.subject.behaviorsubject import BehaviorSubject
-from whirling.ui_core import UIDock, UIText, UIImage, UIButton, UIToggleButton
-from whirling.ui_textures import WhirlingTextures
-from whirling import colors
-from whirling.primitives import Rect
-from whirling.primitives import Point
-from whirling.VisualizationManager import visualizers
+from whirling.ui_core.ui_core import UIDock, UIText, UIButton
+from whirling.ui_core.ui_textures import WhirlingTextures
+from whirling.ui_core import colors
+from whirling.ui_core.primitives import Rect
+from whirling.visualization_manager import visualizers
 
 
 class UIVisualizerController(UIDock):

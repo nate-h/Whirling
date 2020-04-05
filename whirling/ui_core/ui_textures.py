@@ -1,11 +1,8 @@
+from os.path import splitext
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 import pygame as pg
-import OpenGL.GL as ogl
-from enum import Enum
-import numpy as np
-from os.path import splitext
 
 # Code adapated from here:
 # https://www.pygame.org/wiki/SimpleOpenGL2dClasses
@@ -29,19 +26,19 @@ IMAGES = {
 
 
 def loadImage(image):
-    textureSurface = pg.image.load(image)
+    texture_surface = pg.image.load(image)
 
-    textureData = pg.image.tostring(textureSurface, "RGBA", 1)
+    texture_data = pg.image.tostring(texture_surface, "RGBA", 1)
 
-    width = textureSurface.get_width()
-    height = textureSurface.get_height()
+    width = texture_surface.get_width()
+    height = texture_surface.get_height()
 
     texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, textureData)
+                 GL_UNSIGNED_BYTE, texture_data)
 
     return texture, width, height
 
@@ -55,8 +52,8 @@ def delTexture(texture):
 
 
 def createTexDL(texture, width, height):
-    newList = glGenLists(1)
-    glNewList(newList,GL_COMPILE)
+    new_list = glGenLists(1)
+    glNewList(new_list,GL_COMPILE)
     glBindTexture(GL_TEXTURE_2D, texture)
     glBegin(GL_QUADS)
 
@@ -74,11 +71,11 @@ def createTexDL(texture, width, height):
     glEnd()
     glEndList()
 
-    return newList
+    return new_list
 
 
-def delDL(list):
-    glDeleteLists(list, 1)
+def delDL(some_list):
+    glDeleteLists(some_list, 1)
 
 def render(layers):
     for l in layers:

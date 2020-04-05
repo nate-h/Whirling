@@ -1,13 +1,10 @@
+from abc import ABC, abstractmethod
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 import pygame as pg
-import OpenGL.GL as ogl
-from enum import Enum
-import numpy as np
-from whirling import colors
-from whirling.primitives import Rect
-from abc import ABC, abstractmethod
+from whirling.ui_core import colors
+from whirling.ui_core.primitives import Rect
 
 
 class UIElement(ABC):

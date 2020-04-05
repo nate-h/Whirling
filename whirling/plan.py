@@ -9,3 +9,6 @@ def load_plan(plan_name):
         quit()
     with open(full_plan_loc, 'r') as f:
         return json.load(f)
+
+
+# Add class code here!

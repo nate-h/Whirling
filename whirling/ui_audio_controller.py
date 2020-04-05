@@ -1,16 +1,15 @@
 from collections import OrderedDict
 import os
-import vlc
 import time
 from typing import List
+import vlc
 import pygame as pg
 from rx.subject.behaviorsubject import BehaviorSubject
-from whirling.ui_core import UIDock, UIText, UIImage, UIButton, UIToggleButton
-from whirling.ui_textures import WhirlingTextures
-from whirling import colors
-from whirling.primitives import Rect
+from whirling.ui_core.ui_core import UIDock, UIText, UIButton, UIToggleButton
+from whirling.ui_core.ui_textures import WhirlingTextures
+from whirling.ui_core import colors
+from whirling.ui_core.primitives import Rect
 import logging
-from whirling.primitives import Point
 
 
 class UIAudioController(UIDock):

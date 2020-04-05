@@ -3,6 +3,7 @@ from collections import namedtuple
 Point = namedtuple('Point', ['x', 'y'])
 
 class Rect:
+    """Rectangle class"""
     def __init__(self, left=0, top=0, right=0, bottom=0):
         self.left = left
         self.top = top
