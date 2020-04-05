@@ -83,8 +83,8 @@ class UIElement(ABC):
 
 class UIText(UIElement):
     fonts = {
-        'roboto' :'whirling/fonts/Roboto-Black.ttf',
-        'mono' :'whirling/fonts/SourceCodePro-Regular.otf'
+        'roboto' :'whirling/assets/fonts/Roboto-Black.ttf',
+        'mono' :'whirling/assets/fonts/SourceCodePro-Regular.otf'
     }
     def __init__(self, text_string, position, font_size=30, font_key='mono',
             font_color=colors.WHITE, bg_color=colors.CLEAR,
