@@ -29,8 +29,10 @@ Log axis stuff
 Tools
 -----
 
+Explain a little bit about each of these technologies
 librosa
 spleeter
+rxpy
 
 
 What I've learned
@@ -47,3 +49,10 @@ Viridis slowness
 ----------------
 
 Had to recreate viridis because using cmaps was slow.
+
+
+Failing to realize extent of project
+------------------------------------
+
+Failed to realize what I was creating and built many features to do precisely
+what I needed at the time. When more was needed, I had to rebuild that feature.

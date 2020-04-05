@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='whirling',
-    version='0.0.2',
+    version='0.0.3',
     description='Audio visualizer using advanced audio feature extraction',
     url='https://github.com/nate-h/Whirling',
     classifiers=[
