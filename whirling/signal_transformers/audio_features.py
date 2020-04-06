@@ -5,7 +5,24 @@ import logging
 import sklearn
 import numpy as np
 import pkg_resources  # part of setuptools
+from schema import Schema, Optional
 from whirling.plan import load_plan
+
+
+FEATURES_SCHEMA = Schema({
+    Optional('full'): bool,
+    Optional('harmonic'): bool,
+    Optional('percussive'): bool,
+    Optional('beats'): bool,
+    Optional('onsets'): bool,
+    Optional('frame_times'): bool,
+    Optional('rms'): bool,
+    Optional('spectral_centroid'): bool,
+    Optional('spectral_flatness'): bool,
+    Optional('zero_crossing_rates'): bool,
+    Optional('onset_strength'): bool,
+    Optional('loudness'): bool
+})
 
 
 ###############################################################################

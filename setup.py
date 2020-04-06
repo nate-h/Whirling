@@ -22,7 +22,8 @@ setup(
         'jupyter',
         'matplotlib',
         'PyOpenGL',
-        'spleeter'
+        'spleeter',
+        'schema'
     ],
     entry_points={
         'console_scripts': [

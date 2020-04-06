@@ -10,6 +10,11 @@ import pickle
 import logging
 from typing import Dict, List
 from rx.subject.behaviorsubject import BehaviorSubject
+from schema import Schema, And, Optional, Or
+from whirling.visualizers import VALID_VISUALIZERS
+from whirling.signal_transformers import VALID_SIGNALS
+from whirling.signal_transformers.audio_features import FEATURES_SCHEMA
+from whirling.signal_transformers.spectrograms import SPECTROGRAM_SCHEMA
 
 class Store:
     """What loads, saves and manages the data with all the visualizations"""
@@ -67,21 +72,54 @@ class Store:
         with open(full_plan_loc, 'r') as f:
             return json.load(f)
 
+    def validate_plan(self):
+        """Using the schema package, validate the basics for a plan.
+        Each individual visualizer will finish checking the plan respectively
+        for their specific settings."""
+        schema = Schema(
+            {
+                "metadata": {
+                    "sr": int,
+                    "hop_length": int,
+                    Optional("save_signals"): bool
+                },
+                "visualizers": {
+                    And(str, lambda n: n in VALID_VISUALIZERS): {
+                        "settings": dict,
+                        "signals": {
+                            And(str, lambda n: n in VALID_SIGNALS): {
+                                Optional('spectrogram'): SPECTROGRAM_SCHEMA,
+                                Optional('features'): FEATURES_SCHEMA,
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        schema.validate(self.plan)
+
     def generate_store(self, track_name):
         """Generates store data from """
         self.store_data = {
             'plan': self.load_plan()
         }
+        self.validate_plan()
 
-        print(self.signals)
-        print(self.visualizers)
         import pdb; pdb.set_trace()
 
         # Get visualizers from plan
+        print(self.visualizers)
         # Update visualizers subject.
+
         # Get signals from plan
         # Need to get signals.
+        print(self.signals)
         # Save signals if plan wants it.
+
+        # Get data for each visualizer.
+        # Process features
+        # process spectrograms.
+
         return {}
 
     def get_visualizers(self, plan: Dict):

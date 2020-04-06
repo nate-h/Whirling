@@ -10,9 +10,49 @@
                 "window_size": 8
             },
             "signals": {
-                "full": ["loudness"],
-                "harmonic": ["spectral_centroid", "onset_strength", "onsets"],
-                "percussive": ["onset_strength", "beats", "onsets"]
+                "full": {
+                    "features": {
+                        "loudness": true
+                    }
+                },
+                "harmonic": {
+                    "features": {
+                        "spectral_centroid": true,
+                        "onset_strength": true,
+                        "onsets": true
+                    }
+                },
+                "percussive": {
+                    "features": {
+                        "onset_strength": true,
+                        "beats": true,
+                        "onsets": true
+                    }
+                },
+                "spleeter_vocals": {
+                    "features": {
+                        "onset_strength": true,
+                        "onsets": true
+                    }
+                },
+                "spleeter_base": {
+                    "features": {
+                        "onset_strength": true,
+                        "onsets": true
+                    }
+                },
+                "spleeter_drums": {
+                    "features": {
+                        "onset_strength": true,
+                        "onsets": true
+                    }
+                },
+                "spleeter_other": {
+                    "features": {
+                        "onset_strength": true,
+                        "onsets": true
+                    }
+                }
             }
         },
         "spectrogram": {
@@ -20,9 +60,15 @@
                 "window_size": 8
             },
             "signals": {
-                "full": {},
-                "harmonic": {},
-                "percussive": {}
+                "full": {
+                    "spectrogram": null
+                },
+                "harmonic": {
+                    "spectrogram": null
+                },
+                "percussive": {
+                    "spectrogram": null
+                }
             }
         }
     }
