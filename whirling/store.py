@@ -6,59 +6,104 @@ visualization needs.
 
 import os
 import json
+import pickle
 import logging
+from typing import Dict, List
+from rx.subject.behaviorsubject import BehaviorSubject
 
 class Store:
     """What loads, saves and manages the data with all the visualizations"""
-    def __init__(self):
-        pass
+    def __init__(self, plan_name: str, current_track: BehaviorSubject,
+                  use_cache: bool):
+        self.plan_name = plan_name
+        self.use_cache = use_cache
+        self.store_data = None
+        current_track.subscribe(self.on_track_change)
 
-    def load_plan(self, plan_name):
-        full_plan_loc = 'plans/{}.json'.format(plan_name)
+    def on_track_change(self, new_track):
+        exist = self.store_cache_exists(new_track)
+
+        if not exist or not self.use_cache:
+            self.generate_store(new_track)
+            self.save_store(new_track, self.store_data)
+        else:
+            self.store_data = self.load_store(new_track)
+
+    @property
+    def plan(self):
+        if self.store_data is None:
+            return None
+        return self.store_data['plan']
+
+    @property
+    def visualizers(self) -> List[str]:
+        if not self.plan:
+            logging.error('No plan found.')
+            quit()
+        return list(self.plan['visualizers'].keys())
+
+    @property
+    def signals(self) -> List[str]:
+        if not self.plan:
+            logging.error('No plan found.')
+            quit()
+        signals = set()
+        for _v, v_obj in self.plan['visualizers'].items():
+            signals.update(v_obj['signals'].keys())
+        return list(signals)
+
+    def get_visualizer_plan(self, visualizer_name):
+        if visualizer_name not in self.plan['visualizers']:
+            logging.error('Couldn\'t find visualizer plan %s', visualizer_name)
+            quit()
+        return self.plan['visualizers'][visualizer_name]
+
+    def load_plan(self):
+        """Load data generation plan."""
+        full_plan_loc = f'plans/{self.plan_name}.json'
         if not os.path.exists(full_plan_loc):
             logging.error('Couldn\'t find plan %s', full_plan_loc)
             quit()
         with open(full_plan_loc, 'r') as f:
             return json.load(f)
 
-    def save_pickle(self, track_name, store):
+    def generate_store(self, track_name):
+        """Generates store data from """
+        self.store_data = {
+            'plan': self.load_plan()
+        }
+
+        print(self.signals)
+        print(self.visualizers)
+        import pdb; pdb.set_trace()
+
+        # Get visualizers from plan
+        # Update visualizers subject.
+        # Get signals from plan
+        # Need to get signals.
+        # Save signals if plan wants it.
+        return {}
+
+    def get_visualizers(self, plan: Dict):
         pass
 
-    def load_pickle(self, track_name):
-        pass
+    def store_file_name(self, track_name: str) -> str:
+        """Constructs store file name from track name"""
+        return f'{os.path.splitext(track_name)[0]}_{self.plan_name}.p'
 
-    def does_pickle_exist(self, track_name):
-        pass
+    def store_cache_exists(self, track_name: str) -> bool:
+        """Checks if cache exists for the combination of plan and track name."""
+        pickle_name = self.store_file_name(track_name)
+        return os.path.exists(pickle_name)
 
-    def track_to_pickle_name(self, track_name):
-        pass
+    def save_store(self, track_name, store) -> None:
+        """Cache store as a pickle."""
+        pickle_name = self.store_file_name(track_name)
+        with open(pickle_name, "wb") as f:
+            pickle.dump(store, f)
 
-
-###############################################################################
-# Loading Saving etc.
-###############################################################################
-
-def load_track(new_track: str, sr:int=22500):
-    y, sr = librosa.load(new_track, sr=sr)
-    return y, sr
-
-def audio_to_feature_file(track: str, plan: str):
-    return f'{os.path.splitext(track)[0]}_{plan}.json'
-
-def cache_exists(track: str, plan: str):
-    return os.path.exists(audio_to_feature_file(track, plan))
-
-def load_features(track: str, plan: str):
-    logging.info('Loading cached features for track: %s' % track)
-    if not cache_exists(track, plan):
-        logging.info('No cache saved for this file. Generating features now.')
-        return run_plan(plan, track)
-    else:
-        with open(audio_to_feature_file(track, plan), 'r') as f:
-            return json.load(f)
-
-def save_features(track: str, data: any, plan: str):
-    feature_file = audio_to_feature_file(track, plan)
-    # TODO
-    with open(feature_file, 'w') as f:
-        json.dump(data, f, indent=4)
+    def load_store(self, track_name):
+        """Load pickled store."""
+        pickle_name = self.store_file_name(track_name)
+        with open(pickle_name, "rb") as f:
+            return pickle.load(f)

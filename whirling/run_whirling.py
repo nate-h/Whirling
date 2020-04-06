@@ -9,6 +9,7 @@ from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIText
+from whirling import store
 from data.tracks import MUSIC_TRACKS
 
 from whirling.ui_audio_controller import UIAudioController
@@ -59,6 +60,9 @@ class Whirling(object):
         # Initialize subjects.
         self.current_track = BehaviorSubject('')
         self.current_visualizer = BehaviorSubject('')
+
+        self.store = store.Store(plan, self.current_track, use_cache)
+
 
         # Initialize audio controller.
         self.is_playing = False

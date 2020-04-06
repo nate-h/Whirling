@@ -1,0 +1,29 @@
+{
+    "metadata": {
+        "sr": 22050,
+        "hop_length": 512,
+        "save_signals": true
+    },
+    "visualizers": {
+        "debug": {
+            "settings": {
+                "window_size": 8
+            },
+            "signals": {
+                "full": ["loudness"],
+                "harmonic": ["spectral_centroid", "onset_strength", "onsets"],
+                "percussive": ["onset_strength", "beats", "onsets"]
+            }
+        },
+        "spectrogram": {
+            "settings": {
+                "window_size": 8
+            },
+            "signals": {
+                "full": {},
+                "harmonic": {},
+                "percussive": {}
+            }
+        }
+    }
+}

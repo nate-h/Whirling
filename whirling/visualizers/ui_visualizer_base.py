@@ -5,7 +5,7 @@ from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIElement
 from whirling.ui_audio_controller import UIAudioController
-from whirling import audio_features
+from whirling.signal_transformers import audio_features
 
 
 class UIVisualizerBase(UIElement, ABC):
