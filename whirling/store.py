@@ -98,12 +98,37 @@ class Store:
         )
         schema.validate(self.plan)
 
+    def merge_plan_signal_defs(self):
+        """Merge the signal json blobs of all plan visualizers.
+        This makes data generation much easier down the road by not repeating
+        work. Each visualizer can then access the plan and get the necessary
+        data to render."""
+        merged = {}
+        for v, v_obj in self.plan['visualizers'].items():
+            for s, s_obj in v_obj['signals'].items():
+                if s not in merged:
+                    merged[s] = {}
+                # Merge feature data request.
+                if 'features' in s_obj:
+                    if 'features' not in merged[s]:
+                        merged[s]['features'] = {}
+                    for f, use in s_obj['features'].items():
+                        if use:
+                            merged[s]['features'][f] = None
+                # Merge spectrogram data request.
+                if 'spectrogram' in s_obj:
+                    if 'spectrogram' not in merged[s]:
+                        merged[s]['spectrogram'] = None
+        return {'signals': merged}
+
     def generate_store(self, track_name):
         """Generates store data from """
         self.store_data = {
             'plan': self.load_plan()
         }
         self.validate_plan()
+        merged_signal_data_defs = self.merge_plan_signal_defs()
+        self.store_data.update(merged_signal_data_defs)
 
         import pdb; pdb.set_trace()
 
@@ -121,9 +146,6 @@ class Store:
         # process spectrograms.
 
         return {}
-
-    def get_visualizers(self, plan: Dict):
-        pass
 
     def store_file_name(self, track_name: str) -> str:
         """Constructs store file name from track name"""
