@@ -2,6 +2,7 @@
     "metadata": {
         "sr": 22050,
         "hop_length": 512,
+        "n_fft": 2048,
         "save_signals": true
     },
     "visualizers": {
@@ -15,14 +16,14 @@
                         "loudness": true
                     }
                 },
-                "harmonic": {
+                "librosa_harmonic": {
                     "features": {
                         "spectral_centroid": true,
                         "onset_strength": true,
                         "onsets": true
                     }
                 },
-                "percussive": {
+                "librosa_percussive": {
                     "features": {
                         "onset_strength": true,
                         "beats": true,
@@ -63,10 +64,10 @@
                 "full": {
                     "spectrogram": null
                 },
-                "harmonic": {
+                "librosa_harmonic": {
                     "spectrogram": null
                 },
-                "percussive": {
+                "librosa_percussive": {
                     "spectrogram": null
                 }
             }

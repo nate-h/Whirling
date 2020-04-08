@@ -8,6 +8,7 @@ import os
 import json
 import pickle
 import logging
+import librosa
 from typing import Dict, List
 from rx.subject.behaviorsubject import BehaviorSubject
 from schema import Schema, And, Optional, Or
@@ -15,6 +16,7 @@ from whirling.visualizers import VALID_VISUALIZERS
 from whirling.signal_transformers import VALID_SIGNALS
 from whirling.signal_transformers.audio_features import FEATURES_SCHEMA
 from whirling.signal_transformers.spectrograms import SPECTROGRAM_SCHEMA
+from whirling.signal_transformers import signal_dissectors
 
 class Store:
     """What loads, saves and manages the data with all the visualizations"""
@@ -81,6 +83,7 @@ class Store:
                 "metadata": {
                     "sr": int,
                     "hop_length": int,
+                    "n_fft": int,
                     Optional("save_signals"): bool
                 },
                 "visualizers": {
@@ -130,21 +133,18 @@ class Store:
         merged_signal_data_defs = self.merge_plan_signal_defs()
         self.store_data.update(merged_signal_data_defs)
 
-        import pdb; pdb.set_trace()
+        # TODO: inform visualizer controller of intended visualizers (via subject?).
 
-        # Get visualizers from plan
-        print(self.visualizers)
-        # Update visualizers subject.
+        # Generate signals
+        for sig_name in self.store_data['signals']:
+            signal_dissectors.generate(track_name, self.store_data, sig_name)
 
-        # Get signals from plan
-        # Need to get signals.
-        print(self.signals)
-        # Save signals if plan wants it.
-
-        # Get data for each visualizer.
+        # Save signals
+        # Have each signal ready
         # Process features
         # process spectrograms.
 
+        import pdb; pdb.set_trace()
         return {}
 
     def store_file_name(self, track_name: str) -> str:
