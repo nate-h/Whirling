@@ -75,56 +75,6 @@ def save_features(track: str, data: any, plan: str):
 
 
 ###############################################################################
-# Track separation.
-###############################################################################
-
-def get_full_audio_signal(store, settings):
-    """Full is the regular audio signal"""
-    store['audio_signals']['full'] = {
-        'y': store['y'],
-        'D': store['D'],
-    }
-
-def get_hpss_audio_signal(store, settings):
-    audio_signals = store['audio_signals']
-    if 'harmonic' in audio_signals and 'harmonic' in audio_signals:
-        return
-    """HPSS generates two audio signals. One for the harmonics and the
-    other for the percussives."""
-    DH, DP = librosa.decompose.hpss(store['D'], margin=settings['margin'])
-    audio_signals.update({
-        'harmonic': {
-            'y': librosa.istft(DH),
-            'D': DH,
-        },
-        'percussive': {
-            'y': librosa.istft(DP),
-            'D': DP,
-        }
-    })
-
-def get_spleeter_audio_signal(store, settings):
-
-    # Establish what signals spleeter will parse.
-    spleeter_signals = {
-        'spleeter_' + f for f in ['vocals', 'drums', 'base', 'other']}
-
-    # Get full list of audio signals we've extracted already.
-    audio_signals = set(list(store['audio_signals'].keys()))
-
-    # Don't proceed if lists overlap at all.
-    if len(spleeter_signals & audio_signals) > 0:
-        return
-
-
-    """Use spleeter to separate the track into 4 components:
-    Vocals, Drums, base, other separation"""
-
-    pass
-
-
-
-###############################################################################
 # Feature extracting.
 ###############################################################################
 
@@ -237,8 +187,6 @@ def run_plan(plan_name:str, track: str):
 def get_function_mappings():
     return {
         'full': get_full_audio_signal,
-        'harmonic': get_hpss_audio_signal,
-        'percussive': get_hpss_audio_signal,
         'beats': get_beats,
         'onsets': get_onsets,
         'frame_times': get_frame_times,

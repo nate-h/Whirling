@@ -28,6 +28,9 @@ class Store:
         current_track.subscribe(self.on_track_change)
 
     def on_track_change(self, new_track):
+        if new_track == '':
+            return
+
         exist = self.store_cache_exists(new_track)
 
         if not exist or not self.use_cache:
@@ -138,6 +141,8 @@ class Store:
         # Generate signals
         for sig_name in self.store_data['signals']:
             signal_dissectors.generate(track_name, self.store_data, sig_name)
+
+        import pdb; pdb.set_trace()
 
         # Save signals
         # Have each signal ready
