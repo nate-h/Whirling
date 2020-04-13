@@ -8,8 +8,7 @@ import os
 import json
 import pickle
 import logging
-import librosa
-from typing import Dict, List
+from typing import List
 from rx.subject.behaviorsubject import BehaviorSubject
 from schema import Schema, And, Optional, Or
 from whirling.visualizers import VALID_VISUALIZERS
@@ -139,10 +138,9 @@ class Store:
         # TODO: inform visualizer controller of intended visualizers (via subject?).
 
         # Generate signals
-        for sig_name in self.store_data['signals']:
+        sigs = list(self.store_data['signals'].keys())
+        for sig_name in sigs:
             signal_dissectors.generate(track_name, self.store_data, sig_name)
-
-        import pdb; pdb.set_trace()
 
         # Save signals
         # Have each signal ready
