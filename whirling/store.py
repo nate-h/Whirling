@@ -11,11 +11,11 @@ import logging
 from typing import List
 import pkg_resources  # part of setuptools
 from rx.subject.behaviorsubject import BehaviorSubject
-from schema import Schema, And, Optional, Or
+from schema import Schema, And, Optional
 from whirling.visualizers import VALID_VISUALIZERS
 from whirling.signal_transformers import VALID_SIGNALS
 from whirling.signal_transformers import audio_features
-from whirling.signal_transformers import spectrograms
+from whirling.signal_transformers import spectrogram_varients
 from whirling.signal_transformers import signal_dissectors
 
 class Store:
@@ -78,6 +78,20 @@ class Store:
                     signal_features[s].update(features)
         return signal_features
 
+    @property
+    def signal_spectrograms(self):
+        # Find out which signals want a spectrogram.
+        signal_spectrograms = {}
+        for _v, v_obj in self.plan['visualizers'].items():
+            for s, s_obj in v_obj['signals'].items():
+                if s.startswith('spleeter_'):
+                    print(f'Signal not found for {s}')
+                    continue
+                if 'spectrogram' in s_obj:
+                    if s not in signal_spectrograms:
+                        signal_spectrograms[s] = None
+        return signal_spectrograms
+
     def get_visualizer_plan(self, visualizer_name):
         if visualizer_name not in self.plan['visualizers']:
             logging.error('Couldn\'t find visualizer plan %s', visualizer_name)
@@ -110,7 +124,7 @@ class Store:
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {
-                                Optional('spectrogram'): spectrograms.SPECTROGRAM_SCHEMA,
+                                Optional('spectrogram'): spectrogram_varients.SPECTROGRAM_SCHEMA,
                                 Optional('features'): audio_features.FEATURES_SCHEMA,
                             }
                         }
@@ -160,18 +174,13 @@ class Store:
             signal_dissectors.generate(track_name, self.store_data, sig_name)
 
         # Generate spectrogram.
+        for sig, spectrogram_settings in self.signal_spectrograms.items():
+            spectrogram_varients.generate(self.store_data, sig, spectrogram_settings)
 
         # Generate features.
         for sig, features in self.signal_features.items():
             for f in features:
                 audio_features.generate(self.store_data, sig, f)
-
-        #audio_features.generate()
-
-        # Save signals
-        # Have each signal ready
-        # Process features
-        # process spectrograms.
 
         import pdb; pdb.set_trace()
         return {}
