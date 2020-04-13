@@ -86,7 +86,7 @@ class Whirling(object):
         self.fps = UIText('FPS', (offset_x, offset_y), font_size=30)
 
         self.current_track_str = UIText('', (0, 0), font_size=30)
-        self.current_track.subscribe(self.change_song)
+        self.current_track.subscribe(self.on_track_change)
 
         self.stopped = False
         self.dw = display_w
@@ -151,7 +151,7 @@ class Whirling(object):
 
         pg.display.flip()
 
-    def change_song(self, new_track):
+    def on_track_change(self, new_track):
         logging.info('New track: %s', new_track)
         self.current_track_str.text = new_track
         offset_x = 0.99 * self.width - self.current_track_str.width

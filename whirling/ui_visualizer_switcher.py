@@ -2,7 +2,7 @@ from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.ui_core import UIDock
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
-from whirling.visualization_manager import visualizers
+from whirling.visualization_manager import VISUALIZERS
 from whirling.ui_audio_controller import UIAudioController
 from whirling.signal_transformers import audio_features
 
@@ -53,7 +53,7 @@ class UIVisualizerSwitcher(UIDock):
         self.visualizer.draw()
 
     def find_visualizer_class(self, vis_name):
-        return list(filter(lambda x: x[0] == vis_name, visualizers))[0][1]
+        return list(filter(lambda x: x[0] == vis_name, VISUALIZERS))[0][1]
 
     def change_visualizer(self, vis_name)   :
         print('Changing visualizer: %s ' % vis_name)
@@ -66,8 +66,9 @@ class UIVisualizerSwitcher(UIDock):
             self.visualizer.track_audio_features = self.track_audio_features
 
     def current_track_change(self, new_track):
-        self.track_audio_features = audio_features.load_features(
-            new_track, self.plan)
+        import pdb; pdb.set_trace()
+        # self.track_audio_features = audio_features.load_features(
+        #     new_track, self.plan)
 
         # Post processing. Converts events to framed events.
         self.post_process_audio_features()

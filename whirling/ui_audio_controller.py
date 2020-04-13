@@ -27,7 +27,7 @@ class UIAudioController(UIDock):
         self.current_track = current_track
         self.music_tracks = music_tracks
         self.current_track.on_next(self.music_tracks[self.track_num])
-        self.current_track.subscribe(self.change_song)
+        self.current_track.subscribe(self.on_track_change)
 
         # Vars needed to track current time.
         self.last_play_time = 0
@@ -104,7 +104,7 @@ class UIAudioController(UIDock):
         for e in self.elements:
             e.draw()
 
-    def change_song(self, new_track):
+    def on_track_change(self, new_track):
         is_playing = self.player and self.player.is_playing()
         if is_playing:
             self.player.stop()

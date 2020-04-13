@@ -4,7 +4,7 @@ from whirling.ui_core.ui_core import UIDock, UIText, UIButton
 from whirling.ui_core.ui_textures import WhirlingTextures
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
-from whirling.visualization_manager import visualizers
+from whirling.visualization_manager import VISUALIZERS
 
 
 class UIVisualizerController(UIDock):
@@ -64,34 +64,34 @@ class UIVisualizerController(UIDock):
 
     def next_visual(self):
         # If no visuals, quit.
-        if len(visualizers) == 0:
+        if len(VISUALIZERS) == 0:
             pg.quit()
             quit()
 
         # If no visualizer set, set to first one in vis list.
         current_visualizer = self.current_visualizer.value
         if current_visualizer == "":
-            self.current_visualizer.on_next(visualizers[0][0])
+            self.current_visualizer.on_next(VISUALIZERS[0][0])
         # Else find next one.
         else:
-            idx = [v[0] for v in visualizers].index(current_visualizer)
-            vis = visualizers[(idx + 1) % len(visualizers)][0]
+            idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
+            vis = VISUALIZERS[(idx + 1) % len(VISUALIZERS)][0]
             self.current_visualizer.on_next(vis)
 
     def prev_visual(self):
         # If no visuals, quit.
-        if len(visualizers) == 0:
+        if len(VISUALIZERS) == 0:
             pg.quit()
             quit()
 
         # If no visualizer set, set to first one in vis list.
         current_visualizer = self.current_visualizer.value
         if current_visualizer == "":
-            self.current_visualizer.on_next(visualizers[0][0])
+            self.current_visualizer.on_next(VISUALIZERS[0][0])
         # Else find next one.
         else:
-            idx = [v[0] for v in visualizers].index(current_visualizer)
-            vis = visualizers[(idx - 1) % len(visualizers)][0]
+            idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
+            vis = VISUALIZERS[(idx - 1) % len(VISUALIZERS)][0]
             self.current_visualizer.on_next(vis)
 
     def draw(self):
