@@ -9,12 +9,13 @@ import json
 import pickle
 import logging
 from typing import List
+import pkg_resources  # part of setuptools
 from rx.subject.behaviorsubject import BehaviorSubject
 from schema import Schema, And, Optional, Or
 from whirling.visualizers import VALID_VISUALIZERS
 from whirling.signal_transformers import VALID_SIGNALS
-from whirling.signal_transformers.audio_features import FEATURES_SCHEMA
-from whirling.signal_transformers.spectrograms import SPECTROGRAM_SCHEMA
+from whirling.signal_transformers import audio_features
+from whirling.signal_transformers import spectrograms
 from whirling.signal_transformers import signal_dissectors
 
 class Store:
@@ -61,6 +62,22 @@ class Store:
             signals.update(v_obj['signals'].keys())
         return list(signals)
 
+    @property
+    def signal_features(self):
+        # Find features per signal.
+        signal_features = {}
+        for _v, v_obj in self.plan['visualizers'].items():
+            for s, s_obj in v_obj['signals'].items():
+                if s.startswith('spleeter_'):
+                    print(f'Signal not found for {s}')
+                    continue
+                if 'features' in s_obj:
+                    features = set([f for f, b in s_obj['features'].items() if b])
+                    if s not in signal_features:
+                        signal_features[s] = set()
+                    signal_features[s].update(features)
+        return signal_features
+
     def get_visualizer_plan(self, visualizer_name):
         if visualizer_name not in self.plan['visualizers']:
             logging.error('Couldn\'t find visualizer plan %s', visualizer_name)
@@ -93,8 +110,8 @@ class Store:
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {
-                                Optional('spectrogram'): SPECTROGRAM_SCHEMA,
-                                Optional('features'): FEATURES_SCHEMA,
+                                Optional('spectrogram'): spectrograms.SPECTROGRAM_SCHEMA,
+                                Optional('features'): audio_features.FEATURES_SCHEMA,
                             }
                         }
                     }
@@ -138,9 +155,18 @@ class Store:
         # TODO: inform visualizer controller of intended visualizers (via subject?).
 
         # Generate signals
-        sigs = list(self.store_data['signals'].keys())
+        sigs = self.signals
         for sig_name in sigs:
             signal_dissectors.generate(track_name, self.store_data, sig_name)
+
+        # Generate spectrogram.
+
+        # Generate features.
+        for sig, features in self.signal_features.items():
+            for f in features:
+                audio_features.generate(self.store_data, sig, f)
+
+        #audio_features.generate()
 
         # Save signals
         # Have each signal ready
@@ -170,3 +196,6 @@ class Store:
         pickle_name = self.store_file_name(track_name)
         with open(pickle_name, "rb") as f:
             return pickle.load(f)
+
+    def get_version():
+        return pkg_resources.require("Whirling")[0].version
