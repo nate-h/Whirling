@@ -182,9 +182,6 @@ class Store:
             for f in features:
                 audio_features.generate(self.store_data, sig, f)
 
-        import pdb; pdb.set_trace()
-        return {}
-
     def store_file_name(self, track_name: str) -> str:
         """Constructs store file name from track name"""
         return f'{os.path.splitext(track_name)[0]}_{self.plan_name}.p'

@@ -7,12 +7,11 @@ SPECTROGRAM_SCHEMA = Schema(Or(dict, None))
 
 def generate(store, sig, spectrogram_settings):
 
-    import pdb; pdb.set_trace()
-
     # Check if spectrogram is created already.
     if 'D' in store['signals'][sig]:
         return
 
+    # Generate and populate store with the spectrogram for this signal.
     hop_length = store['plan']['metadata']['hop_length']
     n_fft = store['plan']['metadata']['n_fft']
     y = store['signals'][sig]['y']
