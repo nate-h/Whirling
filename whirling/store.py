@@ -50,8 +50,8 @@ class Store():
 
         self.plan_output = None
         self.current_track_bs = BehaviorSubject('')
+        self.current_track_bs.subscribe(self.on_track_change)
         self.current_visualizer_bs = BehaviorSubject('')
-        self.current_visualizer_bs.subscribe(self.on_track_change)
 
         # track name
         # audio

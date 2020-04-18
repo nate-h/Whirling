@@ -20,7 +20,7 @@ class UIVisualizerController(UIDock):
         self.font = pg.font.Font(None, 30)
 
         # Switch to using the first visual.
-        self.current_visualizer_bs = Store.get_instance.current_visualizer_bs
+        self.current_visualizer_bs = Store.get_instance().current_visualizer_bs
         self.next_visual()
 
         self.whirling_textures = WhirlingTextures()
