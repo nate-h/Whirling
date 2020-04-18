@@ -4,17 +4,17 @@ import time
 from typing import List
 import vlc
 import pygame as pg
-from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.ui_core import UIDock, UIText, UIButton, UIToggleButton
 from whirling.ui_core.ui_textures import WhirlingTextures
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
+from whirling.store import Store
 import logging
 
 
 class UIAudioController(UIDock):
-    def __init__(self, music_tracks: List[str], current_track: BehaviorSubject,
-        rect: Rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
+    def __init__(self, music_tracks: List[str], rect: Rect,
+                 bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
         super().__init__(rect=rect, bg_color=bg_color,
@@ -24,10 +24,10 @@ class UIAudioController(UIDock):
         self.volume = 50
         self.track_num = 0
         self.player = None
-        self.current_track = current_track
+        self.store = Store.get_instance()
         self.music_tracks = music_tracks
-        self.current_track.on_next(self.music_tracks[self.track_num])
-        self.current_track.subscribe(self.on_track_change)
+        self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
+        self.store.current_track_bs.subscribe(self.on_track_change)
 
         # Vars needed to track current time.
         self.last_play_time = 0
@@ -175,12 +175,12 @@ class UIAudioController(UIDock):
     def prev(self):
         count = len(self.music_tracks)
         self.track_num = (self.track_num - 1 + count) % count
-        self.current_track.on_next(self.music_tracks[self.track_num])
+        self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
 
     def next(self):
         count = len(self.music_tracks)
         self.track_num = (self.track_num + 1) % count
-        self.current_track.on_next(self.music_tracks[self.track_num])
+        self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
 
     def get_pretty_time_string(self):
         length = round(self.player.get_length()/1000, 1)

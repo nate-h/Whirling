@@ -5,10 +5,11 @@ from whirling.ui_core.ui_textures import WhirlingTextures
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
 from whirling.visualization_manager import VISUALIZERS
+from whirling.store import Store
 
 
 class UIVisualizerController(UIDock):
-    def __init__(self, current_visualizer: BehaviorSubject, rect: Rect,
+    def __init__(self, rect: Rect,
                  bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
@@ -19,7 +20,7 @@ class UIVisualizerController(UIDock):
         self.font = pg.font.Font(None, 30)
 
         # Switch to using the first visual.
-        self.current_visualizer = current_visualizer
+        self.current_visualizer_bs = Store.get_instance.current_visualizer_bs
         self.next_visual()
 
         self.whirling_textures = WhirlingTextures()
@@ -55,7 +56,7 @@ class UIVisualizerController(UIDock):
         text_tup = (10 + self.rect.left, 60 + self.rect.bottom)
         self.visualizer_name = UIText('', text_tup, font_size=30)
 
-        self.current_visualizer.subscribe(self.change_visualizer_name)
+        self.current_visualizer_bs.subscribe(self.change_visualizer_name)
 
         self.elements.append(self.visualizer_name)
 
@@ -69,14 +70,14 @@ class UIVisualizerController(UIDock):
             quit()
 
         # If no visualizer set, set to first one in vis list.
-        current_visualizer = self.current_visualizer.value
+        current_visualizer: str = self.current_visualizer_bs.value
         if current_visualizer == "":
-            self.current_visualizer.on_next(VISUALIZERS[0][0])
+            self.current_visualizer_bs.on_next(VISUALIZERS[0][0])
         # Else find next one.
         else:
             idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
             vis = VISUALIZERS[(idx + 1) % len(VISUALIZERS)][0]
-            self.current_visualizer.on_next(vis)
+            self.current_visualizer_bs.on_next(vis)
 
     def prev_visual(self):
         # If no visuals, quit.
@@ -85,14 +86,14 @@ class UIVisualizerController(UIDock):
             quit()
 
         # If no visualizer set, set to first one in vis list.
-        current_visualizer = self.current_visualizer.value
+        current_visualizer: str = self.current_visualizer_bs.value
         if current_visualizer == "":
-            self.current_visualizer.on_next(VISUALIZERS[0][0])
+            self.current_visualizer_bs.on_next(VISUALIZERS[0][0])
         # Else find next one.
         else:
             idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
             vis = VISUALIZERS[(idx - 1) % len(VISUALIZERS)][0]
-            self.current_visualizer.on_next(vis)
+            self.current_visualizer_bs.on_next(vis)
 
     def draw(self):
         self.draw_background()

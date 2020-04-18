@@ -5,11 +5,11 @@ from whirling.ui_core.primitives import Rect
 from whirling.visualization_manager import VISUALIZERS
 from whirling.ui_audio_controller import UIAudioController
 from whirling.signal_transformers import audio_features
+from whirling.store import Store
 
 
 class UIVisualizerSwitcher(UIDock):
-    def __init__(self, plan, current_visualizer: BehaviorSubject,
-                 current_track: BehaviorSubject, audio_controller: UIAudioController,
+    def __init__(self, plan, audio_controller: UIAudioController,
                  rect: Rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
@@ -21,10 +21,11 @@ class UIVisualizerSwitcher(UIDock):
         self.audio_controller = audio_controller
         self.plan = plan
 
-        current_visualizer.subscribe(self.change_visualizer)
-
-        # Register function for track changes.
-        current_track.subscribe(self.current_track_change)
+        # Subscribe to visualizer and track changes.
+        Store.get_instance().current_visualizer_bs.subscribe(
+            self.on_visualizer_change)
+        Store.get_instance().current_track_bs.subscribe(
+            self.current_track_change)
 
     def get_visualizer_rect(self):
         padding_percent = .03
@@ -55,7 +56,7 @@ class UIVisualizerSwitcher(UIDock):
     def find_visualizer_class(self, vis_name):
         return list(filter(lambda x: x[0] == vis_name, VISUALIZERS))[0][1]
 
-    def change_visualizer(self, vis_name)   :
+    def on_visualizer_change(self, vis_name)   :
         print('Changing visualizer: %s ' % vis_name)
         rect = self.get_visualizer_rect()
         self.visualizer = self.find_visualizer_class(vis_name)(

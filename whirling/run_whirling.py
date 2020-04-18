@@ -9,7 +9,7 @@ from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
 from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIText
-from whirling import store
+from whirling.store import Store
 from data.tracks import MUSIC_TRACKS
 
 from whirling.ui_audio_controller import UIAudioController
@@ -57,36 +57,33 @@ class Whirling(object):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        # Initialize subjects.
-        self.current_track = BehaviorSubject('')
-        self.current_visualizer = BehaviorSubject('')
-
-        self.store = store.Store(plan, self.current_track, use_cache)
-
+        # Initialize store.
+        self.store = Store.get_instance()
+        self.store.initialize(plan, use_cache)
 
         # Initialize audio controller.
         self.is_playing = False
         self.audio_controller = UIAudioController(
-            MUSIC_TRACKS, self.current_track, rect=audio_controller_rect,
+            MUSIC_TRACKS, rect=audio_controller_rect,
             bg_color=(0.1, 0.1, 0.1), border_color=(0.15, 0.15, 0.15))
 
         # Initialize visualizer controller.
         self.visualizer_controller = UIVisualizerController(
-            self.current_visualizer,
             rect=visualizer_controller_rect,
             bg_color=(0.1, 0.1, 0.1), border_color=(0.15, 0.15, 0.15))
 
         # Initialize visualizer.
-        self.visualizer_switcher = UIVisualizerSwitcher(plan, self.current_visualizer,
-            self.current_track, self.audio_controller, rect=visualizer_rect)
+        self.visualizer_switcher = UIVisualizerSwitcher(
+            plan, self.audio_controller, rect=visualizer_rect)
 
         # Initialize text elements.
         offset_x = 0.01 * self.width
         offset_y = self.height - 0.025 * self.width
         self.fps = UIText('FPS', (offset_x, offset_y), font_size=30)
 
+        # Setup text that display track name.
         self.current_track_str = UIText('', (0, 0), font_size=30)
-        self.current_track.subscribe(self.on_track_change)
+        self.store.current_track_bs.subscribe(self.on_track_change)
 
         self.stopped = False
         self.dw = display_w
