@@ -4,7 +4,6 @@ from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
 from whirling.visualization_manager import VISUALIZERS
 from whirling.ui_audio_controller import UIAudioController
-from whirling.signal_transformers import audio_features
 from whirling.store import Store
 
 
@@ -45,9 +44,6 @@ class UIVisualizerSwitcher(UIDock):
     def hop_length(self):
         return self.track_audio_features['metadata']['hop_length']
 
-    def get_frame_number(self, time):
-        return audio_features.get_frame_number(time, self.sr, self.hop_length)
-
     def draw(self):
         super().draw()
 
@@ -56,7 +52,7 @@ class UIVisualizerSwitcher(UIDock):
     def find_visualizer_class(self, vis_name):
         return list(filter(lambda x: x[0] == vis_name, VISUALIZERS))[0][1]
 
-    def on_visualizer_change(self, vis_name)   :
+    def on_visualizer_change(self, vis_name):
         print('Changing visualizer: %s ' % vis_name)
         rect = self.get_visualizer_rect()
         self.visualizer = self.find_visualizer_class(vis_name)(
@@ -67,23 +63,8 @@ class UIVisualizerSwitcher(UIDock):
             self.visualizer.track_audio_features = self.track_audio_features
 
     def current_track_change(self, new_track):
-        import pdb; pdb.set_trace()
         # self.track_audio_features = audio_features.load_features(
         #     new_track, self.plan)
 
-        # Post processing. Converts events to framed events.
-        self.post_process_audio_features()
-
         # Copy audio features over to visualizer.
         self.visualizer.track_audio_features = self.track_audio_features
-
-    def post_process_audio_features(self):
-        # Post processing. Converts events to framed events.
-        # The reason I do this is so everything operates as a frame since
-        # since that's the fundamental thing librosa returns.
-
-        for _, data in self.track_audio_features['audio_signals'].items():
-            events = data['extracts']['events']
-            data['extracts']['framed_events'] = {
-                k: [self.get_frame_number(e) for e in v] for k, v in events.items()
-            }

@@ -73,12 +73,14 @@ def get_zero_crossing_rates(y, D, sr, hop_length):
 def get_beats(y, D, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop_length)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
-    return librosa.frames_to_time(beat_frames, sr=sr)
+    return beat_frames
+    #return librosa.frames_to_time(beat_frames, sr=sr)
 
 
 def get_onsets(y, D, sr, hop_length):
     onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
-    return librosa.frames_to_time(onsets, sr=sr)
+    return onsets
+    #return librosa.frames_to_time(onsets, sr=sr)
 
 
 def get_onset_strength(y, D, sr, hop_length):
