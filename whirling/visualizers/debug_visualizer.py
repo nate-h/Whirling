@@ -8,6 +8,7 @@ from whirling.ui_core import colors
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_core.ui_core import UIText
+from whirling.signal_transformers import audio_features
 
 
 class DebugVisualizer(UIVisualizerBase):
@@ -32,41 +33,47 @@ class DebugVisualizer(UIVisualizerBase):
             return
 
         num_frames = max_window_frame - min_window_frame
-        signals = self.data['audio_signals']
-        sum_framed = sum([len(d['extracts']['framed']) for s,d in signals.items()])
-        sum_framed_events = sum([len(d['extracts']['framed_events']) for s,d in signals.items()])
-        num_rows = sum_framed + sum_framed_events
+        signals = self.data
+
+        # Count number of features we have so we can scale the rows properly.
+        num_rows = 0
+        for s, s_obj in self.data.items():
+            for f, f_obj in s_obj['features'].items():
+                if f_obj is not None:
+                    num_rows += 1
 
         # Plot properties.
         row_num = 0
         row_gap = 50
         row_height = (self.height - num_rows * row_gap)/num_rows
 
-        for signal_name, signal_data in signals.items():
-            framed = signal_data['extracts']['framed']
-            framed_events = signal_data['extracts']['framed_events']
+        for signal_name, s_obj in signals.items():
+            for feature_name, f_data in s_obj['features'].items():
+                if f_data is None:
+                    continue
 
-            for feature_name, data in framed.items():
-                # Points spanning seconds_worth.
-                pnts = data[min_window_frame: max_window_frame]
-
-                # Draw points for subset of feature data.
+                flavor = audio_features.function_listing(feature_name)['flavor']
                 title = "%s - %s" % (signal_name, feature_name)
-                self.plot_signal(pnts, row_num, row_height, row_gap, title)
-                row_num += 1
 
+                # Plot continuous events like onset_strengths.
+                if flavor == 'continuous':
+                    # Points spanning seconds_worth.
+                    pnts = f_data[min_window_frame: max_window_frame]
 
-            # # Convert beat events to frames and then plot them.
-            for feature_name, data in framed_events.items():
-                beat_pnts = filter(
-                    lambda x: min_window_frame <= x <= max_window_frame, data)
-                beat_pnts = [p - min_window_frame for p in beat_pnts]
-                pnts = np.zeros(max_window_frame - min_window_frame + 1)
-                np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
+                    # Draw points for subset of feature data.
+                    self.plot_signal(pnts, row_num, row_height, row_gap, title)
 
-                # Draw points for subset of feature data.
-                title = "%s - %s" % (signal_name, feature_name)
-                self.plot_discrete_signal(pnts, row_num, row_height, row_gap, title)
+                # Plot discrete events like onsets.
+                if flavor == 'discrete':
+                    beat_pnts = filter(
+                        lambda x: min_window_frame <= x <= max_window_frame, f_data)
+                    beat_pnts = [p - min_window_frame for p in beat_pnts]
+                    pnts = np.zeros(max_window_frame - min_window_frame + 1)
+                    np.put(pnts, beat_pnts, np.ones(len(beat_pnts)))
+
+                    # Draw points for subset of feature data.
+                    self.plot_discrete_signal(pnts, row_num, row_height, row_gap, title)
+
                 row_num += 1
 
         self.draw_time_indicator(curr_time, min_window_time, max_window_time)

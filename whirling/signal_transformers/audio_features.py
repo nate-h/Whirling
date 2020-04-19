@@ -92,17 +92,17 @@ def get_loudness(y, D, sr, hop_length):
     return normalize(loudness)
 
 
-def get_function_from_name(name):
+def function_listing(name):
     feature_extraction_fns = {
-        'beats': get_beats,
-        'onsets': get_onsets,
-        'frame_times': get_frame_times,
-        'rms': get_rms,
-        'spectral_centroid': get_spectral_centroids,
-        'spectral_flatness': get_spectral_flatness,
-        'zero_crossing_rates': get_zero_crossing_rates,
-        'onset_strength': get_onset_strength,
-        'loudness': get_loudness
+        'beats': {'fn': get_beats, 'flavor': 'discrete'},
+        'onsets': {'fn': get_onsets, 'flavor': 'discrete'},
+        'rms': {'fn': get_rms, 'flavor': 'continuous'},
+        'spectral_centroid': {'fn': get_spectral_centroids, 'flavor': 'continuous'},
+        'spectral_flatness': {'fn': get_spectral_flatness, 'flavor': 'continuous'},
+        'zero_crossing_rates': {'fn': get_zero_crossing_rates, 'flavor': 'continuous'},
+        'onset_strength': {'fn': get_onset_strength, 'flavor': 'continuous'},
+        'loudness': {'fn': get_loudness, 'flavor': 'continuous'},
+        'frame_times': {'fn': get_frame_times, 'flavor': 'continuous'},
     }
     if name not in feature_extraction_fns:
         logging.info("Can't find feature extraction function %s", name)
@@ -115,5 +115,5 @@ def generate(store, sig, feature_name):
     D = store['signals'][sig]['D']
     sr = store['plan']['metadata']['sr']
     hop_length = store['plan']['metadata']['hop_length']
-    fn = get_function_from_name(feature_name)
+    fn = function_listing(feature_name)['fn']
     store['signals'][sig]['features'][feature_name] = fn(y, D, sr, hop_length)
