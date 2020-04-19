@@ -16,15 +16,12 @@ class UIVisualizerSwitcher(UIDock):
             border_color=border_color)
 
         self.visualizer = None
-        self.track_audio_features = None
         self.audio_controller = audio_controller
         self.plan = plan
 
         # Subscribe to visualizer and track changes.
         Store.get_instance().current_visualizer_bs.subscribe(
             self.on_visualizer_change)
-        Store.get_instance().current_track_bs.subscribe(
-            self.current_track_change)
 
     def get_visualizer_rect(self):
         padding_percent = .03
@@ -35,14 +32,6 @@ class UIVisualizerSwitcher(UIDock):
             self.rect.right - padding,
             self.rect.bottom + padding
         )
-
-    @property
-    def sr(self):
-        return self.track_audio_features['metadata']['sr']
-
-    @property
-    def hop_length(self):
-        return self.track_audio_features['metadata']['hop_length']
 
     def draw(self):
         super().draw()
@@ -57,14 +46,3 @@ class UIVisualizerSwitcher(UIDock):
         rect = self.get_visualizer_rect()
         self.visualizer = self.find_visualizer_class(vis_name)(
             rect, self.audio_controller) #, border_color=colors.RED)
-
-        # Copy audio features over to visualizer.
-        if self.visualizer:
-            self.visualizer.track_audio_features = self.track_audio_features
-
-    def current_track_change(self, new_track):
-        # self.track_audio_features = audio_features.load_features(
-        #     new_track, self.plan)
-
-        # Copy audio features over to visualizer.
-        self.visualizer.track_audio_features = self.track_audio_features

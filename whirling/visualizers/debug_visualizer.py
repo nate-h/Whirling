@@ -17,15 +17,7 @@ class DebugVisualizer(UIVisualizerBase):
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
         self.text_elements = {}
 
-    def draw(self):
-        super().draw()
-
-        self.draw_debug_visuals_surface()
-
-    def draw_debug_visuals_surface(self):
-
-        if self.track_audio_features is None:
-            return
+    def draw_visuals(self):
 
         # Establish what portions of the track to visualize.
         curr_time = self.audio_controller.get_time()
@@ -40,7 +32,7 @@ class DebugVisualizer(UIVisualizerBase):
             return
 
         num_frames = max_window_frame - min_window_frame
-        signals = self.track_audio_features['audio_signals']
+        signals = self.data['audio_signals']
         sum_framed = sum([len(d['extracts']['framed']) for s,d in signals.items()])
         sum_framed_events = sum([len(d['extracts']['framed_events']) for s,d in signals.items()])
         num_rows = sum_framed + sum_framed_events

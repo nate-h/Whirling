@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
@@ -6,6 +6,7 @@ from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIElement
 from whirling.ui_audio_controller import UIAudioController
 from whirling.signal_transformers import audio_features
+from whirling.store import Store
 
 
 class UIVisualizerBase(UIElement, ABC):
@@ -13,13 +14,28 @@ class UIVisualizerBase(UIElement, ABC):
         super().__init__(rect=rect, **kwargs)
 
         self.audio_controller = audio_controller
-        self.track_audio_features = None
+        self.data = None
+
+        Store.get_instance().is_plan_loaded_bs.subscribe(
+            self.on_data_loaded_change)
 
     def draw(self):
         self.draw_background()
         self.draw_border()
 
+        if self.data:
+            self.draw_visuals()
+        #else:
+        #    Render loading screen.
+
+    @abstractmethod
+    def draw_visuals(self):
+        pass
+
     def update(self):
+        pass
+
+    def on_data_loaded_change(self, is_loaded):
         pass
 
     @property

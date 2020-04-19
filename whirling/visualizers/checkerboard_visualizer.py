@@ -18,6 +18,41 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.initialize_shader()
         self.create_vbo_data()
 
+    def draw_visuals(self):
+
+        # Create Buffer object in gpu.
+        VBO = glGenBuffers(1)
+
+        # Create EBO.
+        EBO = glGenBuffers(1)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
+
+        # Bind the buffer.
+        glBindBuffer(GL_ARRAY_BUFFER, VBO)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(self.rectangle), self.rectangle, GL_STATIC_DRAW)
+
+        # Get the position from shader.
+        position = glGetAttribLocation(self.shader, 'position')
+        glVertexAttribPointer(position, 3, GL_FLOAT,
+                              GL_FALSE, 24, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(position)
+
+        # Get the color from shader.
+        color = glGetAttribLocation(self.shader, 'color')
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
+                              24, ctypes.c_void_p(12))
+        glEnableVertexAttribArray(color)
+
+        # Draw rectangles.
+        glUseProgram(self.shader)
+        glLoadIdentity()
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
+        glUseProgram(0)
+
+        glDeleteBuffers(1, [VBO])
+        glDeleteBuffers(1, [EBO])
+
     def create_vbo_data(self):
         sw = self.width / self.pnts_x
         sh = self.height / self.pnts_y
@@ -103,39 +138,3 @@ class CheckerboardVisualizer(UIVisualizerBase):
             OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
             OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
         )
-
-    def draw(self):
-        super().draw()
-
-        # Create Buffer object in gpu.
-        VBO = glGenBuffers(1)
-
-        # Create EBO.
-        EBO = glGenBuffers(1)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
-
-        # Bind the buffer.
-        glBindBuffer(GL_ARRAY_BUFFER, VBO)
-        glBufferData(GL_ARRAY_BUFFER, 4*len(self.rectangle), self.rectangle, GL_STATIC_DRAW)
-
-        # Get the position from shader.
-        position = glGetAttribLocation(self.shader, 'position')
-        glVertexAttribPointer(position, 3, GL_FLOAT,
-                              GL_FALSE, 24, ctypes.c_void_p(0))
-        glEnableVertexAttribArray(position)
-
-        # Get the color from shader.
-        color = glGetAttribLocation(self.shader, 'color')
-        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                              24, ctypes.c_void_p(12))
-        glEnableVertexAttribArray(color)
-
-        # Draw rectangles.
-        glUseProgram(self.shader)
-        glLoadIdentity()
-        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT,  None)
-        glUseProgram(0)
-
-        glDeleteBuffers(1, [VBO])
-        glDeleteBuffers(1, [EBO])

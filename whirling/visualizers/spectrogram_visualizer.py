@@ -41,8 +41,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
 
         print(f'Total time: {time.time() - t0}')
 
-    def draw(self):
-        super().draw()
+    def draw_visuals(self):
 
         # Create spectrogram if it doesn't exist for this spec window.
         self.initialize_spectrogram()

@@ -39,27 +39,32 @@ class Store():
 
             self.current_track_bs: BehaviorSubject = None
             self.current_visualizer_bs: BehaviorSubject = None
+            self.is_plan_loaded_bs: BehaviorSubject = None
             self.plan_name: str = None
             self.use_cache: bool = None
             self.plan_output = None
 
     def initialize(self, plan_name: str, use_cache: bool):
-
+        """Setup store"""
         self.plan_name = plan_name
         self.use_cache = use_cache
 
-        self.plan_output = None
+        # Initialize behavior subjects.
+        self.is_plan_loaded_bs = BehaviorSubject(False)
         self.current_track_bs = BehaviorSubject('')
         self.current_track_bs.subscribe(self.on_track_change)
         self.current_visualizer_bs = BehaviorSubject('')
 
-        # track name
         # audio
-        # current visualizer
         # method for audio_get_time
 
     def on_track_change(self, new_track):
-        """On track change, get  """
+        """On track change, get either generate data or load cached data."""
+
+        # Reset information.
+        self.is_plan_loaded_bs.on_next(False)
+        self.plan_output = None
+
         if new_track == '':
             return
 
@@ -70,6 +75,9 @@ class Store():
             self.save_store(new_track, self.plan_output)
         else:
             self.plan_output = self.load_store(new_track)
+
+        # Notify others the plan is loaded.
+        self.is_plan_loaded_bs.on_next(True)
 
     @property
     def plan(self):
