@@ -24,9 +24,22 @@ class SpectrogramVisualizer(UIVisualizerBase):
 
         self.spec = None
 
-    def initialize_spectrogram(self):
+    def draw_visuals(self):
 
         curr_time = self.audio_controller.get_time()
+
+        # Create spectrogram if it doesn't exist for this spec window.
+        self.create_spectrograms(curr_time)
+
+        if self.spec and self.spec.state == spectrogram.SpecState.LOADED:
+            self.spec.draw()
+
+        # Draw time indicator.
+        self.draw_time_indicator(curr_time)
+
+    def create_spectrograms(self, curr_time):
+
+        # Return if we've already generated the spectrograms for this window.
         if self.spec_window == math.floor(curr_time / self.seconds_worth):
             return
 
@@ -41,25 +54,16 @@ class SpectrogramVisualizer(UIVisualizerBase):
 
         print(f'Total time: {time.time() - t0}')
 
-    def draw_visuals(self):
+    def draw_time_indicator(self, curr_time):
 
-        # Create spectrogram if it doesn't exist for this spec window.
-        self.initialize_spectrogram()
-
-        if self.spec and self.spec.state == spectrogram.SpecState.LOADED:
-            self.spec.draw()
-
-        # Draw time indicator.
-        curr_time = self.audio_controller.get_time()
         curr_window_number = math.floor(curr_time/self.seconds_worth)
         min_window_time = curr_window_number * self.seconds_worth
         max_window_time = (curr_window_number + 1) * self.seconds_worth
-        self.draw_time_indicator(curr_time, min_window_time, max_window_time)
 
-    def draw_time_indicator(self, curr_time, min_time, max_time):
-        if max_time == 0:
+        if max_window_time == 0:
             return
-        fraction = (curr_time - min_time) / (max_time - min_time)
+        fraction = (curr_time - min_window_time) / (
+            max_window_time - min_window_time)
         x = self.width * fraction + self.rect.left
         glBegin(GL_LINES)
         glColor3fv(colors.GRAY)
