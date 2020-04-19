@@ -37,6 +37,7 @@ class Store():
         else:
             Store.__instance = self
 
+            # Declare what variables this store intends to have.
             self.current_track_bs: BehaviorSubject = None
             self.current_visualizer_bs: BehaviorSubject = None
             self.is_plan_loaded_bs: BehaviorSubject = None

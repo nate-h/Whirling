@@ -18,6 +18,8 @@ from whirling.ui_visualizer_controller import UIVisualizerController
 
 DESIRED_FPS = 60
 
+logging.getLogger("OpenGL").setLevel(logging.WARNING)
+
 
 ###############################################################################
 # Whirling
