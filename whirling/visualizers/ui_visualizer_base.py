@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
 from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
@@ -16,7 +17,8 @@ class UIVisualizerBase(UIElement, ABC):
         self.audio_controller = audio_controller
         self.data = None
 
-        Store.get_instance().is_plan_loaded_bs.subscribe(
+        self.store = Store.get_instance()
+        self.store.is_plan_loaded_bs.subscribe(
             self.on_data_loaded_change)
 
     def draw(self):
@@ -36,7 +38,27 @@ class UIVisualizerBase(UIElement, ABC):
         pass
 
     def on_data_loaded_change(self, is_loaded):
-        pass
+
+        # Reset data and return if nothing to work with.
+        self.data = None
+        if not is_loaded:
+            return
+
+        data_wanted = self.store.plan['visualizers'][self.name]['signals']
+        self.data = copy.deepcopy(data_wanted)
+        signals = self.store.plan_output['signals']
+
+        for signal_name, signal_data in data_wanted.items():
+            for transformer_name, transformer_data in signal_data.items():
+                if transformer_name == 'features':
+                    for f_name, use in transformer_data.items():
+                        if use:
+                            self.data[signal_name][transformer_name][f_name] = \
+                                signals[signal_name][transformer_name][f_name]
+
+    @property
+    def name(self):
+        return self.__class__.__name__.replace('Visualizer', '').lower()
 
     @property
     def width(self):
