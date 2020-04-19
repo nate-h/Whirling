@@ -71,6 +71,16 @@
                     "spectrogram": null
                 }
             }
+        },
+        "checkerboard": {
+            "settings": {
+                "window_size": 8
+            },
+            "signals": {
+                "full": {
+                    "spectrogram": null
+                }
+            }
         }
     }
 }

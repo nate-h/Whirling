@@ -165,7 +165,7 @@ class Store():
                     Optional("save_signals"): bool
                 },
                 "visualizers": {
-                    And(str, lambda n: n in VISUALIZERS): {
+                    And(str, lambda n: n in [v[0] for v in VISUALIZERS]): {
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {
