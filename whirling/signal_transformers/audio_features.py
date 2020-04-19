@@ -27,12 +27,6 @@ FEATURES_SCHEMA = Schema({
 # Helpers.
 ###############################################################################
 
-def get_events_at_time(current_track_audio_features, curr_time):
-    beats = current_track_audio_features['beats']
-    # See what beats should be played at curr_time
-    return [b for b in beats if curr_time >= b[0] and curr_time < b[1]]
-
-
 def normalize(x, axis=0):
     return sklearn.preprocessing.minmax_scale(x, axis=axis)
 

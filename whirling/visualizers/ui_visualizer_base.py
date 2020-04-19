@@ -70,11 +70,11 @@ class UIVisualizerBase(UIElement, ABC):
 
     @property
     def sr(self):
-        return self.track_audio_features['metadata']['sr']
+        return self.store.plan['metadata']['sr']
 
     @property
     def hop_length(self):
-        return self.track_audio_features['metadata']['hop_length']
+        return self.store.plan['metadata']['hop_length']
 
     def get_frame_number(self, time):
         return audio_features.get_frame_number(time, self.sr, self.hop_length)
