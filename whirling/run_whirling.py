@@ -101,6 +101,7 @@ class Whirling(object):
             # Event Handling.
             for event in pg.event.get():
                 if event.type == pg.QUIT:
+                    logging.info('Hit pg.QUIT event.')
                     pg.quit()
                     quit()
                 elif event.type == pg.KEYDOWN:
@@ -120,6 +121,7 @@ class Whirling(object):
             self.clock.tick(DESIRED_FPS)
 
         # If exit loop, quit pygame.
+        logging.info('Exiting game loop and ending the program.')
         pg.quit()
         quit()
 

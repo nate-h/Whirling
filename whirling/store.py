@@ -154,7 +154,7 @@ class Store():
         for their specific settings."""
 
         # FIXME: Hack to get around circular import.
-        from whirling.visualizers import VALID_VISUALIZERS
+        from whirling.visualizers import VISUALIZERS
 
         schema = Schema(
             {
@@ -165,7 +165,7 @@ class Store():
                     Optional("save_signals"): bool
                 },
                 "visualizers": {
-                    And(str, lambda n: n in VALID_VISUALIZERS): {
+                    And(str, lambda n: n in VISUALIZERS): {
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {

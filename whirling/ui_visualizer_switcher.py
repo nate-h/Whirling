@@ -1,8 +1,7 @@
-from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.ui_core import UIDock
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
-from whirling.visualization_manager import VISUALIZERS
+from whirling.visualizers import VISUALIZERS
 from whirling.ui_audio_controller import UIAudioController
 from whirling.store import Store
 

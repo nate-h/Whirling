@@ -1,10 +1,10 @@
+import logging
 import pygame as pg
-from rx.subject.behaviorsubject import BehaviorSubject
 from whirling.ui_core.ui_core import UIDock, UIText, UIButton
 from whirling.ui_core.ui_textures import WhirlingTextures
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
-from whirling.visualization_manager import VISUALIZERS
+from whirling.visualizers import VISUALIZERS
 from whirling.store import Store
 
 
@@ -21,6 +21,10 @@ class UIVisualizerController(UIDock):
 
         # Switch to using the first visual.
         self.current_visualizer_bs = Store.get_instance().current_visualizer_bs
+        plan_visualizers = set(Store.get_instance().plan['visualizers'].keys())
+        self.visualizers = [
+            v[0] for v in VISUALIZERS if v[0] in plan_visualizers
+        ]
         self.next_visual()
 
         self.whirling_textures = WhirlingTextures()
@@ -65,34 +69,36 @@ class UIVisualizerController(UIDock):
 
     def next_visual(self):
         # If no visuals, quit.
-        if len(VISUALIZERS) == 0:
+        if len(self.visualizers) == 0:
+            logging.info('No visualizers found. Quitting.')
             pg.quit()
             quit()
 
         # If no visualizer set, set to first one in vis list.
         current_visualizer: str = self.current_visualizer_bs.value
         if current_visualizer == "":
-            self.current_visualizer_bs.on_next(VISUALIZERS[0][0])
+            self.current_visualizer_bs.on_next(self.visualizers[0])
         # Else find next one.
         else:
-            idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
-            vis = VISUALIZERS[(idx + 1) % len(VISUALIZERS)][0]
+            idx = self.visualizers.index(current_visualizer)
+            vis = self.visualizers[(idx + 1) % len(self.visualizers)]
             self.current_visualizer_bs.on_next(vis)
 
     def prev_visual(self):
         # If no visuals, quit.
-        if len(VISUALIZERS) == 0:
+        if len(self.visualizers) == 0:
+            logging.info('No visualizers found. Quitting.')
             pg.quit()
             quit()
 
         # If no visualizer set, set to first one in vis list.
         current_visualizer: str = self.current_visualizer_bs.value
         if current_visualizer == "":
-            self.current_visualizer_bs.on_next(VISUALIZERS[0][0])
+            self.current_visualizer_bs.on_next(self.visualizers[0])
         # Else find next one.
         else:
-            idx = [v[0] for v in VISUALIZERS].index(current_visualizer)
-            vis = VISUALIZERS[(idx - 1) % len(VISUALIZERS)][0]
+            idx = self.visualizers.index(current_visualizer)
+            vis = self.visualizers[(idx - 1) % len(self.visualizers)]
             self.current_visualizer_bs.on_next(vis)
 
     def draw(self):

@@ -5,6 +5,6 @@ from whirling.visualizers.checkerboard_visualizer import CheckerboardVisualizer
 from whirling.visualizers.spectrogram_visualizer import SpectrogramVisualizer
 
 _visualizers = [DebugVisualizer, CheckerboardVisualizer, SpectrogramVisualizer]
-VALID_VISUALIZERS = [
-    v.__name__.replace('Visualizer', '').lower() for v in _visualizers
+VISUALIZERS = [
+    (v.__name__.replace('Visualizer', '').lower(), v) for v in _visualizers
 ]
