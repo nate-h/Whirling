@@ -8,6 +8,7 @@ from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
+from whirling.ui_core.ui_core import UIText
 from whirling.visualizers import spectrogram
 
 
@@ -23,6 +24,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         self.spec_window = None
 
         self.specs = []
+        self.text_elements = {}
 
     def draw_visuals(self):
 
@@ -35,6 +37,8 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if len(self.specs): # and self.spec.state == spectrogram.SpecState.LOADED:
             for s in self.specs:
                 s.draw()
+            for label, text_element in self.text_elements.items():
+                text_element.draw()
 
         # Draw time indicator.
         self.draw_time_indicator(curr_time)
@@ -46,21 +50,13 @@ class SpectrogramVisualizer(UIVisualizerBase):
 
         # Grab spectrogram and what portions we're going to limit it to.
         num_rows = len(self.data)
+        row_gap = 50
 
         if len(self.data) == 0:
             logging.info('No spectrograms to view.')
             return
 
-        if num_rows == 1:
-            row_padding = 0
-            row_height = self.height * 1.0 / num_rows
-        else:
-            row_padding = self.height * .1 / (num_rows - 1)
-            row_height = self.height * 0.9 / num_rows
-
-        print(self.height)
-        print(row_padding)
-        print(row_height)
+        row_height = (self.height - num_rows*row_gap) / num_rows
 
         self.spec_window = math.floor(curr_time / self.seconds_worth)
         min_window_time = self.spec_window * self.seconds_worth
@@ -75,14 +71,19 @@ class SpectrogramVisualizer(UIVisualizerBase):
 
         # Create the spectrograms.
         row_num = 0
-        for _signal_name, s_obj in self.data.items():
-            bottom = row_num * (row_padding + row_height) + self.rect.bottom
+        for signal_name, s_obj in self.data.items():
+            bottom = row_num * (row_gap + row_height) + self.rect.bottom
             top = bottom + row_height
             D = s_obj['D']
             D_clip = D[:, min_window_frame: max_window_frame]
             spec_rect = Rect(self.rect.left, top, self.rect.right, bottom)
             spec = spectrogram.Spectrogram(spec_rect, D_clip)
             self.specs.append(spec)
+
+            # Draw signal name text above spectrogram.
+            color = colors.WHITE
+            pos = (self.rect.left + 10, top + 10)
+            self.render_text(signal_name, pos, color)
             row_num += 1
 
 
@@ -104,3 +105,9 @@ class SpectrogramVisualizer(UIVisualizerBase):
         glVertex2f(x, self.rect.top)
         glVertex2f(x, self.rect.bottom)
         glEnd()
+
+    def render_text(self, title, pos, color):
+        """Generate text if doesn't exist then render it."""
+        if title not in self.text_elements:
+            self.text_elements[title] = UIText(
+                title, pos, font_size=20, font_color=color)

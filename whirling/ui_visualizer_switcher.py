@@ -44,4 +44,4 @@ class UIVisualizerSwitcher(UIDock):
         print('Changing visualizer: %s ' % vis_name)
         rect = self.get_visualizer_rect()
         self.visualizer = self.find_visualizer_class(vis_name)(
-            rect, self.audio_controller, border_color=colors.RED) #, border_color=colors.RED)
+            rect, self.audio_controller) #, border_color=colors.RED)
