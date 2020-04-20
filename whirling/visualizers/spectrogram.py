@@ -20,7 +20,7 @@ class SpecState(Enum):
 
 
 class Spectrogram(UIElement):
-    def __init__(self, rect, D, **kwargs):
+    def __init__(self, rect, log_db_s, **kwargs):
 
         super().__init__(rect=rect, **kwargs)
 
@@ -28,7 +28,7 @@ class Spectrogram(UIElement):
         self.state = SpecState.LOADING
 
         with CodeTimer('create_db_spec'):
-            self.log_db_s = self.create_log_db_spectrogram(D)
+            self.log_db_s = log_db_s
             self.pnts_x, self.pnts_y = self.log_db_s.shape
         with CodeTimer('create_vbo'):
             self.create_vbo_data()
@@ -43,20 +43,6 @@ class Spectrogram(UIElement):
     @property
     def height(self):
         return self.rect.height
-
-    def create_log_db_spectrogram(self, D):
-        # Take our n frequency bins D has and logarithmically chunk them up.
-        # Each chunk is exponentially larger than the last.
-        # Each chunk of frequency bins then gets there values averaged.
-        db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        max_power = int(math.log(db_s.shape[0] - 1, 2))
-        idxs = [(int(math.pow(2, (i-1)/12)), int(math.pow(2, i/12))) for i in range(max_power*12 + 1)
-                if int(math.pow(2, (i-1)/12)) != int(math.pow(2, i/12))]
-        log_db_s = np.array([
-            [np.average(db_s[idx1: idx2, j]) for idx1, idx2 in idxs]
-            for j in range(db_s.shape[1])
-        ])
-        return log_db_s
 
     def draw(self):
         # Create Buffer object in gpu.

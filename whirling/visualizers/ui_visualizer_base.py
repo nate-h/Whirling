@@ -59,8 +59,13 @@ class UIVisualizerBase(UIElement, ABC):
                                 signals[signal_name][transformer_name][f_name]
 
                 # Attach spectrogram to data.
-                if transformer_name == 'spectrogram':
+                if transformer_name == 'spectrograms':
                     self.data[signal_name]['D'] = signals[signal_name]['D']
+
+                    for s_name, use in transformer_data.items():
+                        if use:
+                            self.data[signal_name][transformer_name][s_name] = \
+                                signals[signal_name][transformer_name][s_name]
 
     @property
     def name(self):

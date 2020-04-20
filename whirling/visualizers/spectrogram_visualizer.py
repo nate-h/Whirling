@@ -74,10 +74,10 @@ class SpectrogramVisualizer(UIVisualizerBase):
         for signal_name, s_obj in self.data.items():
             bottom = row_num * (row_gap + row_height) + self.rect.bottom
             top = bottom + row_height
-            D = s_obj['D']
-            D_clip = D[:, min_window_frame: max_window_frame]
+            log_db_s = s_obj['spectrograms']['custom_log_db']
+            log_db_s_clip = log_db_s[min_window_frame: max_window_frame, :]
             spec_rect = Rect(self.rect.left, top, self.rect.right, bottom)
-            spec = spectrogram.Spectrogram(spec_rect, D_clip)
+            spec = spectrogram.Spectrogram(spec_rect, log_db_s_clip)
             self.specs.append(spec)
 
             # Draw signal name text above spectrogram.

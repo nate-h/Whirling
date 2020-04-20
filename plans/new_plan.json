@@ -62,13 +62,22 @@
             },
             "signals": {
                 "full": {
-                    "spectrogram": null
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
                 },
                 "librosa_harmonic": {
-                    "spectrogram": null
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
                 },
                 "librosa_percussive": {
-                    "spectrogram": null
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
                 }
             }
         },
@@ -78,7 +87,10 @@
             },
             "signals": {
                 "full": {
-                    "spectrogram": null
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
                 }
             }
         }

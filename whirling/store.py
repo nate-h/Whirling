@@ -128,9 +128,11 @@ class Store():
                 if s.startswith('spleeter_'):
                     print(f'Signal not found for {s}')
                     continue
-                if 'spectrogram' in s_obj:
+                if 'spectrograms' in s_obj:
+                    spectrograms = set([f for f, b in s_obj['spectrograms'].items() if b])
                     if s not in signal_spectrograms:
-                        signal_spectrograms[s] = None
+                        signal_spectrograms[s] = set()
+                    signal_spectrograms[s].update(spectrograms)
         return signal_spectrograms
 
     def get_visualizer_plan(self, visualizer_name):
@@ -169,7 +171,7 @@ class Store():
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {
-                                Optional('spectrogram'): spectrogram_varients.SPECTROGRAM_SCHEMA,
+                                Optional('spectrograms'): spectrogram_varients.SPECTROGRAM_SCHEMA,
                                 Optional('features'): audio_features.FEATURES_SCHEMA,
                             }
                         }
@@ -186,20 +188,23 @@ class Store():
         data to render."""
         merged = {}
         for v, v_obj in self.plan['visualizers'].items():
-            for s, s_obj in v_obj['signals'].items():
-                if s not in merged:
-                    merged[s] = {}
+            for sig_name, s_obj in v_obj['signals'].items():
+                if sig_name not in merged:
+                    merged[sig_name] = {}
                 # Merge feature data request.
                 if 'features' in s_obj:
-                    if 'features' not in merged[s]:
-                        merged[s]['features'] = {}
+                    if 'features' not in merged[sig_name]:
+                        merged[sig_name]['features'] = {}
                     for f, use in s_obj['features'].items():
                         if use:
-                            merged[s]['features'][f] = None
+                            merged[sig_name]['features'][f] = None
                 # Merge spectrogram data request.
-                if 'spectrogram' in s_obj:
-                    if 'spectrogram' not in merged[s]:
-                        merged[s]['spectrogram'] = None
+                if 'spectrograms' in s_obj:
+                    if 'spectrograms' not in merged[sig_name]:
+                        merged[sig_name]['spectrograms'] = {}
+                    for s, use in s_obj['spectrograms'].items():
+                        if use:
+                            merged[sig_name]['spectrograms'][s] = None
         return {'signals': merged}
 
     def generate_plan_output(self, track_name):
@@ -219,8 +224,9 @@ class Store():
             signal_dissectors.generate(track_name, self.plan_output, sig_name)
 
         # Generate spectrogram.
-        for sig, spectrogram_settings in self.signal_spectrograms.items():
-            spectrogram_varients.generate(self.plan_output, sig, spectrogram_settings)
+        for sig, spectrograms in self.signal_spectrograms.items():
+            for s in spectrograms:
+                spectrogram_varients.generate(self.plan_output, sig, s)
 
         # Generate features.
         for sig, features in self.signal_features.items():
