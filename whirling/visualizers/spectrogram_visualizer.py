@@ -43,14 +43,23 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if self.spec_window == math.floor(curr_time / self.seconds_worth):
             return
 
-        t0 = time.time()
+
+        # Grab spectrogram and what portions we're going to limit it to.
+        D = self.data['full']['D']
         self.spec_window = math.floor(curr_time / self.seconds_worth)
+        min_window_time = self.spec_window * self.seconds_worth
+        max_window_time = (self.spec_window + 1) * self.seconds_worth
+        min_window_frame = self.get_frame_number(min_window_time)
+        max_window_frame = self.get_frame_number(max_window_time)
+
+        D_clip = D[:, min_window_frame: max_window_frame]
+
+        t0 = time.time()
 
         # Create the spectrogram.
         top = self.height/3  + self.rect.bottom
         spec_rect = Rect(self.rect.left, top, self.rect.right, self.rect.bottom)
-        self.spec = spectrogram.Spectrogram(spec_rect, 'data/latch.mp3',
-            self.sr, curr_time, self.seconds_worth)
+        self.spec = spectrogram.Spectrogram(spec_rect, D_clip)
 
         print(f'Total time: {time.time() - t0}')
 

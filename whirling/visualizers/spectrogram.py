@@ -20,21 +20,15 @@ class SpecState(Enum):
 
 
 class Spectrogram(UIElement):
-    def __init__(self, rect, track: str, sr:int, offset: float, duration: float, **kwargs):
+    def __init__(self, rect, D, **kwargs):
 
         super().__init__(rect=rect, **kwargs)
-
-        # length of the windowed signal after padding with zeros
-        self.n_fft = 2048
 
         # A nice way to keep track of loading state.
         self.state = SpecState.LOADING
 
-        with CodeTimer('Load_track'):
-            signal = self.load_track(track, sr, offset, duration)
-        db_s = self.load_spectrogram(signal)
         with CodeTimer('create_db_spec'):
-            self.log_db_s = self.create_log_db_spectrogram(db_s)
+            self.log_db_s = self.create_log_db_spectrogram(D)
             self.pnts_x, self.pnts_y = self.log_db_s.shape
         with CodeTimer('create_vbo'):
             self.create_vbo_data()
@@ -50,30 +44,11 @@ class Spectrogram(UIElement):
     def height(self):
         return self.rect.height
 
-    def load_track(self, track: str, sr:int, offset: float, duration: float):
-        # Extract 8s clip from signal y and run a stft on it.
-        curr_window_number = math.floor(offset/duration)
-        min_window_time = curr_window_number * duration
-        max_window_time = (curr_window_number + 1) * duration
-
-        #import pdb; pdb.set_trace()
-        # FIXME: GET ACTUAL SONG.
-        y_sample, _sr = librosa.load(track, sr=sr, offset=min_window_time,
-                                     duration=max_window_time-min_window_time)
-        return y_sample
-
-    def load_spectrogram(self, signal):
-        n_fft=2048
-        D = librosa.stft(signal, n_fft=n_fft)
-
-        # Convert amplitude spec to DB spec.
-        db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        return db_s
-
-    def create_log_db_spectrogram(self, db_s):
+    def create_log_db_spectrogram(self, D):
         # Take our n frequency bins D has and logarithmically chunk them up.
         # Each chunk is exponentially larger than the last.
         # Each chunk of frequency bins then gets there values averaged.
+        db_s = librosa.amplitude_to_db(np.abs(D), ref=np.max)
         max_power = int(math.log(db_s.shape[0] - 1, 2))
         idxs = [(int(math.pow(2, (i-1)/12)), int(math.pow(2, i/12))) for i in range(max_power*12 + 1)
                 if int(math.pow(2, (i-1)/12)) != int(math.pow(2, i/12))]
