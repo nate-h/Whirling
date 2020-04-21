@@ -87,35 +87,18 @@ class Spectrogram(UIElement):
     def create_vbo_data(self):
         sw = self.width / self.pnts_x
         sh = self.height / self.pnts_y
-        swl = 0.0 * sw
-        swr = 1.0 * sw
-        shl = 0.0 * sh
-        shr = 1.0 * sh
-        rectangle = []
 
         # Generate rectangles and indices for triangles.
         with CodeTimer('inner for loop'):
-            for i in range(self.pnts_x):
-                for j in range(self.pnts_y):
-                    x = i * sw
-                    y = j * sh
 
-                    x1 = self.rect.left   + x + swl
-                    x2 = self.rect.left   + x + swr
-                    y1 = self.rect.bottom + y + shl
-                    y2 = self.rect.bottom + y + shr
-
-                    # Add 2 triangles to create a rect.
-                    rectangle.extend([
-                        # Position
-                        x1, y1, 0.0,
-                        x2, y1, 0.0,
-                        x2, y2, 0.0,
-                        x1, y2, 0.0,
-                    ])
-
-            # Convert to 32bit float.
-            self.rectangle = np.array(rectangle, dtype=np.float32)
+            # New code.
+            xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
+            ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
+            x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+            zero = np.zeros(x1.shape, dtype=x1.dtype)
+            x2 = x1 + sw
+            y2 = y1 + sh
+            self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
         with CodeTimer('Turn log_db_s into colorful image'):
             # Normalize data for color calculation.
