@@ -121,12 +121,8 @@ class Spectrogram(UIElement):
         cmap_ready_s = ((self.log_db_s + 80)/80*99).astype(int).flatten()
 
         with CodeTimer('Set grid_colors'):
-            with CodeTimer('1111111111111111111'):
-                colorizer_fn = np.vectorize(viridis.get_color_0_99, signature='()->(n)')
-            with CodeTimer('2222222222222222222'):
-                grid_colors = colorizer_fn(cmap_ready_s)
-            with CodeTimer('3333333333333333333'):
-                self.grid_colors = np.repeat(grid_colors, 4, axis=0).flatten()
+            grid_colors = viridis.viridis[tuple(cmap_ready_s), :]
+            self.grid_colors = np.repeat(grid_colors, 4, axis=0).flatten()
 
         # Generate triangle indices.
         a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
