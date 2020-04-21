@@ -91,8 +91,6 @@ class Spectrogram(UIElement):
         swr = 1.0 * sw
         shl = 0.0 * sh
         shr = 1.0 * sh
-
-        # Define plot parameters.
         rectangle = []
 
         # Generate rectangles and indices for triangles.
@@ -102,10 +100,10 @@ class Spectrogram(UIElement):
                     x = i * sw
                     y = j * sh
 
-                    x1 = round(self.rect.left   + x + swl)
-                    x2 = round(self.rect.left   + x + swr)
-                    y1 = round(self.rect.bottom + y + shl)
-                    y2 = round(self.rect.bottom + y + shr)
+                    x1 = self.rect.left   + x + swl
+                    x2 = self.rect.left   + x + swr
+                    y1 = self.rect.bottom + y + shl
+                    y2 = self.rect.bottom + y + shr
 
                     # Add 2 triangles to create a rect.
                     rectangle.extend([
@@ -116,21 +114,23 @@ class Spectrogram(UIElement):
                         x1, y2, 0.0,
                     ])
 
-        # Normalize data for color calculation.
-        self.log_db_s = np.clip(self.log_db_s, a_min=-80, a_max=0)
-        cmap_ready_s = ((self.log_db_s + 80)/80*99).astype(int).flatten()
+            # Convert to 32bit float.
+            self.rectangle = np.array(rectangle, dtype=np.float32)
 
-        with CodeTimer('Set grid_colors'):
+        with CodeTimer('Turn log_db_s into colorful image'):
+            # Normalize data for color calculation.
+            self.log_db_s = np.clip(self.log_db_s, a_min=-80, a_max=0)
+            cmap_ready_s = ((self.log_db_s + 80)/80*99).astype(int).flatten()
+
+            # Convert log_db_s into colorful image.
             grid_colors = viridis.viridis[tuple(cmap_ready_s), :]
             self.grid_colors = np.repeat(grid_colors, 4, axis=0).flatten()
 
-        # Generate triangle indices.
-        a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
-        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
-        self.indices = (a[:, np.newaxis] + b).flatten()
-
-        # Convert to 32bit float.
-        self.rectangle = np.array(rectangle, dtype=np.float32)
+        with CodeTimer('Generate triangle indices.'):
+            # Generate triangle indices.
+            a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
+            b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+            self.indices = (a[:, np.newaxis] + b).flatten()
 
     def initialize_shader(self):
         VERTEX_SHADER = """
