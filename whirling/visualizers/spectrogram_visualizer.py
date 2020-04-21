@@ -87,7 +87,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
             row_num += 1
 
 
-        print(f'Total time: {time.time() - t0}')
+        print(f'Total time: {time.time() - t0}\n')
 
     def draw_time_indicator(self, curr_time):
 

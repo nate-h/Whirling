@@ -90,13 +90,18 @@ class Spectrogram(UIElement):
         rectangle = []
         indices = []
 
+        # Normalize data for color calculation.
+        self.log_db_s = np.clip(self.log_db_s, a_min=-80, a_max=0)
+        normed_data = (self.log_db_s + 80)/80
+
+
         # Generate rects and indices for triangles in rect.
         with CodeTimer('inner for loop'):
             for i in range(self.pnts_x):
                 for j in range(self.pnts_y):
                     x = i * sw
                     y = j * sh
-                    signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
+                    signal_strength = normed_data[i, j]
                     c = viridis.get_color(signal_strength)
 
                     x1 = round(self.rect.left   + x + swl)
