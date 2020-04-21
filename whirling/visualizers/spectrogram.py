@@ -27,9 +27,9 @@ class Spectrogram(UIElement):
         # A nice way to keep track of loading state.
         self.state = SpecState.LOADING
 
-        with CodeTimer('create_db_spec'):
-            self.log_db_s = log_db_s
-            self.pnts_x, self.pnts_y = self.log_db_s.shape
+        self.log_db_s = log_db_s
+        self.pnts_x, self.pnts_y = self.log_db_s.shape
+
         with CodeTimer('create_vbo'):
             self.create_vbo_data()
         self.shader = self.initialize_shader()
@@ -89,40 +89,37 @@ class Spectrogram(UIElement):
         # Define plot parameters.
         rectangle = []
         indices = []
-        count = 0
 
         # Generate rects and indices for triangles in rect.
-        for i in range(self.pnts_x):
-            for j in range(self.pnts_y):
-                x = i * sw
-                y = j * sh
-                signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
-                c = viridis.get_color(signal_strength)
+        with CodeTimer('inner for loop'):
+            for i in range(self.pnts_x):
+                for j in range(self.pnts_y):
+                    x = i * sw
+                    y = j * sh
+                    signal_strength = max(min((self.log_db_s[i, j] + 80)/80, 1), 0)
+                    c = viridis.get_color(signal_strength)
 
-                x1 = round(self.rect.left   + x + swl)
-                x2 = round(self.rect.left   + x + swr)
-                y1 = round(self.rect.bottom + y + shl)
-                y2 = round(self.rect.bottom + y + shr)
+                    x1 = round(self.rect.left   + x + swl)
+                    x2 = round(self.rect.left   + x + swr)
+                    y1 = round(self.rect.bottom + y + shl)
+                    y2 = round(self.rect.bottom + y + shr)
 
-                # Add 2 triangles to create a rect.
-                rectangle.extend([
-                    # Position     # Color
-                    x1, y1, 0.0,   c[0], c[1], c[2],
-                    x2, y1, 0.0,   c[0], c[1], c[2],
-                    x2, y2, 0.0,   c[0], c[1], c[2],
-                    x1, y2, 0.0,   c[0], c[1], c[2],
-                ])
+                    # Add 2 triangles to create a rect.
+                    rectangle.extend([
+                        # Position     # Color
+                        x1, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y1, 0.0,   c[0], c[1], c[2],
+                        x2, y2, 0.0,   c[0], c[1], c[2],
+                        x1, y2, 0.0,   c[0], c[1], c[2],
+                    ])
 
-                # Add 3 indexes for each triangle.
-                indices.extend([
-                    0 + 4*count, 1 + 4*count, 2 + 4*count,
-                    2 + 4*count, 3 + 4*count, 0 + 4*count
-                ])
-                count += 1
+        # Generate triangle indices.
+        a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
+        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+        self.indices = (a[:, np.newaxis] + b).flatten()
 
         # Convert to 32bit float.
         self.rectangle = np.array(rectangle, dtype=np.float32)
-        self.indices = np.array(indices, dtype=np.uint32)
 
     def initialize_shader(self):
         VERTEX_SHADER = """
