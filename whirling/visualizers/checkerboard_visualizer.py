@@ -12,7 +12,7 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
 
-COLORS = [colors.LIME, colors.RED, colors.BLUE]
+COLORS = [np.array([0, .2, 0]), np.array([0, 0, 0]), np.array([0, 0, .2])]
 
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -20,12 +20,18 @@ class CheckerboardVisualizer(UIVisualizerBase):
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         self.freq_bands = 87
-        self.grid_colors = None
         self.pnts_x = 2 * self.freq_bands + 1
         self.pnts_y = 2 * self.freq_bands + 1 # TODO: set dynamically w/ data.
         self.initialize_shader()
         self.create_cells()
         self.create_vbo()
+
+        # Generate cell colors.
+        r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        self.grid_colors = np.dstack((r, g, b))
+        self.grid_colors_flat = None
 
     def __del__(self):
         glDeleteBuffers(1, [self.VBO])
@@ -58,7 +64,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
             # Bind the buffer.
             CBO = glGenBuffers(1)
             glBindBuffer(GL_ARRAY_BUFFER, CBO)
-            glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors), self.grid_colors, GL_STATIC_DRAW)
+            glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors_flat), self.grid_colors_flat, GL_STATIC_DRAW)
 
             # Get the color from shader.
             color = glGetAttribLocation(self.shader, 'color')
@@ -94,16 +100,15 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def create_grid_colors(self):
 
+        # Subtract a small amount each frame and floor at zero.
+        #self.grid_colors[:] = self.grid_colors[:] * 0.8 - 0.05
+        self.grid_colors[:] = 0
+        self.grid_colors[self.grid_colors < 0] = 0
+        self.grid_colors[self.grid_colors > 1] = 1
+
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
         count = 0
-
-        # Generate cell colors.
-        r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-
-        grid_colors = np.dstack((r, g, b))
 
         pnt = self.center_point()
 
@@ -111,17 +116,23 @@ class CheckerboardVisualizer(UIVisualizerBase):
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, :]
             log_db_s_clip = (log_db_s_clip + 80) / 80
-            log_db_s_clip[log_db_s_clip < 0.5] = 0
+
+            # High pass.
+            #log_db_s_clip[log_db_s_clip < 0.5] = 0
+            log_db_s_clip[log_db_s_clip < 0.2] = 0
+            log_db_s_clip = log_db_s_clip*log_db_s_clip/np.max(log_db_s_clip*log_db_s_clip)
+
             c = COLORS[count]
             count += 1
 
             for i, v in enumerate(log_db_s_clip):
                 side = 2 * i + 1
                 c_i = c * v
-                self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=c_i)
+                self.draw_rect_into_grid(self.grid_colors, pnt, width=side, height=side, color=c_i)
 
         # Repeat color 4 times, one for each cell vertex.
-        self.grid_colors = np.repeat(grid_colors.reshape(-1, grid_colors.shape[-1]), 4, axis=0).flatten()
+        self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
+
 
     def center_point(self):
         return Point(int(self.pnts_y/2), int(self.pnts_x/2))
