@@ -12,7 +12,7 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
 
-COLORS = [np.array([0, .2, 0]), np.array([0, 0, 0]), np.array([0, 0, .2])]
+COLORS = [np.array([0, 1, 0]), np.array([1, 0, 0]), np.array([0, 0, .2])]
 
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -25,6 +25,8 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.initialize_shader()
         self.create_cells()
         self.create_vbo()
+
+        self.spec_slices = None
 
         # Generate cell colors.
         r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
@@ -57,6 +59,11 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glEnableVertexAttribArray(position)
 
     def draw_visuals(self):
+
+        if not self.spec_slices:
+            self.spec_slices = {}
+            for signal_name in self.data:
+                self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
         with CodeTimer('draw_visuals'):
             self.create_grid_colors()
@@ -100,9 +107,11 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def create_grid_colors(self):
 
+        past_weights = 0.8
+        new_weight = 1 - past_weights
+
         # Subtract a small amount each frame and floor at zero.
-        #self.grid_colors[:] = self.grid_colors[:] * 0.8 - 0.05
-        self.grid_colors[:] = 0
+        self.grid_colors[:] = self.grid_colors[:] * past_weights
         self.grid_colors[self.grid_colors < 0] = 0
         self.grid_colors[self.grid_colors > 1] = 1
 
@@ -112,22 +121,28 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         pnt = self.center_point()
 
-        for _signal_name, s_obj in self.data.items():
+        for signal_name, s_obj in self.data.items():
             log_db_s = s_obj['spectrograms']['custom_log_db']
-            log_db_s_clip = log_db_s[min_window_frame, :]
+            log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # High pass.
-            #log_db_s_clip[log_db_s_clip < 0.5] = 0
-            log_db_s_clip[log_db_s_clip < 0.2] = 0
-            log_db_s_clip = log_db_s_clip*log_db_s_clip/np.max(log_db_s_clip*log_db_s_clip)
+            log_db_s_clip[log_db_s_clip < 0.3] = 0
+
+            # Apply moving average.
+            bins = 3
+            self.spec_slices[signal_name] = np.append(
+                self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
+            if len(self.spec_slices[signal_name]) > bins:
+                self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
+            log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
 
             c = COLORS[count]
             count += 1
 
             for i, v in enumerate(log_db_s_clip):
                 side = 2 * i + 1
-                c_i = c * v
+                c_i = c * v * new_weight
                 self.draw_rect_into_grid(self.grid_colors, pnt, width=side, height=side, color=c_i)
 
         # Repeat color 4 times, one for each cell vertex.
