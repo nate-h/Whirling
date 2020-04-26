@@ -10,6 +10,10 @@ whole spectrogram of the song.
 
 It turned into a learning opportunity with a side consequence of the goal
 
+--------------------------------------------------------------------------------
+-- Opengl + slowness of drawing checkboard
+--------------------------------------------------------------------------------
+
 Opengl
 ------
 
@@ -19,6 +23,18 @@ Iterated several times getting stuff to run faster till I figured out how to use
 
 Creating mini-library of opengl helpers.
 
+## Spectrogram optimizing.
+
+1. Originally took 1.7 seconds to generate vbo to render.
+2. Cut it in half by caching the my modifications to the original spectrogram data.
+3. After optimize indices -> .75 seconds
+4. Perform log_db_s normalization outside of for loop -> .61 seconds
+5. use numpy to generate entire color vertex array -> .32 seconds
+6. Use 0->99 as indices into cmap -> .18 seconds
+7. Remove rounding in rectangle generation -> 0.095 seconds
+
+
+--------------------------------------------------------------------------------
 
 Spectrogram
 -----------
