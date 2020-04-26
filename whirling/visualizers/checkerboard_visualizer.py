@@ -20,22 +20,23 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.pnts_y = 2 * self.freq_bands + 1
         self.initialize_shader()
         self.create_cells()
+        self.create_vbo()
 
-        with CodeTimer('create_grid_colors'):
-            self.create_grid_colors()
+    def __del__(self):
+        glDeleteBuffers(1, [self.VBO])
+        glDeleteBuffers(1, [self.EBO])
 
-    def draw_visuals(self):
+    def create_vbo(self):
         # Create Buffer object in gpu.
-        VBO = glGenBuffers(1)
-        CBO = glGenBuffers(1)
+        self.VBO = glGenBuffers(1)
 
         # Create EBO.
-        EBO = glGenBuffers(1)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
+        self.EBO = glGenBuffers(1)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.EBO)
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
 
         # Bind the buffer.
-        glBindBuffer(GL_ARRAY_BUFFER, VBO)
+        glBindBuffer(GL_ARRAY_BUFFER, self.VBO)
         glBufferData(GL_ARRAY_BUFFER, 4*len(self.rectangle), self.rectangle, GL_STATIC_DRAW)
 
         # Get the position from shader.
@@ -44,25 +45,29 @@ class CheckerboardVisualizer(UIVisualizerBase):
                               GL_FALSE, 12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
 
-        # Bind the buffer.
-        glBindBuffer(GL_ARRAY_BUFFER, CBO)
-        glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors), self.grid_colors, GL_STATIC_DRAW)
+    def draw_visuals(self):
 
-        # Get the color from shader.
-        color = glGetAttribLocation(self.shader, 'color')
-        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                              12, ctypes.c_void_p(0))
-        glEnableVertexAttribArray(color)
+        with CodeTimer('draw_visuals'):
+            self.create_grid_colors()
 
-        # Draw rectangles.
-        glUseProgram(self.shader)
-        glLoadIdentity()
-        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
-        glUseProgram(0)
+            # Bind the buffer.
+            CBO = glGenBuffers(1)
+            glBindBuffer(GL_ARRAY_BUFFER, CBO)
+            glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors), self.grid_colors, GL_STATIC_DRAW)
 
-        glDeleteBuffers(1, [CBO])
-        glDeleteBuffers(1, [VBO])
-        glDeleteBuffers(1, [EBO])
+            # Get the color from shader.
+            color = glGetAttribLocation(self.shader, 'color')
+            glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
+                                12, ctypes.c_void_p(0))
+            glEnableVertexAttribArray(color)
+
+            # Draw rectangles.
+            glUseProgram(self.shader)
+            glLoadIdentity()
+            glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
+            glUseProgram(0)
+
+            glDeleteBuffers(1, [CBO])
 
     def create_cells(self):
         sw = self.width / self.pnts_x
@@ -96,8 +101,6 @@ class CheckerboardVisualizer(UIVisualizerBase):
             color = [1, 1, 1]
             side = 2 * i + 1
             self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=color)
-
-        grid_colors[0, 0, :] = 0.5
 
         # Repeat color 4 times, one for each cell vertex.
         self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
