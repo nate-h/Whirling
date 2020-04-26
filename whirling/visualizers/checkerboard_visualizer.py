@@ -69,19 +69,17 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # shl = 0.05 * sh
         # shr = 0.95 * sh
 
-        # Generate rectangles and indices for triangles.
+        # Generate checkerboard vertices.
         with CodeTimer('generate rectangle'):
-
-            # New code.
             xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
             ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
             x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
             zero = np.zeros(x1.shape, dtype=x1.dtype)
             x2 = x1 + sw
             y2 = y1 + sh
-            t = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero))
             self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
+        # Generate cell colors..
         with CodeTimer('generate colors'):
             r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
             g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
@@ -95,8 +93,8 @@ class CheckerboardVisualizer(UIVisualizerBase):
             # Repeat color 4 times, one for each cell vertex.
             self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
 
+        # Generate triangle indices.
         with CodeTimer('generate triangle indices'):
-            # Generate triangle indices.
             a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
             b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
             self.indices = (a[:, np.newaxis] + b).flatten()
