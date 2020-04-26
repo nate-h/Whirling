@@ -111,6 +111,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, :]
             log_db_s_clip = (log_db_s_clip + 80) / 80
+            log_db_s_clip[log_db_s_clip < 0.5] = 0
             c = COLORS[count]
             count += 1
 
