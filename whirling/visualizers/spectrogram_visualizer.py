@@ -67,8 +67,6 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if max_window_frame == 0:
             return
 
-        t0 = time.time()
-
         # Create the spectrograms.
         row_num = 0
         for signal_name, s_obj in self.data.items():
@@ -85,9 +83,6 @@ class SpectrogramVisualizer(UIVisualizerBase):
             pos = (self.rect.left + 10, top + 10)
             self.render_text(signal_name, pos, color)
             row_num += 1
-
-
-        print(f'Total time: {time.time() - t0}\n')
 
     def draw_time_indicator(self, curr_time):
 

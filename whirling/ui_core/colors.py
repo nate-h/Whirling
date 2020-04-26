@@ -1,32 +1,35 @@
 """This file contains colors and functions to modify colors."""
 
+import numpy as np
+
+
 # Basic colors.
-WHITE = (1, 1, 1)
-BLACK = (0, 0, 0)
-RED = (1, 0, 0)
-LIME = (0, 1, 0)
-BLUE = (0, 0, 1)
-YELLOW = (1, 1, 0)
-SILVER = (0.75, 0.75, 0.75)
-CYAN = (0, 1, 1)
-MAGENTA = (1, 0, 1)
-GOLD = (1, 0.85, 0)
-CHARTREUSE = (0.5, 1, 0)
-ORANGE_RED = (1, 0.27, 0)
-VIOLET = (0.93, 0.51, 0.93)
-HOT_PINK = (1, .08, 0.58)
-LAWN_GREEN = (0.48, 0.98, 0)
-DEEP_SKY_BLUE = (0, 0.75, 1)
-TEAL = (0, 0.5, 0.5)
-PURPLE = (0.5, 0, 0.5)
-OLIVE = (0.5, 0.5, 0)
-GRAY = (0.5, 0.5, 0.5)
-MAROON = (0.5, 0, 0)
-GREEN = (0, 0.5, 0)
-NAVY = (0, 0, 0.5)
+WHITE = np.array([1, 1, 1])
+BLACK = np.array([0, 0, 0])
+RED = np.array([1, 0, 0])
+LIME = np.array([0, 1, 0])
+BLUE = np.array([0, 0, 1])
+YELLOW = np.array([1, 1, 0])
+SILVER = np.array([0.75, 0.75, 0.75])
+CYAN = np.array([0, 1, 1])
+MAGENTA = np.array([1, 0, 1])
+GOLD = np.array([1, 0.85, 0])
+CHARTREUSE = np.array([0.5, 1, 0])
+ORANGE_RED = np.array([1, 0.27, 0])
+VIOLET = np.array([0.93, 0.51, 0.93])
+HOT_PINK = np.array([1, .08, 0.58])
+LAWN_GREEN = np.array([0.48, 0.98, 0])
+DEEP_SKY_BLUE = np.array([0, 0.75, 1])
+TEAL = np.array([0, 0.5, 0.5])
+PURPLE = np.array([0.5, 0, 0.5])
+OLIVE = np.array([0.5, 0.5, 0])
+GRAY = np.array([0.5, 0.5, 0.5])
+MAROON = np.array([0.5, 0, 0])
+GREEN = np.array([0, 0.5, 0])
+NAVY = np.array([0, 0, 0.5])
 
 # 4 channel colors.
-CLEAR = (0, 0, 0, 0)
+CLEAR = np.array([0, 0, 0, 0])
 
 # Convenient arrays to iterate on.
 COLORS = {

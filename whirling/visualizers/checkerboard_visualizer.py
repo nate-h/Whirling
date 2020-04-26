@@ -1,14 +1,18 @@
+import math
 import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
+from whirling.ui_core import colors
 from whirling.ui_core.primitives import Point
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
+
+COLORS = [colors.LIME, colors.RED, colors.BLUE]
 
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -16,8 +20,9 @@ class CheckerboardVisualizer(UIVisualizerBase):
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         self.freq_bands = 87
+        self.grid_colors = None
         self.pnts_x = 2 * self.freq_bands + 1
-        self.pnts_y = 2 * self.freq_bands + 1
+        self.pnts_y = 2 * self.freq_bands + 1 # TODO: set dynamically w/ data.
         self.initialize_shader()
         self.create_cells()
         self.create_vbo()
@@ -88,6 +93,11 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.indices = (a[:, np.newaxis] + b).flatten()
 
     def create_grid_colors(self):
+
+        curr_time = self.audio_controller.get_time()
+        min_window_frame = self.get_frame_number(curr_time)
+        count = 0
+
         # Generate cell colors.
         r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
         g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
@@ -97,10 +107,17 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         pnt = self.center_point()
 
-        for i in range(self.freq_bands + 1):
-            color = [1, 1, 1]
-            side = 2 * i + 1
-            self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=color)
+        for _signal_name, s_obj in self.data.items():
+            log_db_s = s_obj['spectrograms']['custom_log_db']
+            log_db_s_clip = log_db_s[min_window_frame, :]
+            log_db_s_clip = (log_db_s_clip + 80) / 80
+            c = COLORS[count]
+            count += 1
+
+            for i, v in enumerate(log_db_s_clip):
+                side = 2 * i + 1
+                c_i = c * v
+                self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=c_i)
 
         # Repeat color 4 times, one for each cell vertex.
         self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
@@ -116,10 +133,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
         y1 = max(pnt.y - half_h, 0)
         y2 = min(pnt.y + half_h, self.pnts_y - 1)
 
-        grid_colors[x1:x2 + 1, y1, :] = 0.9
-        grid_colors[x1:x2 + 1, y2, :] = 0.9
-        grid_colors[x1, y1:y2 + 1, :] = 0.9
-        grid_colors[x2, y1:y2 + 1, :] = 0.9
+        grid_colors[x1:x2 + 1, y1, :] += color
+        grid_colors[x1:x2 + 1, y2, :] += color
+        grid_colors[x1, y1:y2 + 1, :] += color
+        grid_colors[x2, y1:y2 + 1, :] += color
 
     def initialize_shader(self):
         VERTEX_SHADER = """
