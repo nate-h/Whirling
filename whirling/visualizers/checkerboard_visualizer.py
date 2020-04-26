@@ -15,11 +15,14 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.pnts_x = 65
-        self.pnts_y = 65
+        self.freq_bands = 87
+        self.pnts_x = 2 * self.freq_bands + 1
+        self.pnts_y = 2 * self.freq_bands + 1
         self.initialize_shader()
-        with CodeTimer('create_vbo_data'):
-            self.create_vbo_data()
+        self.create_cells()
+
+        with CodeTimer('create_grid_colors'):
+            self.create_grid_colors()
 
     def draw_visuals(self):
         # Create Buffer object in gpu.
@@ -61,48 +64,48 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glDeleteBuffers(1, [VBO])
         glDeleteBuffers(1, [EBO])
 
-    def create_vbo_data(self):
+    def create_cells(self):
         sw = self.width / self.pnts_x
         sh = self.height / self.pnts_y
-        # swl = 0.05 * sw
-        # swr = 0.95 * sw
-        # shl = 0.05 * sh
-        # shr = 0.95 * sh
 
         # Generate checkerboard vertices.
-        with CodeTimer('generate rectangle'):
-            xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
-            ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
-            x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
-            zero = np.zeros(x1.shape, dtype=x1.dtype)
-            x2 = x1 + sw
-            y2 = y1 + sh
-            self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
-
-        # Generate cell colors..
-        with CodeTimer('generate colors'):
-            r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-            g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-            b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-
-            grid_colors = np.dstack((r, g, b))
-
-            pnt = self.center_point()
-            self.draw_rect_into_grid(grid_colors, pnt, width=3, height=3)
-
-            # Repeat color 4 times, one for each cell vertex.
-            self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
+        xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
+        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
+        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+        zero = np.zeros(x1.shape, dtype=x1.dtype)
+        x2 = x1 + sw
+        y2 = y1 + sh
+        self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
         # Generate triangle indices.
-        with CodeTimer('generate triangle indices'):
-            a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
-            b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
-            self.indices = (a[:, np.newaxis] + b).flatten()
+        a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
+        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+        self.indices = (a[:, np.newaxis] + b).flatten()
+
+    def create_grid_colors(self):
+        # Generate cell colors.
+        r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+
+        grid_colors = np.dstack((r, g, b))
+
+        pnt = self.center_point()
+
+        for i in range(self.freq_bands + 1):
+            color = [1, 1, 1]
+            side = 2 * i + 1
+            self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=color)
+
+        grid_colors[0, 0, :] = 0.5
+
+        # Repeat color 4 times, one for each cell vertex.
+        self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
 
     def center_point(self):
         return Point(int(self.pnts_y/2), int(self.pnts_x/2))
 
-    def draw_rect_into_grid(self, grid_colors, pnt: Point, width: int, height: int):
+    def draw_rect_into_grid(self, grid_colors, pnt: Point, width: int, height: int, color):
         half_w = int(width/2)
         half_h = int(height/2)
         x1 = max(pnt.x - half_w, 0)
