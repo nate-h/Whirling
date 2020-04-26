@@ -4,8 +4,10 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import OpenGL.GL.shaders
 import numpy as np
+from whirling.ui_core.primitives import Point
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
+from whirling.tools.code_timer import CodeTimer
 
 
 class CheckerboardVisualizer(UIVisualizerBase):
@@ -13,15 +15,16 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.pnts_x = 64
-        self.pnts_y = 64
+        self.pnts_x = 65
+        self.pnts_y = 65
         self.initialize_shader()
-        self.create_vbo_data()
+        with CodeTimer('create_vbo_data'):
+            self.create_vbo_data()
 
     def draw_visuals(self):
-
         # Create Buffer object in gpu.
         VBO = glGenBuffers(1)
+        CBO = glGenBuffers(1)
 
         # Create EBO.
         EBO = glGenBuffers(1)
@@ -35,13 +38,17 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # Get the position from shader.
         position = glGetAttribLocation(self.shader, 'position')
         glVertexAttribPointer(position, 3, GL_FLOAT,
-                              GL_FALSE, 24, ctypes.c_void_p(0))
+                              GL_FALSE, 12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
+
+        # Bind the buffer.
+        glBindBuffer(GL_ARRAY_BUFFER, CBO)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors), self.grid_colors, GL_STATIC_DRAW)
 
         # Get the color from shader.
         color = glGetAttribLocation(self.shader, 'color')
         glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                              24, ctypes.c_void_p(12))
+                              12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(color)
 
         # Draw rectangles.
@@ -50,55 +57,65 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
         glUseProgram(0)
 
+        glDeleteBuffers(1, [CBO])
         glDeleteBuffers(1, [VBO])
         glDeleteBuffers(1, [EBO])
 
     def create_vbo_data(self):
         sw = self.width / self.pnts_x
         sh = self.height / self.pnts_y
-        swl = 0.05 * sw
-        swr = 0.95 * sw
-        shl = 0.05 * sh
-        shr = 0.95 * sh
+        # swl = 0.05 * sw
+        # swr = 0.95 * sw
+        # shl = 0.05 * sh
+        # shr = 0.95 * sh
 
-        # Define plot parameters.
-        rectangle = []
-        indices = []
-        count = 0
+        # Generate rectangles and indices for triangles.
+        with CodeTimer('generate rectangle'):
 
-        # Generate rects and indices for triangles in rect.
-        for i in range(self.pnts_x):
-            for j in range(self.pnts_y):
-                x = i * sw
-                y = j * sh
-                x1 = round(self.rect.left   + x + swl)
-                x2 = round(self.rect.left   + x + swr)
-                y1 = round(self.rect.bottom + y + shl)
-                y2 = round(self.rect.bottom + y + shr)
+            # New code.
+            xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
+            ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
+            x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+            zero = np.zeros(x1.shape, dtype=x1.dtype)
+            x2 = x1 + sw
+            y2 = y1 + sh
+            t = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero))
+            self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
-                # Add 2 triangles to create a rect.
-                rectangle.extend(
-                    [
-                        # Position      # Color
-                        x1, y1, 0.0,   1, 0.0, 1,
-                        x2, y1, 0.0,   1, 0.0, 1,
-                        x2, y2, 0.0,   1, 0.0, 1,
-                        x1, y2, 0.0,   1, 0.0, 1,
-                    ]
-                )
+        with CodeTimer('generate colors'):
+            r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+            g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+            b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
 
-                # Add 3 indexes for each triangle.
-                indices.extend(
-                    [
-                        0 + 4*count, 1 + 4*count, 2 + 4*count,
-                        2 + 4*count, 3 + 4*count, 0 + 4*count
-                    ]
-                )
-                count += 1
+            grid_colors = np.dstack((r, g, b))
 
-        # Convert to 32bit float.
-        self.rectangle = np.array(rectangle, dtype=np.float32)
-        self.indices = np.array(indices, dtype=np.uint32)
+            pnt = self.center_point()
+            self.draw_rect_into_grid(grid_colors, pnt, width=3, height=3)
+
+            # Repeat color 4 times, one for each cell vertex.
+            self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
+
+        with CodeTimer('generate triangle indices'):
+            # Generate triangle indices.
+            a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
+            b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+            self.indices = (a[:, np.newaxis] + b).flatten()
+
+    def center_point(self):
+        return Point(int(self.pnts_y/2), int(self.pnts_x/2))
+
+    def draw_rect_into_grid(self, grid_colors, pnt: Point, width: int, height: int):
+        half_w = int(width/2)
+        half_h = int(height/2)
+        x1 = max(pnt.x - half_w, 0)
+        x2 = min(pnt.x + half_w, self.pnts_x - 1)
+        y1 = max(pnt.y - half_h, 0)
+        y2 = min(pnt.y + half_h, self.pnts_y - 1)
+
+        grid_colors[x1:x2 + 1, y1, :] = 0.9
+        grid_colors[x1:x2 + 1, y2, :] = 0.9
+        grid_colors[x1, y1:y2 + 1, :] = 0.9
+        grid_colors[x2, y1:y2 + 1, :] = 0.9
 
     def initialize_shader(self):
         VERTEX_SHADER = """
