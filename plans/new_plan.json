@@ -86,7 +86,13 @@
                 "window_size": 8
             },
             "signals": {
-                "full": {
+                "librosa_harmonic": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "librosa_percussive": {
                     "spectrograms": {
                         "standard": true,
                         "custom_log_db": true
