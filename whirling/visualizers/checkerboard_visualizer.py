@@ -120,7 +120,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
                 self.draw_rect_into_grid(grid_colors, pnt, width=side, height=side, color=c_i)
 
         # Repeat color 4 times, one for each cell vertex.
-        self.grid_colors = np.repeat(grid_colors.flatten(), 4, axis=0).flatten()
+        self.grid_colors = np.repeat(grid_colors.reshape(-1, grid_colors.shape[-1]), 4, axis=0).flatten()
 
     def center_point(self):
         return Point(int(self.pnts_y/2), int(self.pnts_x/2))
@@ -133,10 +133,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
         y1 = max(pnt.y - half_h, 0)
         y2 = min(pnt.y + half_h, self.pnts_y - 1)
 
-        grid_colors[x1:x2 + 1, y1, :] += color
-        grid_colors[x1:x2 + 1, y2, :] += color
-        grid_colors[x1, y1:y2 + 1, :] += color
-        grid_colors[x2, y1:y2 + 1, :] += color
+        grid_colors[x1:x2 + 1, y2, :] += color  # top    l->r
+        grid_colors[x2, y1:y2, :] += color      # right  t->b
+        grid_colors[x1+1:x2, y1, :] += color    # bottom l->r
+        grid_colors[x1, y1:y2, :] += color      # left   t->b
 
     def initialize_shader(self):
         VERTEX_SHADER = """
