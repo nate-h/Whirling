@@ -15,8 +15,8 @@ settings = {
 
     'spleeter_vocals': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 0, 1])},
     'spleeter_other': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'spleeter_drums': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
-    'spleeter_bass': {'filter_bins': 5, 'high_pass': 0.5, 'color': np.array([0.7, 0.7, 0])},
+    'spleeter_drums': {'filter_bins': 3, 'high_pass': 0.3, 'color': np.array([1, 0, 0])},
+    'spleeter_bass': {'filter_bins': 5, 'high_pass': 0.5, 'color': np.array([0.9, 0.6, 0.1])},
 }
 
 class CheckerboardVisualizer(UIVisualizerBase):
