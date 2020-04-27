@@ -11,8 +11,11 @@ from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
+settings = {
+    'librosa_harmonic': {'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
+    'librosa_percussive': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])}
+}
 
-COLORS = [np.array([0, 1, 0]), np.array([1, 0, 0]), np.array([0, 0, .2])]
 
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -107,7 +110,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def create_grid_colors(self):
 
-        past_weights = 0.8
+        past_weights = 0.5
         new_weight = 1 - past_weights
 
         # Subtract a small amount each frame and floor at zero.
@@ -127,18 +130,18 @@ class CheckerboardVisualizer(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # High pass.
-            log_db_s_clip[log_db_s_clip < 0.3] = 0
+            high_pass = settings[signal_name]['high_pass']
+            log_db_s_clip[log_db_s_clip < high_pass] = 0
 
             # Apply moving average.
-            bins = 3
+            bins = settings[signal_name]['filter_bins']
             self.spec_slices[signal_name] = np.append(
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
                 self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
             log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
 
-            c = COLORS[count]
-            count += 1
+            c = settings[signal_name]['color']
 
             for i, v in enumerate(log_db_s_clip):
                 side = 2 * i + 1
