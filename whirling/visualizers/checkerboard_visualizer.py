@@ -65,33 +65,31 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def draw_visuals(self):
 
-        with CodeTimer('draw_visuals'):
+        if not self.spec_slices:
+            self.spec_slices = {}
+            for signal_name in self.data:
+                self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
-            if not self.spec_slices:
-                self.spec_slices = {}
-                for signal_name in self.data:
-                    self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
+        self.create_grid_colors()
 
-            self.create_grid_colors()
+        # Bind the buffer.
+        CBO = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, CBO)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors_flat), self.grid_colors_flat, GL_STATIC_DRAW)
 
-            # Bind the buffer.
-            CBO = glGenBuffers(1)
-            glBindBuffer(GL_ARRAY_BUFFER, CBO)
-            glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors_flat), self.grid_colors_flat, GL_STATIC_DRAW)
+        # Get the color from shader.
+        color = glGetAttribLocation(self.shader, 'color')
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
+                            12, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(color)
 
-            # Get the color from shader.
-            color = glGetAttribLocation(self.shader, 'color')
-            glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                                12, ctypes.c_void_p(0))
-            glEnableVertexAttribArray(color)
+        # Draw rectangles.
+        glUseProgram(self.shader)
+        glLoadIdentity()
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
+        glUseProgram(0)
 
-            # Draw rectangles.
-            glUseProgram(self.shader)
-            glLoadIdentity()
-            glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
-            glUseProgram(0)
-
-            glDeleteBuffers(1, [CBO])
+        glDeleteBuffers(1, [CBO])
 
     def create_cells(self):
         sw = self.width / self.pnts_x
