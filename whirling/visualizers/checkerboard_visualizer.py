@@ -10,13 +10,13 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
 settings = {
-    'librosa_harmonic': {'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'librosa_percussive': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
+    'librosa_harmonic':   {'use': False, 'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
+    'librosa_percussive': {'use': False, 'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
 
-    'spleeter_vocals': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 0, 1])},
-    'spleeter_other': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'spleeter_drums': {'filter_bins': 3, 'high_pass': 0.3, 'color': np.array([1, 0, 0])},
-    'spleeter_bass': {'filter_bins': 5, 'high_pass': 0.5, 'color': np.array([0.9, 0.6, 0.1])},
+    'spleeter_vocals': {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
+    'spleeter_other':  {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 0, 1])},
+    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.30, 'color': np.array([1, 0, 0])},
+    'spleeter_bass':   {'use': True, 'filter_bins': 7, 'high_pass': 0.5, 'color': np.array([0.54, 0.0, 0.54])},
 }
 
 class CheckerboardVisualizer(UIVisualizerBase):
@@ -126,6 +126,9 @@ class CheckerboardVisualizer(UIVisualizerBase):
         pnt = self.center_point()
 
         for signal_name, s_obj in self.data.items():
+            if not settings[signal_name]['use']:
+                continue
+
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
             log_db_s_clip = (log_db_s_clip + 80) / 80
