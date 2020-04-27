@@ -110,13 +110,25 @@
                 "window_size": 8
             },
             "signals": {
-                "librosa_harmonic": {
+                "spleeter_drums": {
                     "spectrograms": {
                         "standard": true,
                         "custom_log_db": true
                     }
                 },
-                "librosa_percussive": {
+                "spleeter_vocals": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "spleeter_bass": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "spleeter_other": {
                     "spectrograms": {
                         "standard": true,
                         "custom_log_db": true

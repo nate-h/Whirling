@@ -1,5 +1,3 @@
-import math
-import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -13,9 +11,13 @@ from whirling.tools.code_timer import CodeTimer
 
 settings = {
     'librosa_harmonic': {'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'librosa_percussive': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])}
-}
+    'librosa_percussive': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
 
+    'spleeter_vocals': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 0, 1])},
+    'spleeter_other': {'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
+    'spleeter_drums': {'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
+    'spleeter_bass': {'filter_bins': 5, 'high_pass': 0.5, 'color': np.array([0.7, 0.7, 0])},
+}
 
 class CheckerboardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -63,12 +65,13 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def draw_visuals(self):
 
-        if not self.spec_slices:
-            self.spec_slices = {}
-            for signal_name in self.data:
-                self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
-
         with CodeTimer('draw_visuals'):
+
+            if not self.spec_slices:
+                self.spec_slices = {}
+                for signal_name in self.data:
+                    self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
+
             self.create_grid_colors()
 
             # Bind the buffer.
