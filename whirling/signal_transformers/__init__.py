@@ -3,7 +3,7 @@ VALID_SIGNALS = [
     "librosa_harmonic",
     "librosa_percussive",
     "spleeter_vocals",
-    "spleeter_base",
+    "spleeter_bass",
     "spleeter_drums",
     "spleeter_other"
 ]

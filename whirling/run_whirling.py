@@ -49,6 +49,10 @@ class Whirling(object):
         visualizer_controller_rect = Rect(
             ac_w, bottom_controls_h, display_w, 0)
 
+        # Initialize store.
+        self.store = Store.get_instance()
+        self.store.initialize(plan, use_cache)
+
         # Initialize pygame and opengl.
         pg.init()
         pg.display.set_mode((display_w, display_h), pg.OPENGL|pg.DOUBLEBUF)
@@ -58,10 +62,6 @@ class Whirling(object):
         glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        # Initialize store.
-        self.store = Store.get_instance()
-        self.store.initialize(plan, use_cache)
 
         # Initialize audio controller.
         self.is_playing = False

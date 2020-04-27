@@ -109,9 +109,6 @@ class Store():
         signal_features = {}
         for _v, v_obj in self.plan['visualizers'].items():
             for s, s_obj in v_obj['signals'].items():
-                if s.startswith('spleeter_'):
-                    print(f'Signal not found for {s}')
-                    continue
                 if 'features' in s_obj:
                     features = set([f for f, b in s_obj['features'].items() if b])
                     if s not in signal_features:
@@ -125,9 +122,6 @@ class Store():
         signal_spectrograms = {}
         for _v, v_obj in self.plan['visualizers'].items():
             for s, s_obj in v_obj['signals'].items():
-                if s.startswith('spleeter_'):
-                    print(f'Signal not found for {s}')
-                    continue
                 if 'spectrograms' in s_obj:
                     spectrograms = set([f for f, b in s_obj['spectrograms'].items() if b])
                     if s not in signal_spectrograms:

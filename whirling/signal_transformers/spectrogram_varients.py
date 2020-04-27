@@ -17,7 +17,7 @@ def generate(store, sig, spectrogram_name):
     y = store['signals'][sig]['y']
 
     # Check if spectrogram is created already.
-    if 'D' not in store['signals'][sig]:
+    if 'D' not in store['signals'][sig] or store['signals'][sig]['D'] is None:
         store['signals'][sig]['D'] = standard_spectrogram(y, n_fft, hop_length)
 
     D = store['signals'][sig]['D']

@@ -1,5 +1,3 @@
-import os
-import json
 import librosa
 import logging
 import sklearn
@@ -83,7 +81,7 @@ def get_onset_strength(y, D, sr, hop_length):
 
 
 def get_loudness(y, D, sr, hop_length):
-    n_fft=2048
+    n_fft = 2048
     S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
     power = np.abs(S)**2
     p_mean = np.sum(power, axis=0, keepdims=True)

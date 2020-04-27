@@ -26,7 +26,7 @@ def generate(track_name: str, store, signal_name: str) -> None:
     # Segment signals.
     if signal_name in ["librosa_harmonic", "librosa_percussive"]:
         segment_harmonics_percussives(store, D)
-    elif signal_name in ['spleeter_' + f for f in ['vocals', 'drums', 'base', 'other']]:
+    elif signal_name in ['spleeter_' + f for f in ['vocals', 'drums', 'bass', 'other']]:
         segment_signal_with_spleeter(store, y, track_name)
 
 
@@ -58,10 +58,6 @@ def segment_harmonics_percussives(store, D):
 
 
 def segment_signal_with_spleeter(store, y, track_name):
-    return
-
-    # TODO: pull spleeter when it's fixed.
-
     """Use spleeter to separate the track into 4 components:
     Vocals, Drums, base, other separation"""
 
@@ -71,11 +67,16 @@ def segment_signal_with_spleeter(store, y, track_name):
     separator = Separator('spleeter:4stems')
     prediction = separator.separate(y_new, track_name)
 
+    other = np.ascontiguousarray(prediction['other'][:, 0], dtype=np.float32)
+    drums = np.ascontiguousarray(prediction['drums'][:, 0], dtype=np.float32)
+    bass = np.ascontiguousarray(prediction['bass'][:, 0], dtype=np.float32)
+    vocals = np.ascontiguousarray(prediction['vocals'][:, 0], dtype=np.float32)
+
     # Add segmented signals to the store.
-    add_signal(store, 'spleeter_other', prediction['other'][:, 0])
-    add_signal(store, 'spleeter_drums', prediction['drums'][:, 0])
-    add_signal(store, 'spleeter_bass', prediction['bass'][:, 0])
-    add_signal(store, 'spleeter_vocals', prediction['vocals'][:, 0])
+    add_signal(store, 'spleeter_other', other)
+    add_signal(store, 'spleeter_drums', drums)
+    add_signal(store, 'spleeter_bass', bass)
+    add_signal(store, 'spleeter_vocals', vocals)
 
 def already_ran_segmenter(store, signal_name: str) -> bool:
     """Return wether or not the store has any separated signal data."""
