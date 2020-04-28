@@ -14,9 +14,9 @@ settings = {
     'librosa_percussive': {'use': False, 'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0]), "keep_biggest":5},
 
     'spleeter_vocals': {'use': True, 'filter_bins': 20, 'high_pass': 0.4, 'color': np.array([0.23, 1, .08]), "keep_biggest":5},
-    'spleeter_other':  {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([.243, 0, 1]), "keep_biggest":5},
-    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'color': np.array([1, 0, 0]), "keep_biggest":7},
-    'spleeter_bass':   {'use': True, 'filter_bins': 5, 'high_pass': 0.3, 'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":3},
+    'spleeter_other':  {'use': True, 'filter_bins': 15, 'high_pass': 0.35, 'color': np.array([.243, 0, 1]), "keep_biggest":4},
+    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'color': np.array([1, 0, 0]), "keep_biggest":5},
+    'spleeter_bass':   {'use': True, 'filter_bins': 7, 'high_pass': 0.3, 'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":4},
 }
 
 class CheckerboardVisualizer(UIVisualizerBase):
@@ -112,6 +112,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
     def create_grid_colors(self):
 
         # Settings.
+        biggest_damper = 0.85
         past_weights = 0.5
         new_weight = 1 - past_weights
 
@@ -142,7 +143,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
             keep_biggest = settings[signal_name]['keep_biggest']
             idxs = np.argpartition(log_db_s_clip, -keep_biggest)
             val = log_db_s_clip[idxs[-keep_biggest]]
-            log_db_s_clip[log_db_s_clip < val] = 0
+            log_db_s_clip[log_db_s_clip < val * biggest_damper] = 0
 
 
             # Apply moving average.
