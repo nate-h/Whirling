@@ -10,13 +10,13 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
 settings = {
-    'librosa_harmonic':   {'use': False, 'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'librosa_percussive': {'use': False, 'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0])},
+    'librosa_harmonic':   {'use': False, 'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0]), "keep_biggest":5},
+    'librosa_percussive': {'use': False, 'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0]), "keep_biggest":5},
 
-    'spleeter_vocals': {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 1, 0])},
-    'spleeter_other':  {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([0, 0, 1])},
-    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.30, 'color': np.array([1, 0, 0])},
-    'spleeter_bass':   {'use': True, 'filter_bins': 7, 'high_pass': 0.5, 'color': np.array([0.54, 0.0, 0.54])},
+    'spleeter_vocals': {'use': True, 'filter_bins': 20, 'high_pass': 0.4, 'color': np.array([0.23, 1, .08]), "keep_biggest":5},
+    'spleeter_other':  {'use': True, 'filter_bins': 20, 'high_pass': 0.5, 'color': np.array([.243, 0, 1]), "keep_biggest":5},
+    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'color': np.array([1, 0, 0]), "keep_biggest":7},
+    'spleeter_bass':   {'use': True, 'filter_bins': 5, 'high_pass': 0.3, 'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":3},
 }
 
 class CheckerboardVisualizer(UIVisualizerBase):
@@ -111,6 +111,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
     def create_grid_colors(self):
 
+        # Settings.
         past_weights = 0.5
         new_weight = 1 - past_weights
 
@@ -136,6 +137,13 @@ class CheckerboardVisualizer(UIVisualizerBase):
             # High pass.
             high_pass = settings[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
+
+            # Floor all values smaller than nth largest values.
+            keep_biggest = settings[signal_name]['keep_biggest']
+            idxs = np.argpartition(log_db_s_clip, -keep_biggest)
+            val = log_db_s_clip[idxs[-keep_biggest]]
+            log_db_s_clip[log_db_s_clip < val] = 0
+
 
             # Apply moving average.
             bins = settings[signal_name]['filter_bins']
