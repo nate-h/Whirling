@@ -21,7 +21,7 @@ class UIAudioController(UIDock):
             border_color=border_color)
 
         # Setup player.
-        self.volume = 100
+        self.volume = 70
         self.track_num = 0
         self.player = None
         self.store = Store.get_instance()
@@ -67,13 +67,13 @@ class UIAudioController(UIDock):
             return button
 
         # Initialize buttons
-        self.rw_button = initialize_button('rw', self.rw)
+        # self.rw_button = initialize_button('rw', self.rw_key_down)
         self.prev_button = initialize_button('prev', self.prev)
         self.play_button = UIToggleButton(button_rect(), play_states,
             texset=self.whirling_textures, border_color=colors.WHITE)
         self.elements.append(self.play_button)
         self.next_button = initialize_button('next', self.next)
-        self.ffw_button = initialize_button('ffw', self.ffw)
+        # self.ffw_button = initialize_button('ffw', self.ffw_key_down)
 
         # Add volume buttons and text.
         gap += 50
@@ -152,22 +152,20 @@ class UIAudioController(UIDock):
         logging.info('Toggle play')
         self.play_button.perform_action()
 
-    def ffw(self):
-        self.adjust_time_by(2)
-
-    def rw(self):
-        self.adjust_time_by(-2)
-
-    def adjust_time_by(self, seconds):
+    def ffw_key_down(self):
         if self.player is None:
             return
-        logging.info('Adjusting time by %d seconds ', seconds)
-        curr_time = self.get_time()
-        proposed_time = 1000 * (curr_time + seconds)
-        max_time = self.player.get_length()
-        realistic_proposed_time = int(min(max(proposed_time, 0), max_time))
-        self.player.set_time(realistic_proposed_time)
-        self.reset_time_vars()
+        self.player.set_rate(5)
+
+    # def rw_key_down(self):
+    #     if self.player is None:
+    #         return
+    #     self.player.set_rate(-5)
+
+    def playback_speed_key_up(self):
+        if self.player is None:
+            return
+        self.player.set_rate(1)
 
     def prev(self):
         count = len(self.music_tracks)

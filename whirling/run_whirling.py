@@ -106,6 +106,8 @@ class Whirling(object):
                     quit()
                 elif event.type == pg.KEYDOWN:
                     self.handle_key_down(event)
+                elif event.type == pg.KEYUP:
+                    self.handle_key_up(event)
 
                 self.audio_controller.handle_event(event)
                 self.visualizer_controller.handle_event(event)
@@ -130,10 +132,14 @@ class Whirling(object):
             self.stopped = True
         elif event.key == pg.K_SPACE:
             self.audio_controller.toggle_play()
-        elif event.key == pg.K_LEFT:
-            self.audio_controller.rw()
+        # elif event.key == pg.K_LEFT:
+        #     self.audio_controller.rw_key_down()
         elif event.key == pg.K_RIGHT:
-            self.audio_controller.ffw()
+            self.audio_controller.ffw_key_down()
+
+    def handle_key_up(self, event):
+        if event.key == pg.K_LEFT or event.key == pg.K_RIGHT:
+            self.audio_controller.playback_speed_key_up()
 
     def draw(self):
         glMatrixMode(GL_MODELVIEW)
