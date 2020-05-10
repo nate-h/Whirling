@@ -131,9 +131,9 @@ class Whirling(object):
         elif event.key == pg.K_SPACE:
             self.audio_controller.toggle_play()
         elif event.key == pg.K_LEFT:
-            self.audio_controller.adjust_time_by(-2)
+            self.audio_controller.rw()
         elif event.key == pg.K_RIGHT:
-            self.audio_controller.adjust_time_by(2)
+            self.audio_controller.ffw()
 
     def draw(self):
         glMatrixMode(GL_MODELVIEW)

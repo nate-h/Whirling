@@ -1,6 +1,7 @@
-from collections import OrderedDict
 import os
 import time
+import logging
+from collections import OrderedDict
 from typing import List
 import vlc
 import pygame as pg
@@ -9,7 +10,6 @@ from whirling.ui_core.ui_textures import WhirlingTextures
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
 from whirling.store import Store
-import logging
 
 
 class UIAudioController(UIDock):
@@ -138,9 +138,7 @@ class UIAudioController(UIDock):
 
         # Save this out because poor resolution of vlc's get time.
         # Check get_time for more info.
-        curr_time = self.player.get_time() * .001
-        self.last_play_time = curr_time
-        self.last_play_time_global = time.time()
+        self.reset_time_vars()
 
     def pause(self):
         logging.info('Pause')
@@ -148,9 +146,7 @@ class UIAudioController(UIDock):
 
         # Save this out because poor resolution of vlc's get time.
         # Check get_time for more info.
-        curr_time = self.player.get_time() * .001
-        self.last_play_time = curr_time
-        self.last_play_time_global = time.time()
+        self.reset_time_vars()
 
     def toggle_play(self):
         logging.info('Toggle play')
@@ -166,11 +162,12 @@ class UIAudioController(UIDock):
         if self.player is None:
             return
         logging.info('Adjusting time by %d seconds ', seconds)
-        curr_time = self.player.get_time()
-        proposed_time = curr_time + 1000*seconds
+        curr_time = self.get_time()
+        proposed_time = 1000 * (curr_time + seconds)
         max_time = self.player.get_length()
-        realistic_proposed_time = min(max(proposed_time, 0), max_time)
+        realistic_proposed_time = int(min(max(proposed_time, 0), max_time))
         self.player.set_time(realistic_proposed_time)
+        self.reset_time_vars()
 
     def prev(self):
         count = len(self.music_tracks)
@@ -183,9 +180,9 @@ class UIAudioController(UIDock):
         self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
 
     def get_pretty_time_string(self):
-        length = round(self.player.get_length()/1000, 1)
-        time = round(self.player.get_time()/1000, 1)
-        return '%s / %s' % (time, length)
+        length_seconds = round(self.player.get_length()/1000, 1)
+        time_seconds = round(self.get_time(), 1)
+        return '%s / %s' % (time_seconds, length_seconds)
 
     def get_time(self):
         # This exists because vlcs default get time updates only a couple
@@ -200,7 +197,11 @@ class UIAudioController(UIDock):
         if self.last_play_time == curr_time and self.last_play_time != 0:
             curr_time += time.time() - self.last_play_time_global
         else:
-            self.last_play_time = curr_time
-            self.last_play_time_global = time.time()
+            self.reset_time_vars()
 
         return curr_time
+
+    def reset_time_vars(self):
+        curr_time = self.player.get_time() * .001
+        self.last_play_time = curr_time
+        self.last_play_time_global = time.time()
