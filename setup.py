@@ -28,7 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             'run_whirling=whirling.run_whirling:main',
-            #'run_visual_tester=whirling.visual_tester:main',
+            'run_cache_tracks=whirling.run_cache_tracks:main',
         ],
     },
     scripts=[
