@@ -1,3 +1,4 @@
+import re
 import copy
 from abc import ABC, abstractmethod
 from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
@@ -69,7 +70,8 @@ class UIVisualizerBase(UIElement, ABC):
 
     @property
     def name(self):
-        return self.__class__.__name__.replace('Visualizer', '').lower()
+        return re.sub( '(?<!^)(?=[A-Z])', '_', self.__class__.__name__.replace(
+            'Visualizer', '')).lower()
 
     @property
     def width(self):

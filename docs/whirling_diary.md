@@ -72,3 +72,11 @@ Failing to realize extent of project
 
 Failed to realize what I was creating and built many features to do precisely
 what I needed at the time. When more was needed, I had to rebuild that feature.
+
+
+----------------------------------------------
+
+Random thought:
+
+Something that's distinct to your ears is not distinct to the data
+I would love to create a visualizer that captures the vibrato of a voice or the decay on a cymbal
