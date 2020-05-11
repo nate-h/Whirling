@@ -13,10 +13,22 @@ settings = {
     'librosa_harmonic':   {'use': False, 'filter_bins': 30, 'high_pass': 0.5, 'color': np.array([0, 1, 0]), "keep_biggest":5},
     'librosa_percussive': {'use': False, 'filter_bins': 3, 'high_pass': 0.5, 'color': np.array([1, 0, 0]), "keep_biggest":5},
 
-    'spleeter_vocals': {'use': True, 'filter_bins': 20, 'high_pass': 0.4, 'color': np.array([0.23, 1, .08]), "keep_biggest":5},
-    'spleeter_other':  {'use': True, 'filter_bins': 15, 'high_pass': 0.35, 'color': np.array([.243, 0, 1]), "keep_biggest":4},
-    'spleeter_drums':  {'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'color': np.array([1, 0, 0]), "keep_biggest":5},
-    'spleeter_bass':   {'use': True, 'filter_bins': 7, 'high_pass': 0.3, 'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":4},
+    'spleeter_vocals': {
+        'use': True, 'filter_bins': 20, 'high_pass': 0.4,
+        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1
+    },
+    'spleeter_other':  {
+        'use': True, 'filter_bins': 15, 'high_pass': 0.35,
+        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1
+    },
+    'spleeter_drums':  {
+        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
+        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1
+    },
+    'spleeter_bass':   {
+        'use': True, 'filter_bins': 15, 'high_pass': 0.1,
+        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 2
+    },
 }
 
 class CheckerboardVisualizer(UIVisualizerBase):
@@ -113,7 +125,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         # Settings.
         biggest_damper = 0.85
-        past_weights = 0.5
+        past_weights = 0.3
         new_weight = 1 - past_weights
 
         # Subtract a small amount each frame and floor at zero.
@@ -123,7 +135,6 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
-        count = 0
 
         pnt = self.center_point()
 
@@ -131,9 +142,10 @@ class CheckerboardVisualizer(UIVisualizerBase):
             if not settings[signal_name]['use']:
                 continue
 
+            scalar = settings[signal_name]['scalar']
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
-            log_db_s_clip = (log_db_s_clip + 80) / 80
+            log_db_s_clip = (log_db_s_clip + 80) / 80 * scalar
 
             # High pass.
             high_pass = settings[signal_name]['high_pass']
