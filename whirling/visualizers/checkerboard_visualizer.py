@@ -97,8 +97,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         # Get the color from shader.
         color = glGetAttribLocation(self.shader, 'color')
-        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE,
-                            12, ctypes.c_void_p(0))
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(color)
 
         # Draw rectangles.
@@ -148,14 +147,17 @@ class CheckerboardVisualizer(UIVisualizerBase):
             if not settings[signal_name]['use']:
                 continue
 
-            scalar = settings[signal_name]['scalar']
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
-            log_db_s_clip = (log_db_s_clip + 80) / 80 * scalar
+            log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # High pass.
             high_pass = settings[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
+
+            # Scale up anything that needs to pop.
+            scalar = settings[signal_name]['scalar']
+            log_db_s_clip = log_db_s_clip * scalar
 
             # Floor all values smaller than nth largest values.
             keep_biggest = settings[signal_name]['keep_biggest']
