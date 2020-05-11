@@ -37,7 +37,7 @@ settings = {
     },
 }
 
-class CheckerboardVisualizer(UIVisualizerBase):
+class StackedEqualizersVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)

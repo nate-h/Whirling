@@ -101,7 +101,7 @@ class DebugVisualizer(UIVisualizerBase):
         pos = (pl, pb + dh + row_gap/10)
         self.render_text(title, pos, color)
 
-        # Draw checkerboard.
+        # Draw lines.
         glBegin(GL_LINES)
         glColor3fv(color)
         for i, y1 in enumerate(signal_segment):
@@ -126,7 +126,7 @@ class DebugVisualizer(UIVisualizerBase):
         pos = (pl, pb + dh + row_gap/10)
         self.render_text(title, pos, color)
 
-        # Draw checkerboard.
+        # Draw points.
         glPointSize(5)
         glBegin(GL_POINTS)
         glColor3fv(color)
