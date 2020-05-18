@@ -12,28 +12,28 @@ from whirling.tools.code_timer import CodeTimer
 settings = {
     'librosa_harmonic':   {
         'use': False, 'filter_bins': 30, 'high_pass': 0.5,
-        'color': np.array([0, 1, 0]), 'scalar': 1, 'order': 1
+        'color': np.array([0, 1, 0]), 'order': 1
     },
     'librosa_percussive': {
         'use': False, 'filter_bins': 3, 'high_pass': 0.5,
-        'color': np.array([1, 0, 0]), 'scalar': 1, 'order': 1
+        'color': np.array([1, 0, 0]), 'order': 1
     },
 
     'spleeter_vocals': {
         'use': True, 'filter_bins': 12, 'high_pass': 0.1,
-        'color': np.array([0.23, 1, .08]), 'scalar': 2, 'order': 2
+        'color': np.array([0.23, 1, .08]), 'order': 2
     },
     'spleeter_other':  {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1,
-        'color': np.array([.243, 0, 1]), 'scalar': 2, 'order': 1
+        'color': np.array([.243, 0, 1]), 'order': 1
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.1,
-        'color': np.array([1, 0, 0]), 'scalar': 2, 'order': 3
+        'color': np.array([1, 0, 0]), 'order': 3
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), 'scalar': 2, 'order': 0
+        'color': np.array([0.54, 0.0, 0.54]), 'order': 0
     },
 }
 
@@ -110,9 +110,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
          # Settings.
         sw = self.width / self.freq_bands
         sh = self.height / self.stems
-        biggest_damper = 0.85
-        past_weights = 0.3
-        new_weight = 1 - past_weights
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
@@ -148,7 +145,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             log_db_s_clip[log_db_s_clip < high_pass] = 0
 
             # Scale up anything that needs to pop.
-            scalar = settings[signal_name]['scalar']
+            scalar = 1.8
             log_db_s_clip = log_db_s_clip * scalar
             log_db_s_clip[log_db_s_clip > 2] = 2
 
