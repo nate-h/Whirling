@@ -45,6 +45,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         self.freq_bands = 87
         self.initialize_shader()
         self.stems = len(self.data.keys())  # Doesn't handle 'use' flag.
+        self.rectangle = None
 
         # Create a sorted list of stems, colors, order. Where order corresponds
         # to the order each stem appears in a stacked bar.
@@ -56,7 +57,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         # Create an array to represent the colors the bar chart will have.
         self.create_cbo_and_ebo()
-        self.create_vbo()
 
         self.spec_slices = None
 
@@ -65,6 +65,23 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         return
         glDeleteBuffers(1, [self.CBO])
         glDeleteBuffers(1, [self.EBO])
+        glDeleteBuffers(1, [self.VBO])
+
+    def draw_visuals(self):
+
+        # if not self.spec_slices:
+        #     self.spec_slices = {}
+        #     for signal_name in self.data:
+        #         self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
+
+        self.create_vbo()
+
+        # Draw rectangles.
+        glUseProgram(self.shader)
+        glLoadIdentity()
+        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
+        glUseProgram(0)
+
         glDeleteBuffers(1, [self.VBO])
 
     def create_cbo_and_ebo(self):
@@ -95,17 +112,65 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
     def create_vbo(self):
 
+         # Settings.
         sw = self.width / self.freq_bands
         sh = self.height / self.stems
+        biggest_damper = 0.85
+        past_weights = 0.3
+        new_weight = 1 - past_weights
 
-        # Generate checkerboard vertices.
-        xs = np.linspace(self.rect.left, self.rect.right, num=self.freq_bands, endpoint=False, dtype=np.float32)
-        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.stems, endpoint=False, dtype=np.float32)
-        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='xy')
-        zero = np.zeros(x1.shape, dtype=x1.dtype)
-        x2 = x1 + sw
-        y2 = y1 + sh
-        self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
+        curr_time = self.audio_controller.get_time()
+        min_window_frame = self.get_frame_number(curr_time)
+
+        x0 = np.linspace(self.rect.left, self.rect.right, num=self.freq_bands, endpoint=False, dtype=np.float32)
+        x_left = np.tile(x0, (self.stems, 1))
+        x_right = x_left + sw
+
+        zero = np.zeros(x_left.shape, dtype=x_left.dtype)
+
+        y_lower = np.zeros(x_left.shape, dtype=x0.dtype)
+        y_upper = np.zeros(x_left.shape, dtype=x0.dtype)
+
+        # Set first row of y lower.
+        y0 = np.zeros(x0.shape, dtype=x0.dtype)
+        y_lower[0, :] = y0
+
+        y_previous = y0
+
+
+        count = 0
+        for signal_name, s_obj in self.data.items():  # Is this the same order as "color_order"
+            if not settings[signal_name]['use']:
+                continue
+
+            log_db_s = s_obj['spectrograms']['custom_log_db']
+            log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
+            log_db_s_clip = (log_db_s_clip + 80) / 80
+
+            # High pass.
+            high_pass = settings[signal_name]['high_pass']
+            log_db_s_clip[log_db_s_clip < high_pass] = 0
+
+            # Scale up anything that needs to pop.
+            scalar = settings[signal_name]['scalar']
+            log_db_s_clip = log_db_s_clip * scalar
+
+            y_current = y_previous + log_db_s_clip*sh
+
+            # Don't add last signal to y lower.
+            # Because y_upper didn't get zeroth row.
+            if count < self.stems - 1:
+                y_lower[count + 1, :] = y_current
+
+            y_upper[count, :] = y_current
+
+            y_previous = y_current
+            count += 1
+
+        self.rectangle = np.dstack(
+            (x_left, y_lower, zero, x_right, y_lower, zero, x_right, y_upper,
+            zero, x_left, y_upper, zero)
+        ).flatten()
 
         # Create Buffer object in gpu.
         self.VBO = glGenBuffers(1)
@@ -119,22 +184,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glVertexAttribPointer(position, 3, GL_FLOAT,
                               GL_FALSE, 12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
-    def draw_visuals(self):
-
-        # if not self.spec_slices:
-        #     self.spec_slices = {}
-        #     for signal_name in self.data:
-        #         self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
-
-
-        #self.create_cells()
-
-        # Draw rectangles.
-        glUseProgram(self.shader)
-        glLoadIdentity()
-        glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
-        glUseProgram(0)
 
     def create_grid_colors(self):
 
@@ -193,23 +242,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         # Repeat color 4 times, one for each cell vertex.
         self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
-
-
-    def center_point(self):
-        return Point(int(self.pnts_y/2), int(self.pnts_x/2))
-
-    def draw_rect_into_grid(self, grid_colors, pnt: Point, width: int, height: int, color):
-        half_w = int(width/2)
-        half_h = int(height/2)
-        x1 = max(pnt.x - half_w, 0)
-        x2 = min(pnt.x + half_w, self.pnts_x - 1)
-        y1 = max(pnt.y - half_h, 0)
-        y2 = min(pnt.y + half_h, self.pnts_y - 1)
-
-        grid_colors[x1:x2 + 1, y2, :] += color  # top    l->r
-        grid_colors[x2, y1:y2, :] += color      # right  t->b
-        grid_colors[x1+1:x2, y1, :] += color    # bottom l->r
-        grid_colors[x1, y1:y2, :] += color      # left   t->b
 
     def initialize_shader(self):
         VERTEX_SHADER = """
