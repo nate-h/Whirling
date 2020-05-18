@@ -42,8 +42,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        #self.freq_bands = 87
-        self.freq_bands = 2
+        self.freq_bands = 87
         self.initialize_shader()
         self.stems = len(self.data.keys())  # Doesn't handle 'use' flag.
 
@@ -63,6 +62,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
 
     def __del__(self):
+        return
         glDeleteBuffers(1, [self.CBO])
         glDeleteBuffers(1, [self.EBO])
         glDeleteBuffers(1, [self.VBO])
@@ -70,10 +70,8 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
     def create_cbo_and_ebo(self):
 
         # Create flattened grid of colors.
-        ordered_colors = [obj[1] for obj in self.color_order]
+        ordered_colors = np.array([obj[1] for obj in self.color_order], dtype=np.float32)
         grid_colors_flat = np.repeat(ordered_colors, 4*self.freq_bands, axis=0).flatten()
-
-        import pdb; pdb.set_trace()
 
         # Bind the buffer.
         self.CBO = glGenBuffers(1)
@@ -103,7 +101,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         # Generate checkerboard vertices.
         xs = np.linspace(self.rect.left, self.rect.right, num=self.freq_bands, endpoint=False, dtype=np.float32)
         ys = np.linspace(self.rect.bottom, self.rect.top, num=self.stems, endpoint=False, dtype=np.float32)
-        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='xy')
         zero = np.zeros(x1.shape, dtype=x1.dtype)
         x2 = x1 + sw
         y2 = y1 + sh
@@ -137,8 +135,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glLoadIdentity()
         glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
         glUseProgram(0)
-
-        #glDeleteBuffers(1, [self.VBO])
 
     def create_grid_colors(self):
 
