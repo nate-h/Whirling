@@ -20,19 +20,19 @@ settings = {
     },
 
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 20, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 12, 'high_pass': 0.1,
         'color': np.array([0.23, 1, .08]), 'scalar': 2, 'order': 2
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.35,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
         'color': np.array([.243, 0, 1]), 'scalar': 2, 'order': 1
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.1,
         'color': np.array([1, 0, 0]), 'scalar': 2, 'order': 3
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54]), 'scalar': 2, 'order': 0
     },
 }
@@ -58,7 +58,9 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         # Create an array to represent the colors the bar chart will have.
         self.create_cbo_and_ebo()
 
-        self.spec_slices = None
+        self.spec_slices = {}
+        for signal_name in self.data:
+            self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
 
     def __del__(self):
@@ -66,11 +68,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glDeleteBuffers(1, [self.EBO])
 
     def draw_visuals(self):
-
-        # if not self.spec_slices:
-        #     self.spec_slices = {}
-        #     for signal_name in self.data:
-        #         self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
         self.create_vbo()
 
@@ -155,6 +152,15 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             log_db_s_clip = log_db_s_clip * scalar
             log_db_s_clip[log_db_s_clip > 2] = 2
 
+            # Apply moving average.
+            # Save up to 'filter_bins' and use that for the average.
+            bins = settings[signal_name]['filter_bins']
+            self.spec_slices[signal_name] = np.append(
+                self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
+            if len(self.spec_slices[signal_name]) > bins:
+                self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
+            log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
+
             y_current = y_previous + log_db_s_clip*sh
 
             # Don't add last signal to y lower.
@@ -184,61 +190,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glVertexAttribPointer(position, 3, GL_FLOAT,
                               GL_FALSE, 12, ctypes.c_void_p(0))
         glEnableVertexAttribArray(position)
-
-    def create_grid_colors(self):
-
-        # Settings.
-        biggest_damper = 0.85
-        past_weights = 0.3
-        new_weight = 1 - past_weights
-
-        # Subtract a small amount each frame and floor at zero.
-        self.grid_colors[:] = self.grid_colors[:] * past_weights
-        self.grid_colors[self.grid_colors < 0] = 0
-        self.grid_colors[self.grid_colors > 1] = 1
-
-        curr_time = self.audio_controller.get_time()
-        min_window_frame = self.get_frame_number(curr_time)
-
-        pnt = self.center_point()
-
-        for signal_name, s_obj in self.data.items():
-            if not settings[signal_name]['use']:
-                continue
-
-            log_db_s = s_obj['spectrograms']['custom_log_db']
-            log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
-            log_db_s_clip = (log_db_s_clip + 80) / 80
-
-            # High pass.
-            high_pass = settings[signal_name]['high_pass']
-            log_db_s_clip[log_db_s_clip < high_pass] = 0
-
-            # Scale up anything that needs to pop.
-            scalar = settings[signal_name]['scalar']
-            log_db_s_clip = log_db_s_clip * scalar
-
-            # Floor all values smaller than nth largest values.
-            log_db_s_clip[log_db_s_clip < val * biggest_damper] = 0
-
-            # Apply moving average.
-            # Save up to 'filter_bins' and use that for the average.
-            bins = settings[signal_name]['filter_bins']
-            self.spec_slices[signal_name] = np.append(
-                self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
-            if len(self.spec_slices[signal_name]) > bins:
-                self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
-            log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
-
-            c = settings[signal_name]['color']
-
-            for i, v in enumerate(log_db_s_clip):
-                side = 2 * i + 1
-                c_i = c * v * new_weight
-                self.draw_rect_into_grid(self.grid_colors, pnt, width=side, height=side, color=c_i)
-
-        # Repeat color 4 times, one for each cell vertex.
-        self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
 
     def initialize_shader(self):
         VERTEX_SHADER = """
