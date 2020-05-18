@@ -155,7 +155,7 @@ class UIAudioController(UIDock):
     def ffw_key_down(self):
         if self.player is None:
             return
-        self.player.set_rate(10)
+        self.player.set_rate(20)
 
     # def rw_key_down(self):
     #     if self.player is None:

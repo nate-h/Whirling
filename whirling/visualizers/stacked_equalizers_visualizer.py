@@ -12,28 +12,28 @@ from whirling.tools.code_timer import CodeTimer
 settings = {
     'librosa_harmonic':   {
         'use': False, 'filter_bins': 30, 'high_pass': 0.5,
-        'color': np.array([0, 1, 0]), "keep_biggest":5, 'scalar': 1, 'order': 1
+        'color': np.array([0, 1, 0]), 'scalar': 1, 'order': 1
     },
     'librosa_percussive': {
         'use': False, 'filter_bins': 3, 'high_pass': 0.5,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1, 'order': 1
+        'color': np.array([1, 0, 0]), 'scalar': 1, 'order': 1
     },
 
     'spleeter_vocals': {
         'use': True, 'filter_bins': 20, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1.2, 'order': 2
+        'color': np.array([0.23, 1, .08]), 'scalar': 2, 'order': 2
     },
     'spleeter_other':  {
         'use': True, 'filter_bins': 15, 'high_pass': 0.35,
-        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1.2, 'order': 1
+        'color': np.array([.243, 0, 1]), 'scalar': 2, 'order': 1
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1.2, 'order': 3
+        'color': np.array([1, 0, 0]), 'scalar': 2, 'order': 3
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 15, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 1.2, 'order': 0
+        'color': np.array([0.54, 0.0, 0.54]), 'scalar': 2, 'order': 0
     },
 }
 
@@ -153,7 +153,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             # Scale up anything that needs to pop.
             scalar = settings[signal_name]['scalar']
             log_db_s_clip = log_db_s_clip * scalar
-            log_db_s_clip[log_db_s_clip > 1] = 1
+            log_db_s_clip[log_db_s_clip > 2] = 2
 
             y_current = y_previous + log_db_s_clip*sh
 
@@ -219,9 +219,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             log_db_s_clip = log_db_s_clip * scalar
 
             # Floor all values smaller than nth largest values.
-            keep_biggest = settings[signal_name]['keep_biggest']
-            idxs = np.argpartition(log_db_s_clip, -keep_biggest)
-            val = log_db_s_clip[idxs[-keep_biggest]]
             log_db_s_clip[log_db_s_clip < val * biggest_damper] = 0
 
             # Apply moving average.
