@@ -12,28 +12,28 @@ from whirling.tools.code_timer import CodeTimer
 settings = {
     'librosa_harmonic':   {
         'use': False, 'filter_bins': 30, 'high_pass': 0.5,
-        'color': np.array([0, 1, 0]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([0, 1, 0]), "keep_biggest":5, 'scalar': 1, 'order': 1
     },
     'librosa_percussive': {
         'use': False, 'filter_bins': 3, 'high_pass': 0.5,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1, 'order': 1
     },
 
     'spleeter_vocals': {
         'use': True, 'filter_bins': 20, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1, 'order': 2
     },
     'spleeter_other':  {
         'use': True, 'filter_bins': 15, 'high_pass': 0.35,
-        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1, 'order': 1
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1, 'order': 3
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 15, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 2
+        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 2, 'order': 0
     },
 }
 
@@ -42,34 +42,75 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.freq_bands = 87
-        self.pnts_x = 2 * self.freq_bands + 1
-        self.pnts_y = 2 * self.freq_bands + 1 # TODO: set dynamically w/ data.
+        #self.freq_bands = 87
+        self.freq_bands = 2
         self.initialize_shader()
-        self.create_cells()
+        self.stems = len(self.data.keys())  # Doesn't handle 'use' flag.
+
+        # Create a sorted list of stems, colors, order. Where order corresponds
+        # to the order each stem appears in a stacked bar.
+        self.color_order = \
+            sorted([
+                [k, v['color'], v['order']] for k, v in settings.items()
+                if k in self.data.keys() and v['use']
+            ], key=lambda x: x[2])
+
+        # Create an array to represent the colors the bar chart will have.
+        self.create_cbo_and_ebo()
         self.create_vbo()
 
         self.spec_slices = None
 
-        # Generate cell colors.
-        r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        self.grid_colors = np.dstack((r, g, b))
-        self.grid_colors_flat = None
 
     def __del__(self):
-        glDeleteBuffers(1, [self.VBO])
+        glDeleteBuffers(1, [self.CBO])
         glDeleteBuffers(1, [self.EBO])
+        glDeleteBuffers(1, [self.VBO])
 
-    def create_vbo(self):
-        # Create Buffer object in gpu.
-        self.VBO = glGenBuffers(1)
+    def create_cbo_and_ebo(self):
+
+        # Create flattened grid of colors.
+        ordered_colors = [obj[1] for obj in self.color_order]
+        grid_colors_flat = np.repeat(ordered_colors, 4*self.freq_bands, axis=0).flatten()
+
+        import pdb; pdb.set_trace()
+
+        # Bind the buffer.
+        self.CBO = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, self.CBO)
+        glBufferData(GL_ARRAY_BUFFER, 4*len(grid_colors_flat), grid_colors_flat, GL_STATIC_DRAW)
+
+        # Get the color from shader.
+        color = glGetAttribLocation(self.shader, 'color')
+        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 12, ctypes.c_void_p(0))
+        glEnableVertexAttribArray(color)
+
+        # Generate triangle indices.
+        a = 4 * np.arange(0, self.freq_bands * self.stems, dtype=np.uint32)
+        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+        self.indices = (a[:, np.newaxis] + b).flatten()
 
         # Create EBO.
         self.EBO = glGenBuffers(1)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.EBO)
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices, GL_STATIC_DRAW)
+
+    def create_vbo(self):
+
+        sw = self.width / self.freq_bands
+        sh = self.height / self.stems
+
+        # Generate checkerboard vertices.
+        xs = np.linspace(self.rect.left, self.rect.right, num=self.freq_bands, endpoint=False, dtype=np.float32)
+        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.stems, endpoint=False, dtype=np.float32)
+        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+        zero = np.zeros(x1.shape, dtype=x1.dtype)
+        x2 = x1 + sw
+        y2 = y1 + sh
+        self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
+
+        # Create Buffer object in gpu.
+        self.VBO = glGenBuffers(1)
 
         # Bind the buffer.
         glBindBuffer(GL_ARRAY_BUFFER, self.VBO)
@@ -83,22 +124,13 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
     def draw_visuals(self):
 
-        if not self.spec_slices:
-            self.spec_slices = {}
-            for signal_name in self.data:
-                self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
+        # if not self.spec_slices:
+        #     self.spec_slices = {}
+        #     for signal_name in self.data:
+        #         self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
-        self.create_grid_colors()
 
-        # Bind the buffer.
-        CBO = glGenBuffers(1)
-        glBindBuffer(GL_ARRAY_BUFFER, CBO)
-        glBufferData(GL_ARRAY_BUFFER, 4*len(self.grid_colors_flat), self.grid_colors_flat, GL_STATIC_DRAW)
-
-        # Get the color from shader.
-        color = glGetAttribLocation(self.shader, 'color')
-        glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 12, ctypes.c_void_p(0))
-        glEnableVertexAttribArray(color)
+        #self.create_cells()
 
         # Draw rectangles.
         glUseProgram(self.shader)
@@ -106,25 +138,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
         glUseProgram(0)
 
-        glDeleteBuffers(1, [CBO])
-
-    def create_cells(self):
-        sw = self.width / self.pnts_x
-        sh = self.height / self.pnts_y
-
-        # Generate checkerboard vertices.
-        xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
-        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
-        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
-        zero = np.zeros(x1.shape, dtype=x1.dtype)
-        x2 = x1 + sw
-        y2 = y1 + sh
-        self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
-
-        # Generate triangle indices.
-        a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
-        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
-        self.indices = (a[:, np.newaxis] + b).flatten()
+        #glDeleteBuffers(1, [self.VBO])
 
     def create_grid_colors(self):
 
