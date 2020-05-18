@@ -21,19 +21,19 @@ settings = {
 
     'spleeter_vocals': {
         'use': True, 'filter_bins': 20, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1, 'order': 2
+        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1.2, 'order': 2
     },
     'spleeter_other':  {
         'use': True, 'filter_bins': 15, 'high_pass': 0.35,
-        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1, 'order': 1
+        'color': np.array([.243, 0, 1]), "keep_biggest":5, 'scalar': 1.2, 'order': 1
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1, 'order': 3
+        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1.2, 'order': 3
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 15, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 2, 'order': 0
+        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":5, 'scalar': 1.2, 'order': 0
     },
 }
 
@@ -44,7 +44,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         self.freq_bands = 87
         self.initialize_shader()
-        self.stems = len(self.data.keys())  # Doesn't handle 'use' flag.
+        self.stems = len([k for k in self.data if settings[k]['use']])
         self.rectangle = None
 
         # Create a sorted list of stems, colors, order. Where order corresponds
@@ -62,10 +62,8 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
 
     def __del__(self):
-        return
         glDeleteBuffers(1, [self.CBO])
         glDeleteBuffers(1, [self.EBO])
-        glDeleteBuffers(1, [self.VBO])
 
     def draw_visuals(self):
 
@@ -139,9 +137,10 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
 
         count = 0
-        for signal_name, s_obj in self.data.items():  # Is this the same order as "color_order"
-            if not settings[signal_name]['use']:
-                continue
+        for s_array in self.color_order:  # Is this the same order as "color_order"
+
+            signal_name = s_array[0]
+            s_obj = self.data[signal_name]
 
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
@@ -154,6 +153,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             # Scale up anything that needs to pop.
             scalar = settings[signal_name]['scalar']
             log_db_s_clip = log_db_s_clip * scalar
+            log_db_s_clip[log_db_s_clip > 1] = 1
 
             y_current = y_previous + log_db_s_clip*sh
 
