@@ -5,11 +5,12 @@ from whirling.visualizers.debug_visualizer import DebugVisualizer
 from whirling.visualizers.spectrogram_visualizer import SpectrogramVisualizer
 from whirling.visualizers.checkerboard_visualizer import CheckerboardVisualizer
 from whirling.visualizers.stacked_equalizers_visualizer import StackedEqualizersVisualizer
+from whirling.visualizers.combo_board_visualizer import ComboBoardVisualizer
 
 # Listify visualizer classes.
 _visualizers = [
     DebugVisualizer, SpectrogramVisualizer, CheckerboardVisualizer,
-    StackedEqualizersVisualizer
+    StackedEqualizersVisualizer, ComboBoardVisualizer
 ]
 
 # Create tuples of (visualizer name, visualizer class).

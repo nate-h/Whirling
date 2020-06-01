@@ -166,6 +166,37 @@
                     }
                 }
             }
+        },
+        "combo_board": {
+            "settings": {
+                "window_size": 8
+            },
+            "signals": {
+                "spleeter_drums": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "spleeter_vocals": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "spleeter_bass": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                },
+                "spleeter_other": {
+                    "spectrograms": {
+                        "standard": true,
+                        "custom_log_db": true
+                    }
+                }
+            }
         }
     }
 }
