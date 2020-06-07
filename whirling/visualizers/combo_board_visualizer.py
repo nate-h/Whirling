@@ -10,15 +10,6 @@ from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
 settings = {
-    'librosa_harmonic':   {
-        'use': False, 'filter_bins': 30, 'high_pass': 0.5,
-        'color': np.array([0, 1, 0]), "keep_biggest":5, 'scalar': 1
-    },
-    'librosa_percussive': {
-        'use': False, 'filter_bins': 3, 'high_pass': 0.5,
-        'color': np.array([1, 0, 0]), "keep_biggest":5, 'scalar': 1
-    },
-
     'spleeter_vocals': {
         'use': True, 'filter_bins': 15, 'high_pass': 0.4,
         'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1

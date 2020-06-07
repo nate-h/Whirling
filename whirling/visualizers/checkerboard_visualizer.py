@@ -20,19 +20,19 @@ settings = {
     },
 
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1
+        'use': True, 'filter_bins': 15, 'high_pass': 0.45,
+        'color': np.array([0.23, 1, .08]), "keep_biggest":4, 'scalar': 1
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.35,
+        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
         'color': np.array([.243, 0, 1]), "keep_biggest":4, 'scalar': 1
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.22,
         'color': np.array([1, 0, 0]), "keep_biggest": 6, 'scalar': 1
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.15,
         'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":3, 'scalar': 1.5
     },
 }

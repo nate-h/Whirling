@@ -21,7 +21,7 @@ class UIAudioController(UIDock):
             border_color=border_color)
 
         # Setup player.
-        self.volume = 70
+        self.volume = 100
         self.track_num = 0
         self.player = None
         self.store = Store.get_instance()

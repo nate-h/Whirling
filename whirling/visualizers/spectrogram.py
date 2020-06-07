@@ -30,8 +30,7 @@ class Spectrogram(UIElement):
         self.log_db_s = log_db_s
         self.pnts_x, self.pnts_y = self.log_db_s.shape
 
-        with CodeTimer('create_vbo'):
-            self.create_vbo_data()
+        self.create_vbo_data()
         self.shader = self.initialize_shader()
 
         self.state = SpecState.LOADED
@@ -89,31 +88,26 @@ class Spectrogram(UIElement):
         sh = self.height / self.pnts_y
 
         # Generate rectangles and indices for triangles.
-        with CodeTimer('inner for loop'):
+        xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
+        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
+        x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
+        zero = np.zeros(x1.shape, dtype=x1.dtype)
+        x2 = x1 + sw
+        y2 = y1 + sh
+        self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
-            # New code.
-            xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
-            ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
-            x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
-            zero = np.zeros(x1.shape, dtype=x1.dtype)
-            x2 = x1 + sw
-            y2 = y1 + sh
-            self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
+        # Normalize data for color calculation.
+        self.log_db_s = np.clip(self.log_db_s, a_min=-80, a_max=0)
+        cmap_ready_s = ((self.log_db_s + 80)/80*99).astype(int).flatten()
 
-        with CodeTimer('Turn log_db_s into colorful image'):
-            # Normalize data for color calculation.
-            self.log_db_s = np.clip(self.log_db_s, a_min=-80, a_max=0)
-            cmap_ready_s = ((self.log_db_s + 80)/80*99).astype(int).flatten()
+        # Convert log_db_s into colorful image.
+        grid_colors = viridis.viridis[tuple(cmap_ready_s), :]
+        self.grid_colors = np.repeat(grid_colors, 4, axis=0).flatten()
 
-            # Convert log_db_s into colorful image.
-            grid_colors = viridis.viridis[tuple(cmap_ready_s), :]
-            self.grid_colors = np.repeat(grid_colors, 4, axis=0).flatten()
-
-        with CodeTimer('Generate triangle indices.'):
-            # Generate triangle indices.
-            a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
-            b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
-            self.indices = (a[:, np.newaxis] + b).flatten()
+        # Generate triangle indices.
+        a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
+        b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
+        self.indices = (a[:, np.newaxis] + b).flatten()
 
     def initialize_shader(self):
         VERTEX_SHADER = """
