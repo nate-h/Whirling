@@ -42,7 +42,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.freq_bands = 87
+        self.freq_bands = 81
         self.pnts_x = 2 * self.freq_bands + 1
         self.pnts_y = 2 * self.freq_bands + 1 # TODO: set dynamically w/ data.
         self.initialize_shader()

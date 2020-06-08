@@ -12,19 +12,19 @@ from whirling.tools.code_timer import CodeTimer
 settings = {
     'spleeter_vocals': {
         'use': True, 'filter_bins': 15, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest":5, 'scalar': 1
+        'color': np.array([0.23, 1, .08]), "keep_biggest": 3, 'scalar': 1
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.35,
-        'color': np.array([.243, 0, 1]), "keep_biggest":4, 'scalar': 1
+        'use': True, 'filter_bins': 15, 'high_pass': 0.3,
+        'color': np.array([.243, 0, 1]), "keep_biggest":3, 'scalar': 1
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0, 0]), "keep_biggest": 6, 'scalar': 1
+        'use': True, 'filter_bins': 3, 'high_pass': 0.25,
+        'color': np.array([1, 0, 0]), "keep_biggest": 3, 'scalar': 1
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":3, 'scalar': 1.5
+        'use': True, 'filter_bins': 15, 'high_pass': 0.1,
+        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest": 3, 'scalar': 1.5
     },
 }
 
@@ -33,9 +33,10 @@ class ComboBoardVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.freq_bands = 87
-        self.pnts_x = 2 * self.freq_bands + 1
-        self.pnts_y = 2 * self.freq_bands + 1 # TODO: set dynamically w/ data.
+        self.freq_bands = 81
+        self.pnts_x = 9
+        self.pnts_y = 9
+        self.grid_gap = self.width / 100
         self.initialize_shader()
         self.create_cells()
         self.create_vbo()
@@ -100,12 +101,14 @@ class ComboBoardVisualizer(UIVisualizerBase):
         glDeleteBuffers(1, [CBO])
 
     def create_cells(self):
-        sw = self.width / self.pnts_x
-        sh = self.height / self.pnts_y
+        sw = (self.width - (self.pnts_x - 1) * self.grid_gap) / self.pnts_x
+        sh = (self.height - (self.pnts_y - 1) * self.grid_gap) / self.pnts_y
 
         # Generate checkerboard vertices.
-        xs = np.linspace(self.rect.left, self.rect.right, num=self.pnts_x, endpoint=False, dtype=np.float32)
-        ys = np.linspace(self.rect.bottom, self.rect.top, num=self.pnts_y, endpoint=False, dtype=np.float32)
+        xs = np.linspace(self.rect.left, self.rect.right + self.grid_gap,
+            num=self.pnts_x, endpoint=False, dtype=np.float32)
+        ys = np.linspace(self.rect.bottom, self.rect.top + self.grid_gap,
+            num=self.pnts_y, endpoint=False, dtype=np.float32)
         x1, y1 = np.meshgrid(xs, ys, sparse=False, indexing='ij')
         zero = np.zeros(x1.shape, dtype=x1.dtype)
         x2 = x1 + sw
@@ -131,8 +134,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
-
-        pnt = self.center_point()
 
         for signal_name, s_obj in self.data.items():
             if not settings[signal_name]['use']:
@@ -167,30 +168,21 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
             c = settings[signal_name]['color']
 
+
+            self.offset = 0
+
             for i, v in enumerate(log_db_s_clip):
-                side = 2 * i + 1
                 c_i = c * v * new_weight
-                self.draw_rect_into_grid(self.grid_colors, pnt, width=side, height=side, color=c_i)
+                self.draw_rect_into_grid(self.grid_colors, color=c_i, index=i)
 
         # Repeat color 4 times, one for each cell vertex.
         self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
 
+    def draw_rect_into_grid(self, grid_colors, color, index: int):
+        x = int((81 - 1 - index) / 9)
+        y = (self.freq_bands - 1 - index) % self.pnts_y
 
-    def center_point(self):
-        return Point(int(self.pnts_y/2), int(self.pnts_x/2))
-
-    def draw_rect_into_grid(self, grid_colors, pnt: Point, width: int, height: int, color):
-        half_w = int(width/2)
-        half_h = int(height/2)
-        x1 = max(pnt.x - half_w, 0)
-        x2 = min(pnt.x + half_w, self.pnts_x - 1)
-        y1 = max(pnt.y - half_h, 0)
-        y2 = min(pnt.y + half_h, self.pnts_y - 1)
-
-        grid_colors[x1:x2 + 1, y2, :] += color  # top    l->r
-        grid_colors[x2, y1:y2, :] += color      # right  t->b
-        grid_colors[x1+1:x2, y1, :] += color    # bottom l->r
-        grid_colors[x1, y1:y2, :] += color      # left   t->b
+        grid_colors[x, y, :] += color
 
     def initialize_shader(self):
         VERTEX_SHADER = """

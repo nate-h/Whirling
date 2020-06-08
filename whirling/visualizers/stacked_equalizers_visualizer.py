@@ -42,7 +42,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
-        self.freq_bands = 87
+        self.freq_bands = 81
         self.initialize_shader()
         self.stems = len([k for k in self.data if settings[k]['use']])
         self.rectangle = None
