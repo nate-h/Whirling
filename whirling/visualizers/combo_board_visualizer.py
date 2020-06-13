@@ -12,19 +12,19 @@ from whirling.tools.code_timer import CodeTimer
 settings = {
     'spleeter_vocals': {
         'use': True, 'filter_bins': 15, 'high_pass': 0.4,
-        'color': np.array([0.23, 1, .08]), "keep_biggest": 3, 'scalar': 1
+        'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.3,
-        'color': np.array([.243, 0, 1]), "keep_biggest":3, 'scalar': 1
+        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
+        'color': np.array([.243, 0, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.25,
-        'color': np.array([1, 0, 0]), "keep_biggest": 3, 'scalar': 1
+        'use': True, 'filter_bins': 3, 'high_pass': 0.5,
+        'color': np.array([1, 0, 0])
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 15, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), "keep_biggest": 3, 'scalar': 1.5
+        'color': np.array([0.54, 0.0, 0.54])
     },
 }
 
@@ -123,7 +123,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
     def create_grid_colors(self):
 
         # Settings.
-        biggest_damper = 0.85
         past_weights = 0.3
         new_weight = 1 - past_weights
 
@@ -147,16 +146,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
             high_pass = settings[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
 
-            # Scale up anything that needs to pop.
-            scalar = settings[signal_name]['scalar']
-            log_db_s_clip = log_db_s_clip * scalar
-
-            # Floor all values smaller than nth largest values.
-            keep_biggest = settings[signal_name]['keep_biggest']
-            idxs = np.argpartition(log_db_s_clip, -keep_biggest)
-            val = log_db_s_clip[idxs[-keep_biggest]]
-            log_db_s_clip[log_db_s_clip < val * biggest_damper] = 0
-
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
             bins = settings[signal_name]['filter_bins']
@@ -168,9 +157,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
             c = settings[signal_name]['color']
 
-
-            self.offset = 0
-
             for i, v in enumerate(log_db_s_clip):
                 c_i = c * v * new_weight
                 self.draw_rect_into_grid(self.grid_colors, color=c_i, index=i)
@@ -179,9 +165,8 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
 
     def draw_rect_into_grid(self, grid_colors, color, index: int):
-        x = int((81 - 1 - index) / 9)
-        y = (self.freq_bands - 1 - index) % self.pnts_y
-
+        x = index % self.pnts_x
+        y = int(index / self.pnts_x)
         grid_colors[x, y, :] += color
 
     def initialize_shader(self):
