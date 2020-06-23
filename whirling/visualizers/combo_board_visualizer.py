@@ -11,19 +11,19 @@ from whirling.tools.code_timer import CodeTimer
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.4,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.4,
         'color': np.array([.243, 0, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.5,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.3,
         'color': np.array([1, 0, 0])
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54])
     },
 }
@@ -32,6 +32,10 @@ class ComboBoardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
+
+        # Create 15 element weighted array.
+        base = 1/1.75/5
+        self.weights = 5*[base] + 5*[base/2] + 5*[base/4]
 
         self.freq_bands = 81
         self.pnts_x = 9
@@ -122,27 +126,25 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
     def create_grid_colors(self):
 
-        # Settings.
-        past_weights = 0.3
-        new_weight = 1 - past_weights
-
-        # Subtract a small amount each frame and floor at zero.
-        self.grid_colors[:] = self.grid_colors[:] * past_weights
-        self.grid_colors[self.grid_colors < 0] = 0
-        self.grid_colors[self.grid_colors > 1] = 1
+        # Reset colors.
+        self.grid_colors[:] = 0
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
+        current_vals = np.zeros((len(self.data), self.freq_bands), dtype=np.float32)
+        signal_colors = []
 
-        for signal_name, s_obj in self.data.items():
+        # Calculate colors for signal at current time.
+        for i, (signal_name, s_obj) in enumerate(self.data.items()):
             if not settings[signal_name]['use']:
                 continue
 
+            # Get spectrogram data for current time.
             log_db_s = s_obj['spectrograms']['custom_log_db']
             log_db_s_clip = log_db_s[min_window_frame, 0: self.freq_bands]
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
-            # High pass.
+            # Apply a high pass.
             high_pass = settings[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
 
@@ -153,13 +155,20 @@ class ComboBoardVisualizer(UIVisualizerBase):
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
                 self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
-            log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
 
-            c = settings[signal_name]['color']
+            # Calculate final set of values for this signal at time t.
+            current_vals[i] = np.average(self.spec_slices[signal_name], axis=0)
+            #weights=self.weights[:len(self.spec_slices[signal_name])])
+            signal_colors.append(settings[signal_name]['color'])
 
-            for i, v in enumerate(log_db_s_clip):
-                c_i = c * v * new_weight
-                self.draw_rect_into_grid(self.grid_colors, color=c_i, index=i)
+        # Find brightest signal per frequency and record which signal it was.
+        max_signal_vals = np.max(current_vals, axis=0)
+        which_color_to_use = np.argmax(current_vals, axis=0)
+
+        # Render colors.
+        for i, val in enumerate(max_signal_vals):
+            color = signal_colors[which_color_to_use[i]] * val
+            self.draw_rect_into_grid(self.grid_colors, color=color, index=i)
 
         # Repeat color 4 times, one for each cell vertex.
         self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
