@@ -11,19 +11,19 @@ from whirling.tools.code_timer import CodeTimer
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
         'color': np.array([.243, 0, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.3,
+        'use': True, 'filter_bins': 5, 'high_pass': 0.3,
         'color': np.array([1, 0, 0])
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54])
     },
 }
