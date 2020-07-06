@@ -149,6 +149,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
             # Apply a high pass.
             high_pass = settings[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
+            log_db_s_clip = (log_db_s_clip - high_pass) /(1 - high_pass)
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
