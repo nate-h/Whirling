@@ -13,7 +13,7 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.25, 'extrema': False,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.3, 'extrema': False,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
@@ -21,7 +21,7 @@ settings = {
         'color': np.array([.243, 0, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 5, 'high_pass': 0.3, 'extrema': False,
+        'use': True, 'filter_bins': 2, 'high_pass': 0.2, 'extrema': False,
         'color': np.array([1, 0, 0])
     },
     'spleeter_bass':   {
@@ -153,8 +153,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
 
             # Arbitrary effect to make brighter colors pop.
-            log_db_s_clip = log_db_s_clip ** 1.5 * 1.8
-
+            log_db_s_clip = log_db_s_clip ** 1.4 * 1.5
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
