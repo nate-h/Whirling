@@ -93,6 +93,9 @@ class UIAudioController(UIDock):
                 e.handle_event(event)
 
     def update(self):
+        # Determine if song is over and should go to next.
+        self.play_next_track_if_over()
+
         time_str = self.get_pretty_time_string()
         self.current_time.text = time_str
 
@@ -105,13 +108,31 @@ class UIAudioController(UIDock):
             e.draw()
 
     def on_track_change(self, new_track):
-        is_playing = self.player and self.player.is_playing()
+        is_playing = self.player and (self.player.is_playing() or self.player.get_state() == 6)
         if is_playing:
             self.player.stop()
         self.player = vlc.MediaPlayer(new_track)
         self.player.audio_set_volume(self.volume)
         if is_playing:
             self.player.play()
+
+    def play_next_track_if_over(self):
+        """ Determine if song is over and should go to next.
+        This code is hacky because there are several different signals that
+        indicate that the song is over. Signals like:
+        1. The user fast forwarding to next track.
+        2. The track naturally ending.
+        3. Weird behavior on vlc's side from things being initialized while
+            other things yet to be initialized.
+        There's probably a more elegant way / signal that can be intercepted.
+        """
+        if self.player:
+            length_seconds = round(self.player.get_length()/1000, 1)
+            time_seconds = round(self.get_time(), 1)
+            has_ended = self.player.get_state() == 6
+            has_started = self.player.get_state() != 0 and length_seconds != 0.0
+            if has_started and (has_ended or time_seconds + 0.1 > length_seconds):
+                self.next()
 
     def volume_up(self):
         self.set_volume(self.volume + 10)

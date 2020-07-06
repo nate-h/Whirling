@@ -9,21 +9,23 @@ from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 from whirling.tools.code_timer import CodeTimer
 
+from scipy.signal import argrelextrema
+
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 15, 'high_pass': 0.3, 'extrema': False,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 15, 'high_pass': 0.4,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.3, 'extrema': False,
         'color': np.array([.243, 0, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 5, 'high_pass': 0.3,
+        'use': True, 'filter_bins': 5, 'high_pass': 0.3, 'extrema': False,
         'color': np.array([1, 0, 0])
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.1, 'extrema': False,
         'color': np.array([0.54, 0.0, 0.54])
     },
 }
@@ -157,7 +159,13 @@ class ComboBoardVisualizer(UIVisualizerBase):
                 self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
 
             # Calculate final set of values for this signal at time t.
-            current_vals[i] = np.average(self.spec_slices[signal_name], axis=0)
+            sig = np.average(self.spec_slices[signal_name], axis=0)
+            if settings[signal_name]['extrema']:
+                sig_indices = argrelextrema(sig, np.greater)
+                mask = np.ones(sig.size, dtype=bool)
+                mask[sig_indices] = False
+                sig[mask] *= 0.8
+            current_vals[i] = sig
             #weights=self.weights[:len(self.spec_slices[signal_name])])
             signal_colors.append(settings[signal_name]['color'])
 
