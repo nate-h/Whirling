@@ -13,7 +13,7 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.3, 'extrema': False,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.25, 'extrema': False,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
@@ -40,8 +40,8 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.weights = 5*[base] + 5*[base/2] + 5*[base/4]
 
         self.freq_bands = 81
-        self.pnts_x = 9
-        self.pnts_y = 9
+        self.pnts_x = 12
+        self.pnts_y = 7
         self.grid_gap = self.width / 100
         self.initialize_shader()
         self.create_cells()
@@ -50,9 +50,9 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.spec_slices = None
 
         # Generate cell colors.
-        r = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        g = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
-        b = np.zeros((self.pnts_y, self.pnts_x), dtype=np.float32)
+        r = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
+        g = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
+        b = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
         self.grid_colors = np.dstack((r, g, b))
         self.grid_colors_flat = None
 
