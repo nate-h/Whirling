@@ -13,7 +13,7 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.25, 'extrema': False,
+        'use': True, 'filter_bins': 5, 'high_pass': 0.20, 'extrema': False,
         'color': np.array([0.23, 1, .08])
     },
     'spleeter_other':  {
