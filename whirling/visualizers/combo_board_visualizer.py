@@ -1,3 +1,11 @@
+"""
+    0. Start off with checkerboard
+    1. Local value modifies l
+    2. Local value modifies square size
+    3. Full volume modifies s
+    4. Spectral centroid modifies random jiggle size.
+"""
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -22,7 +30,7 @@ settings = {
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 2, 'high_pass': 0.2, 'extrema': False,
-        'color': np.array([1, 0, 0])
+        'color': np.array([1, 0.0274, 0.2274])
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1, 'extrema': False,

@@ -239,6 +239,14 @@ class Store():
     def save_store(self, track_name, store) -> None:
         """Cache store as a pickle."""
         pickle_name = self.store_file_name(track_name)
+
+        # Delete full spectrogram since log based one is much smaller.
+        # I may add this back and this is a short term solution to drastically
+        # reducing pickle size.
+        for s in store['signals'].keys():
+            del store['signals'][s]['D']
+            store['signals'][s]['D'] = None
+
         with open(pickle_name, "wb") as f:
             pickle.dump(store, f)
 
