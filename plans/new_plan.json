@@ -13,45 +13,25 @@
             "signals": {
                 "full": {
                     "features": {
-                        "loudness": true
+                        "rms": true,
+                        "loudness": true,
+                        "spectral_centroid": true,
+                        "zero_crossing_rates": true,
+                        "spectral_flatness": true
                     }
                 },
                 "librosa_harmonic": {
                     "features": {
-                        "spectral_centroid": true,
+                        "loudness": true,
                         "onset_strength": true,
-                        "onsets": true
+                        "spectral_centroid": true,
+                        "spectral_flatness": true
                     }
                 },
                 "librosa_percussive": {
                     "features": {
                         "onset_strength": true,
-                        "beats": true,
-                        "onsets": true
-                    }
-                },
-                "spleeter_vocals": {
-                    "features": {
-                        "onset_strength": true,
-                        "onsets": true
-                    }
-                },
-                "spleeter_bass": {
-                    "features": {
-                        "onset_strength": true,
-                        "onsets": true
-                    }
-                },
-                "spleeter_drums": {
-                    "features": {
-                        "onset_strength": true,
-                        "onsets": true
-                    }
-                },
-                "spleeter_other": {
-                    "features": {
-                        "onset_strength": true,
-                        "onsets": true
+                        "beats": true
                     }
                 }
             }
@@ -203,6 +183,17 @@
                 "window_size": 8
             },
             "signals": {
+                "full": {
+                    "features": {
+                        "loudness": true,
+                        "spectral_centroid": true
+                    }
+                },
+                "librosa_harmonic": {
+                    "features": {
+                        "spectral_centroid": true
+                    }
+                },
                 "spleeter_drums": {
                     "spectrograms": {
                         "standard": true,

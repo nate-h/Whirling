@@ -6,9 +6,6 @@ from schema import Schema, Optional
 
 
 FEATURES_SCHEMA = Schema({
-    Optional('full'): bool,
-    Optional('harmonic'): bool,
-    Optional('percussive'): bool,
     Optional('beats'): bool,
     Optional('onsets'): bool,
     Optional('frame_times'): bool,
