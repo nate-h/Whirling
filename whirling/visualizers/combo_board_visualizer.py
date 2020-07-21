@@ -2,9 +2,12 @@
     0. Start off with checkerboard
     1. Local value modifies l
     2. Local value modifies square size
-    3. Full volume modifies s
     4. Spectral centroid modifies random jiggle size.
+    3. Full volume modifies s
 """
+
+# Get full
+# Get spectral centroid
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -21,20 +24,20 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 5, 'high_pass': 0.20, 'extrema': False,
-        'color': np.array([0.23, 1, .08])
+        'use': True, 'filter_bins': 12, 'high_pass': 0.20, 'extrema': False,
+        'color': np.array([0.23, 1, .08]), 'max_cutoff': 0.8,
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.3, 'extrema': False,
-        'color': np.array([.243, 0, 1])
+        'use': True, 'filter_bins': 12, 'high_pass': 0.3, 'extrema': False,
+        'color': np.array([.243, 0, 1]), 'max_cutoff': 0.8,
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 2, 'high_pass': 0.2, 'extrema': False,
-        'color': np.array([1, 0.0274, 0.2274])
+        'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'extrema': False,
+        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.6,
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.1, 'extrema': False,
-        'color': np.array([0.54, 0.0, 0.54])
+        'use': True, 'filter_bins': 7, 'high_pass': 0.1, 'extrema': False,
+        'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.7,
     },
 }
 
@@ -52,8 +55,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.pnts_y = 7
         self.grid_gap = self.width / 100
         self.initialize_shader()
-        self.create_cells()
-        self.create_vbo()
 
         self.spec_slices = None
 
@@ -65,8 +66,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.grid_colors_flat = None
 
     def __del__(self):
-        glDeleteBuffers(1, [self.VBO])
-        glDeleteBuffers(1, [self.EBO])
+        pass
 
     def create_vbo(self):
         # Create Buffer object in gpu.
@@ -91,10 +91,15 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
         if not self.spec_slices:
             self.spec_slices = {}
-            for signal_name in self.data:
+            used_signals = [s for s in self.data.keys() if s in settings]
+            for signal_name in used_signals:
                 self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
+        self.create_cells()
+        self.create_vbo()
         self.create_grid_colors()
+
+        # TODO don't attach vbo/ebo to self.
 
         # Bind the buffer.
         CBO = glGenBuffers(1)
@@ -112,6 +117,8 @@ class ComboBoardVisualizer(UIVisualizerBase):
         glDrawElements(GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None)
         glUseProgram(0)
 
+        glDeleteBuffers(1, [self.EBO])
+        glDeleteBuffers(1, [self.VBO])
         glDeleteBuffers(1, [CBO])
 
     def create_cells(self):
@@ -141,11 +148,18 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
-        current_vals = np.zeros((len(self.data), self.freq_bands), dtype=np.float32)
+        used_signals = [s for s in self.data.keys() if s in settings]
+        current_vals = np.zeros((len(used_signals), self.freq_bands), dtype=np.float32)
         signal_colors = []
 
         # Calculate colors for signal at current time.
-        for i, (signal_name, s_obj) in enumerate(self.data.items()):
+        for i, signal_name in enumerate(used_signals):
+
+            s_obj = self.data[signal_name]
+
+            if signal_name not in settings:
+                continue
+
             if not settings[signal_name]['use']:
                 continue
 
@@ -159,6 +173,10 @@ class ComboBoardVisualizer(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip - high_pass) /(1 - high_pass)
             log_db_s_clip[log_db_s_clip < 0] = 0
 
+            # Floor everything below max*threshold
+            max_cutoff = settings[signal_name]['max_cutoff']
+            localMax = np.max(log_db_s_clip)
+            log_db_s_clip[log_db_s_clip < max_cutoff * localMax] = 0
 
             # Arbitrary effect to make brighter colors pop.
             log_db_s_clip = log_db_s_clip ** 1.4 * 1.5

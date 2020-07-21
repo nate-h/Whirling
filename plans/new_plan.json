@@ -147,7 +147,7 @@
                 }
             }
         },
-        "combo_board": {
+        "concentric_squares": {
             "settings": {
                 "window_size": 8
             },
@@ -178,7 +178,7 @@
                 }
             }
         },
-        "concentric_squares": {
+        "combo_board": {
             "settings": {
                 "window_size": 8
             },
@@ -191,6 +191,7 @@
                 },
                 "librosa_harmonic": {
                     "features": {
+                        "loudness": true,
                         "spectral_centroid": true
                     }
                 },
