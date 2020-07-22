@@ -4,6 +4,7 @@ import coloredlogs
 from whirling.store import Store
 from data.tracks import MUSIC_TRACKS
 import tensorflow as tf
+import multiprocessing
 
 
 ###############################################################################
@@ -24,7 +25,9 @@ class CacheTracks(object):
         for t in tracks:
             logging.info('Processing track: %s', t)
             tf.keras.backend.clear_session()
-            self.store.current_track_bs.on_next(t)
+            process_eval = multiprocessing.Process(target=run_track, args=(self.store, t))
+            process_eval.start()
+            process_eval.join()
 
 
     def get_unprocessed_tracks(self, tracks, blast_cache):
@@ -37,6 +40,9 @@ class CacheTracks(object):
                 ret_tracks.append(t)
 
         return ret_tracks
+
+def run_track(store, t):
+    store.current_track_bs.on_next(t)
 
 
 ###############################################################################
