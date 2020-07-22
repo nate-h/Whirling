@@ -9,6 +9,7 @@
 # Get full
 # Get spectral centroid
 
+import random
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -50,20 +51,23 @@ class ComboBoardVisualizer(UIVisualizerBase):
         base = 1/1.75/5
         self.weights = 5*[base] + 5*[base/2] + 5*[base/4]
 
-        self.freq_bands = 81
         self.pnts_x = 12
         self.pnts_y = 7
+        self.freq_bands = self.pnts_x * self.pnts_y
         self.grid_gap = self.width / 100
         self.initialize_shader()
 
         self.spec_slices = None
 
-        # Generate cell colors.
+        # Setup cell colors.
         r = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
         g = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
         b = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
         self.grid_colors = np.dstack((r, g, b))
         self.grid_colors_flat = None
+
+        # Setup max value array.
+        self.max_signal_vals = np.zeros((self.freq_bands), dtype=np.float32)
 
     def __del__(self):
         pass
@@ -95,9 +99,9 @@ class ComboBoardVisualizer(UIVisualizerBase):
             for signal_name in used_signals:
                 self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
+        self.create_grid_colors()
         self.create_cells()
         self.create_vbo()
-        self.create_grid_colors()
 
         # TODO don't attach vbo/ebo to self.
 
@@ -125,6 +129,15 @@ class ComboBoardVisualizer(UIVisualizerBase):
         sw = (self.width - (self.pnts_x - 1) * self.grid_gap) / self.pnts_x
         sh = (self.height - (self.pnts_y - 1) * self.grid_gap) / self.pnts_y
 
+        # Calculate each square size based on it's frequency intensity.
+        max_contraction = 0.5
+        max_vals_shaped = self.max_signal_vals[:].reshape(self.pnts_x, self.pnts_y)
+        max_vals_shaped *= 2
+        max_vals_shaped[max_vals_shaped > 1] = 1
+        vals = (1 - max_vals_shaped) / 2 * max_contraction
+        vals_x = vals * sw
+        vals_y = vals * sh
+
         # Generate checkerboard vertices.
         xs = np.linspace(self.rect.left, self.rect.right + self.grid_gap,
             num=self.pnts_x, endpoint=False, dtype=np.float32)
@@ -134,12 +147,35 @@ class ComboBoardVisualizer(UIVisualizerBase):
         zero = np.zeros(x1.shape, dtype=x1.dtype)
         x2 = x1 + sw
         y2 = y1 + sh
+
+        # Adjust square size based on frequency intensity.
+        x1 = x1 + vals_x
+        x2 = x2 - vals_x
+        y1 = y1 + vals_y
+        y2 = y2 - vals_y
+
         self.rectangle = np.dstack((x1, y1, zero, x2, y1, zero, x2, y2, zero, x1, y2, zero)).flatten()
 
         # Generate triangle indices.
         a = 4* np.arange(0, self.pnts_x * self.pnts_y, dtype=np.uint32)
         b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
         self.indices = (a[:, np.newaxis] + b).flatten()
+
+    def blah(self):
+        # Get current spectral centroid.
+        curr_time = self.audio_controller.get_time()
+        curr_window_frame = self.get_frame_number(curr_time)
+        spec_centroid_data = self.data['full']['features']['spectral_centroid']
+        curr_spec_centroid = spec_centroid_data[curr_window_frame]
+
+        # Calculate jiggle values.
+        jiggle_aggressiveness = 0.01
+        self.jiggle_x = self.jiggle_x * 0.99
+        self.jiggle_x[self.jiggle_x < -1] = -1
+        self.jiggle_x[self.jiggle_x > 1] = 1
+        rand_x = random.uniform(-1, 1)
+        jiggle_delta_x = rand_x * jiggle_aggressiveness * curr_spec_centroid
+        self.jiggle_x += jiggle_delta_x
 
     def create_grid_colors(self):
 
@@ -178,9 +214,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
             localMax = np.max(log_db_s_clip)
             log_db_s_clip[log_db_s_clip < max_cutoff * localMax] = 0
 
-            # Arbitrary effect to make brighter colors pop.
-            log_db_s_clip = log_db_s_clip ** 1.4 * 1.5
-
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
             bins = settings[signal_name]['filter_bins']
@@ -201,11 +234,15 @@ class ComboBoardVisualizer(UIVisualizerBase):
             signal_colors.append(settings[signal_name]['color'])
 
         # Find brightest signal per frequency and record which signal it was.
-        max_signal_vals = np.max(current_vals, axis=0)
+        self.max_signal_vals = np.max(current_vals, axis=0)
         which_color_to_use = np.argmax(current_vals, axis=0)
 
+        # Arbitrary effect to make brighter colors pop.
+        self.max_signal_vals = self.max_signal_vals ** 1.4 * 1.5
+        self.max_signal_vals[self.max_signal_vals > 1] = 1
+
         # Render colors.
-        for i, val in enumerate(max_signal_vals):
+        for i, val in enumerate(self.max_signal_vals):
             color = signal_colors[which_color_to_use[i]] * val
             self.draw_rect_into_grid(self.grid_colors, color=color, index=i)
 
