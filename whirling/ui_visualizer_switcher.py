@@ -43,5 +43,11 @@ class UIVisualizerSwitcher(UIDock):
     def on_visualizer_change(self, vis_name):
         print('Changing visualizer: %s ' % vis_name)
         rect = self.get_visualizer_rect()
+
+        # TODO: Get a __del__ working. Likely circular reference causing it
+        #       not to fire.
+        if self.visualizer:
+            self.visualizer.sub.dispose()
+
         self.visualizer = self.find_visualizer_class(vis_name)(
             rect, self.audio_controller) #, border_color=colors.RED)

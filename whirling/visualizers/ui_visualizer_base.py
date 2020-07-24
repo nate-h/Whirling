@@ -19,7 +19,7 @@ class UIVisualizerBase(UIElement, ABC):
         self.data = None
 
         self.store = Store.get_instance()
-        self.store.is_plan_loaded_bs.subscribe(
+        self.sub = self.store.is_plan_loaded_bs.subscribe(
             self.on_data_loaded_change)
 
     def draw(self):
