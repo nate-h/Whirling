@@ -25,11 +25,11 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 8, 'high_pass': 0.20,
+        'use': True, 'filter_bins': 12, 'high_pass': 0.20,
         'color': np.array([0.23, 1, .08]), 'max_cutoff': 0.8,
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 8, 'high_pass': 0.2,
+        'use': True, 'filter_bins': 12, 'high_pass': 0.2,
         'color': np.array([.243, 0, 1]), 'max_cutoff': 0.8,
     },
     'spleeter_drums':  {
@@ -37,7 +37,7 @@ settings = {
         'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.86,
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 8, 'high_pass': 0.1,
+        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.7,
     },
 }
@@ -48,8 +48,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         # Create 15 element weighted array.
-        base = 1/1.75/5
-        self.weights = 5*[base] + 5*[base/2] + 5*[base/4]
+        self.weights = np.arange(1, 13, dtype=np.float32)
 
         self.pnts_x = 12
         self.pnts_y = 7
@@ -230,9 +229,9 @@ class ComboBoardVisualizer(UIVisualizerBase):
                 self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
 
             # Calculate final set of values for this signal at time t.
-            sig = np.average(self.spec_slices[signal_name], axis=0)
+            sig = np.average(self.spec_slices[signal_name], axis=0, weights= \
+                             self.weights[:len(self.spec_slices[signal_name])])
             current_vals[i] = sig
-            #weights=self.weights[:len(self.spec_slices[signal_name])])
             signal_colors.append(settings[signal_name]['color'])
 
         # Find brightest signal per frequency and record which signal it was.
