@@ -25,19 +25,19 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 12, 'high_pass': 0.20, 'extrema': False,
+        'use': True, 'filter_bins': 8, 'high_pass': 0.20,
         'color': np.array([0.23, 1, .08]), 'max_cutoff': 0.8,
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 12, 'high_pass': 0.3, 'extrema': False,
+        'use': True, 'filter_bins': 8, 'high_pass': 0.2,
         'color': np.array([.243, 0, 1]), 'max_cutoff': 0.8,
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.2, 'extrema': False,
-        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.6,
+        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
+        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.86,
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 7, 'high_pass': 0.1, 'extrema': False,
+        'use': True, 'filter_bins': 8, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.7,
     },
 }
@@ -129,12 +129,10 @@ class ComboBoardVisualizer(UIVisualizerBase):
         sw = (self.width - (self.pnts_x - 1) * self.grid_gap) / self.pnts_x
         sh = (self.height - (self.pnts_y - 1) * self.grid_gap) / self.pnts_y
 
-        # Calculate each square size based on it's frequency intensity.
-        max_contraction = 0.5
-        max_vals_shaped = self.max_signal_vals[:].reshape(self.pnts_x, self.pnts_y)
-        max_vals_shaped *= 2
-        max_vals_shaped[max_vals_shaped > 1] = 1
-        vals = (1 - max_vals_shaped) / 2 * max_contraction
+        # Calculate changing square size.
+        # DISABLED FOR NOW. IT DOESN'T LOOK GOOD.
+        # vals = self.calculate_square_deltas()
+        vals = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
         vals_x = vals * sw
         vals_y = vals * sh
 
@@ -161,7 +159,16 @@ class ComboBoardVisualizer(UIVisualizerBase):
         b = np.array([0, 1, 2, 2, 3, 0], dtype=np.uint32)
         self.indices = (a[:, np.newaxis] + b).flatten()
 
-    def blah(self):
+    def calculate_square_deltas(self):
+        # Calculate each square size based on it's frequency intensity.
+        max_vals_shaped = self.max_signal_vals[:].reshape(self.pnts_x, self.pnts_y)
+        max_vals_shaped *= 2  # Make values closer to 1.
+        max_vals_shaped[max_vals_shaped > 1] = 1  # Cap at 1.
+        max_contraction = 0.25
+        vals = (1 - max_vals_shaped) / 2 * max_contraction
+        return vals
+
+    def jiggle_squares(self):
         # Get current spectral centroid.
         curr_time = self.audio_controller.get_time()
         curr_window_frame = self.get_frame_number(curr_time)
@@ -224,11 +231,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
             # Calculate final set of values for this signal at time t.
             sig = np.average(self.spec_slices[signal_name], axis=0)
-            if settings[signal_name]['extrema']:
-                sig_indices = argrelextrema(sig, np.greater)
-                mask = np.ones(sig.size, dtype=bool)
-                mask[sig_indices] = False
-                sig[mask] *= 0.8
             current_vals[i] = sig
             #weights=self.weights[:len(self.spec_slices[signal_name])])
             signal_colors.append(settings[signal_name]['color'])
