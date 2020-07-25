@@ -15,6 +15,7 @@
                     "features": {
                         "rms": true,
                         "loudness": true,
+                        "loudness_smoothed": true,
                         "spectral_centroid": true,
                         "zero_crossing_rates": true,
                         "spectral_flatness": true
@@ -22,7 +23,6 @@
                 },
                 "librosa_harmonic": {
                     "features": {
-                        "loudness": true,
                         "onset_strength": true,
                         "spectral_centroid": true,
                         "spectral_flatness": true
@@ -186,6 +186,7 @@
                 "full": {
                     "features": {
                         "loudness": true,
+                        "loudness_smoothed": true,
                         "spectral_centroid": true
                     }
                 },

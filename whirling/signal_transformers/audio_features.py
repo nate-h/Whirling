@@ -14,7 +14,8 @@ FEATURES_SCHEMA = Schema({
     Optional('spectral_flatness'): bool,
     Optional('zero_crossing_rates'): bool,
     Optional('onset_strength'): bool,
-    Optional('loudness'): bool
+    Optional('loudness'): bool,
+    Optional('loudness_smoothed'): bool,
 })
 
 
@@ -87,6 +88,23 @@ def get_loudness(y, D, sr, hop_length):
     return normalize(loudness)
 
 
+def smooth_operator(y, box_pts):
+    box = np.ones(box_pts)/box_pts
+    y_smooth = np.convolve(y, box, mode='same')
+    return y_smooth
+
+
+def get_loudness_smoothed(y, D, sr, hop_length):
+    n_fft = 2048
+    S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
+    power = np.abs(S)**2
+    p_mean = np.sum(power, axis=0, keepdims=True)
+    p_ref = np.max(power)  # or whatever other reference power you want to use
+    loudness = librosa.amplitude_to_db(p_mean, ref=p_ref)[0]
+    loudness_normed = normalize(loudness)
+    return smooth_operator(loudness_normed, 15)
+
+
 def function_listing(name):
     feature_extraction_fns = {
         'beats': {'fn': get_beats, 'flavor': 'discrete'},
@@ -97,6 +115,7 @@ def function_listing(name):
         'zero_crossing_rates': {'fn': get_zero_crossing_rates, 'flavor': 'continuous'},
         'onset_strength': {'fn': get_onset_strength, 'flavor': 'continuous'},
         'loudness': {'fn': get_loudness, 'flavor': 'continuous'},
+        'loudness_smoothed': {'fn': get_loudness_smoothed, 'flavor': 'continuous'},
         'frame_times': {'fn': get_frame_times, 'flavor': 'continuous'},
     }
     if name not in feature_extraction_fns:
