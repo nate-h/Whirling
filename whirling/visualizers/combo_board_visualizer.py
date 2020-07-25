@@ -38,13 +38,13 @@ settings = {
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.86,
-        'hsl_color': np.array([0.966, 0.51, 1])
+        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.5,
+        'hsl_color': np.array([0, 0.41, 0.59])
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.7,
-        'hsl_color': np.array([0.833, 0.26, 1])
+        'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.6,
+        'hsl_color': np.array([0.872, 0.22, 1])
     },
 }
 
@@ -86,7 +86,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.loudness_20 = np.percentile(loudness_smoothed, 20)
 
     def loudness_to_saturation_scalar(self, loudness):
-        return min(0.4 + 0.67 * math.sqrt(loudness), 1)
+        return min(0.3 + 0.76 * math.sqrt(loudness), 1)
 
     def create_vbo(self):
         # Create Buffer object in gpu.
