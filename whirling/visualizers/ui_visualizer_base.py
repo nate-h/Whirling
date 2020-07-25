@@ -68,6 +68,12 @@ class UIVisualizerBase(UIElement, ABC):
                             self.data[signal_name][transformer_name][s_name] = \
                                 signals[signal_name][transformer_name][s_name]
 
+        # Perform any derived class specific post processing.
+        self.post_process_data()
+
+    def post_process_data(self):
+        pass
+
     @property
     def name(self):
         return re.sub( '(?<!^)(?=[A-Z])', '_', self.__class__.__name__.replace(

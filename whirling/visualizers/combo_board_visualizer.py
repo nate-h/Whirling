@@ -9,7 +9,9 @@
 # Get full
 # Get spectral centroid
 
+import math
 import random
+import colorsys
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -27,18 +29,22 @@ settings = {
     'spleeter_vocals': {
         'use': True, 'filter_bins': 12, 'high_pass': 0.20,
         'color': np.array([0.23, 1, .08]), 'max_cutoff': 0.8,
+        'hsl_color': np.array([1/3, 0.5, 1])
     },
     'spleeter_other':  {
         'use': True, 'filter_bins': 12, 'high_pass': 0.2,
         'color': np.array([.243, 0, 1]), 'max_cutoff': 0.8,
+        'hsl_color': np.array([2/3, 0.5, 1])
     },
     'spleeter_drums':  {
         'use': True, 'filter_bins': 3, 'high_pass': 0.2,
         'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.86,
+        'hsl_color': np.array([0.966, 0.51, 1])
     },
     'spleeter_bass':   {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1,
         'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.7,
+        'hsl_color': np.array([0.833, 0.26, 1])
     },
 }
 
@@ -57,6 +63,8 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.initialize_shader()
 
         self.spec_slices = None
+        self.loudness_max = None
+        self.loudness_80 = None
 
         # Setup cell colors.
         r = np.zeros((self.pnts_x, self.pnts_y), dtype=np.float32)
@@ -70,6 +78,15 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
     def __del__(self):
         pass
+
+    def post_process_data(self):
+        loudness_smoothed = self.data['full']['features']['loudness_smoothed']
+        self.loudness_max = np.max(loudness_smoothed)
+        self.loudness_80 = np.percentile(loudness_smoothed, 80)
+        self.loudness_20 = np.percentile(loudness_smoothed, 20)
+
+    def loudness_to_saturation_scalar(self, loudness):
+        return min(0.4 + 0.67 * math.sqrt(loudness), 1)
 
     def create_vbo(self):
         # Create Buffer object in gpu.
@@ -232,7 +249,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
             sig = np.average(self.spec_slices[signal_name], axis=0, weights= \
                              self.weights[:len(self.spec_slices[signal_name])])
             current_vals[i] = sig
-            signal_colors.append(settings[signal_name]['color'])
+            signal_colors.append(np.copy(settings[signal_name]['hsl_color']))
 
         # Find brightest signal per frequency and record which signal it was.
         self.max_signal_vals = np.max(current_vals, axis=0)
@@ -241,6 +258,20 @@ class ComboBoardVisualizer(UIVisualizerBase):
         # Arbitrary effect to make brighter colors pop.
         self.max_signal_vals = self.max_signal_vals ** 1.4 * 1.5
         self.max_signal_vals[self.max_signal_vals > 1] = 1
+
+        # Find loudness value.
+        curr_time = self.audio_controller.get_time()
+        curr_window_frame = self.get_frame_number(curr_time)
+        loudness_smoothed = self.data['full']['features']['loudness_smoothed']
+        curr_loudness = loudness_smoothed[curr_window_frame]
+
+        # Adjust saturation.
+        saturation_scalar = self.loudness_to_saturation_scalar(curr_loudness)
+        for sc in signal_colors:
+            sc[2] *= saturation_scalar
+
+        # Convert hsl colors back to rgb.
+        signal_colors = [np.array(colorsys.hls_to_rgb(*c)) for c in signal_colors]
 
         # Render colors.
         for i, val in enumerate(self.max_signal_vals):
@@ -257,7 +288,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
     def initialize_shader(self):
         VERTEX_SHADER = """
-
             #version 130
 
             in vec3 position;
@@ -270,8 +300,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
                 newColor = color;
 
             }
-
-
         """
 
         FRAGMENT_SHADER = """
@@ -285,7 +313,6 @@ class ComboBoardVisualizer(UIVisualizerBase):
             outColor = vec4(newColor, 1.0f);
 
             }
-
         """
 
         # Compile The Program and shaders.
