@@ -27,24 +27,20 @@ from scipy.signal import argrelextrema
 
 settings = {
     'spleeter_vocals': {
-        'use': True, 'filter_bins': 12, 'high_pass': 0.20,
-        'color': np.array([0.23, 1, .08]), 'max_cutoff': 0.8,
-        'hsl_color': np.array([1/3, 0.5, 1])
+        'use': True, 'filter_bins': 12, 'high_pass': 0.25,
+        'max_cutoff': 0.75, 'hsl_color': np.array([1/3, 0.5, 1])
     },
     'spleeter_other':  {
-        'use': True, 'filter_bins': 12, 'high_pass': 0.2,
-        'color': np.array([.243, 0, 1]), 'max_cutoff': 0.8,
-        'hsl_color': np.array([2/3, 0.5, 1])
+        'use': True, 'filter_bins': 12, 'high_pass': 0.25,
+        'max_cutoff': 0.73, 'hsl_color': np.array([2/3, 0.5, 1])
     },
     'spleeter_drums':  {
-        'use': True, 'filter_bins': 3, 'high_pass': 0.2,
-        'color': np.array([1, 0.0274, 0.2274]), 'max_cutoff': 0.5,
-        'hsl_color': np.array([0, 0.41, 0.59])
+        'use': True, 'filter_bins': 2, 'high_pass': 0.13,
+        'max_cutoff': 0.5, 'hsl_color': np.array([0, 0.22, 0.59])
     },
     'spleeter_bass':   {
-        'use': True, 'filter_bins': 10, 'high_pass': 0.1,
-        'color': np.array([0.54, 0.0, 0.54]), 'max_cutoff': 0.6,
-        'hsl_color': np.array([0.872, 0.22, 1])
+        'use': True, 'filter_bins': 10, 'high_pass': 0.15,
+        'max_cutoff': 0.6, 'hsl_color': np.array([.81, .22, .4])
     },
 }
 
@@ -86,7 +82,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
         self.loudness_20 = np.percentile(loudness_smoothed, 20)
 
     def loudness_to_saturation_scalar(self, loudness):
-        return min(0.3 + 0.76 * math.sqrt(loudness), 1)
+        return min(0.25 + 0.81 * math.sqrt(loudness), 1)
 
     def create_vbo(self):
         # Create Buffer object in gpu.
