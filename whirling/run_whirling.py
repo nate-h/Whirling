@@ -165,17 +165,19 @@ class Whirling(object):
         offset_y = self.height - 0.025 * self.width
         self.current_track_str.rect = Rect().translate(offset_x, offset_y)
 
+
 ###############################################################################
 # Main and option handling.
 ###############################################################################
 
 def parse_options():
-    description = 'A python music visualizer using audio feature extraction'
-    parser = argparse.ArgumentParser(description=description)
+    description = "A python music visualizer using audio feature extraction"
+    epilog = "Usage: run_whirling --move-window --plan new_plan --use-cache"
+    parser = argparse.ArgumentParser(description=description, epilog=epilog)
     parser.add_argument('--plan', type=str, default='default_plan',
                         help='A plan to generate data from a list of songs.')
     parser.add_argument('--use-cache', default=False, action='store_true',
-                        help='Load cached audio features stored as dnz files'
+                        help='Load cached audio features stored as pickle files'
                         ' along side the original audio file.')
     parser.add_argument('--move-window', default=False, action='store_true',
                         help='Moves window to my preferred location')
