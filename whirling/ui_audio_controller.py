@@ -12,6 +12,9 @@ from whirling.ui_core.primitives import Rect
 from whirling.store import Store
 
 
+STARTING_TRACK_NUMBER = 0
+
+
 class UIAudioController(UIDock):
     def __init__(self, music_tracks: List[str], rect: Rect,
                  bg_color=colors.CLEAR, border_color=colors.BLACK):
@@ -22,7 +25,7 @@ class UIAudioController(UIDock):
 
         # Setup player.
         self.volume = 100
-        self.track_num = 0
+        self.track_num = STARTING_TRACK_NUMBER
         self.player = None
         self.store = Store.get_instance()
         self.music_tracks = music_tracks
