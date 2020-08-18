@@ -1,0 +1,30 @@
+{
+    "metadata": {
+        "sr": 22050,
+        "hop_length": 512,
+        "n_fft": 2048,
+        "save_signals": true
+    },
+    "visualizers": {
+        "debug": {
+            "settings": {
+                "window_size": 8
+            },
+            "signals": {
+                "full": {
+                    "features": {
+                        "rms": true,
+                        "loudness": true,
+                        "loudness_smoothed": true,
+                        "spectral_centroid": true,
+                        "zero_crossing_rates": true,
+                        "spectral_flatness": true,
+                        "beats": true,
+                        "onsets": true,
+                        "onset_strength": true
+                    }
+                }
+            }
+        }
+    }
+}
