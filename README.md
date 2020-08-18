@@ -1,6 +1,9 @@
-# README.md
+README.md
+=========
 
-## How to get project up and running.
+How to get project up and running.
+----------------------------------
+
 ```sh
     # Needed for librosa
     sudo apt-get install vlc ffmpeg

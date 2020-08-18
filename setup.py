@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name='whirling',
     version='0.0.3',
-    description='Audio visualizer using advanced audio feature extraction',
+    description='Audio visualizer using track segmentation and audio feature extraction',
     url='https://github.com/nate-h/Whirling',
     classifiers=[
         'Programming Language :: Python :: 3.6.8',
