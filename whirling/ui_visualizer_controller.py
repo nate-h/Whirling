@@ -1,3 +1,7 @@
+"""Whirling
+Defines the UI to switch the visuals.
+"""
+
 import logging
 import pygame as pg
 from whirling.ui_core.ui_core import UIDock, UIText, UIButton
@@ -9,12 +13,15 @@ from whirling.store import Store
 
 
 class UIVisualizerController(UIDock):
+    """Defines the UI to switch the visuals."""
+
     def __init__(self, rect: Rect,
                  bg_color=colors.CLEAR, border_color=colors.BLACK):
+        """Initialize the class."""
 
         # Initialize base class.
         super().__init__(rect=rect, bg_color=bg_color,
-            border_color=border_color)
+                         border_color=border_color)
 
         # Initialize pygame vars.
         self.font = pg.font.Font(None, 30)
@@ -31,6 +38,7 @@ class UIVisualizerController(UIDock):
         self.initialize_elements()
 
     def initialize_elements(self):
+        """Initialize visual elements contained in this component."""
         button_w = 50
         button_h = 50
         margin_x = 20
@@ -47,8 +55,9 @@ class UIVisualizerController(UIDock):
         def initialize_button(texname, action):
             rect = button_rect()
             button = UIButton(rect, action,
-                texset=self.whirling_textures, texname=texname,
-                border_color=colors.WHITE)
+                              texset=self.whirling_textures,
+                              texname=texname,
+                              border_color=colors.WHITE)
             self.elements.append(button)
             return button
 
@@ -65,9 +74,11 @@ class UIVisualizerController(UIDock):
         self.elements.append(self.visualizer_name)
 
     def change_visualizer_name(self, text):
-        self.visualizer_name.text = 'Visualizer: %s' % text
+        """Handles changes to the visualizer name."""
+        self.visualizer_name.text = f'Visualizer: {text}'
 
     def next_visual(self):
+        """Changes the visualizer to the next in line."""
         # If no visuals, quit.
         if len(self.visualizers) == 0:
             logging.info('No visualizers found. Quitting.')
@@ -85,6 +96,7 @@ class UIVisualizerController(UIDock):
             self.current_visualizer_bs.on_next(vis)
 
     def prev_visual(self):
+        """Changes the visualizer to the previous in line."""
         # If no visuals, quit.
         if len(self.visualizers) == 0:
             logging.info('No visualizers found. Quitting.')
@@ -102,6 +114,7 @@ class UIVisualizerController(UIDock):
             self.current_visualizer_bs.on_next(vis)
 
     def draw(self):
+        """Draw all the elements contained in this component."""
         self.draw_background()
         self.draw_border(bottom=False, left=False, right=False)
 
@@ -110,6 +123,7 @@ class UIVisualizerController(UIDock):
             e.draw()
 
     def handle_event(self, event):
+        """Test and handle events a child component may have."""
         for e in self.elements:
             if hasattr(e, 'handle_event') and callable(e.handle_event):
                 e.handle_event(event)
