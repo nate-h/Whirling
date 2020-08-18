@@ -1,17 +1,20 @@
+"""Whirling
+Start with `run_whirling --help`
+"""
+
 import os
 import logging
 import argparse
 import coloredlogs
 import pygame as pg
-from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
-from rx.subject.behaviorsubject import BehaviorSubject
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+
+from data.tracks import MUSIC_TRACKS
 from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIText
 from whirling.store import Store
-from data.tracks import MUSIC_TRACKS
-
 from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_visualizer_switcher import UIVisualizerSwitcher
 from whirling.ui_visualizer_controller import UIVisualizerController
@@ -25,8 +28,14 @@ logging.getLogger("OpenGL").setLevel(logging.WARNING)
 # Whirling
 ###############################################################################
 
-class Whirling(object):
+class Whirling():
+    """Whirling
+    A music visualizer that tries to intelligently understand as much about the
+    song that's playing so it could create a more representative visual. It
+    uses track segmentation and audio feature extraction to do so.
+    """
     def __init__(self, plan, display_w, display_h, use_cache=False):
+        """Initialize class."""
 
         # Initialize window and pygame.
         self.width = display_w
@@ -88,14 +97,14 @@ class Whirling(object):
         self.store.current_track_bs.subscribe(self.on_track_change)
 
         self.stopped = False
-        self.dw = display_w
-        self.dh = display_h
         self.clock = pg.time.Clock()
 
         self.main_loop()
 
     def main_loop(self):
-
+        """The main loop defines what should run constantly at the frame rate
+        It's a nice paradigm for handling events and refreshing the screen.
+        """
         while self.stopped is False:
 
             # Event Handling.
@@ -128,6 +137,7 @@ class Whirling(object):
         quit()
 
     def handle_key_down(self, event):
+        """Handle key down events."""
         if event.key == pg.K_ESCAPE:
             self.stopped = True
         elif event.key == pg.K_SPACE:
@@ -138,10 +148,12 @@ class Whirling(object):
             self.audio_controller.ffw_key_down()
 
     def handle_key_up(self, event):
+        """Handle key up events."""
         if event.key == pg.K_LEFT or event.key == pg.K_RIGHT:
             self.audio_controller.playback_speed_key_up()
 
     def draw(self):
+        """All drawing originates from this function."""
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glClear(GL_COLOR_BUFFER_BIT)
@@ -159,6 +171,7 @@ class Whirling(object):
         pg.display.flip()
 
     def on_track_change(self, new_track):
+        """Handle track change events."""
         logging.info('New track: %s', new_track)
         self.current_track_str.text = new_track
         offset_x = 0.99 * self.width - self.current_track_str.width
@@ -171,6 +184,7 @@ class Whirling(object):
 ###############################################################################
 
 def parse_options():
+    """Define arguments for this program."""
     description = "A python music visualizer using audio feature extraction"
     epilog = "Usage: run_whirling --move-window --plan new_plan --use-cache"
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
@@ -187,6 +201,7 @@ def parse_options():
     return args
 
 def main():
+    """Initialize the program."""
     coloredlogs.install()
     display_width = 1500
     display_height = 1600

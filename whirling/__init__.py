@@ -1,4 +1,5 @@
 """Whirling
 """
 
-from whirling import run_whirling
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
