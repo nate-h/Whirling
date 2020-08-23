@@ -1,3 +1,6 @@
+"""This file contains all of the spectrograms available.
+"""
+
 import math
 import numpy as np
 import librosa
@@ -11,7 +14,7 @@ SPECTROGRAM_SCHEMA = Schema({
 
 
 def generate(store, sig, spectrogram_name):
-
+    """Generates standard spectrogram and any specified variant."""
     hop_length = store['plan']['metadata']['hop_length']
     n_fft = store['plan']['metadata']['n_fft']
     y = store['signals'][sig]['y']
@@ -28,6 +31,7 @@ def generate(store, sig, spectrogram_name):
 
 
 def standard_spectrogram(y, n_fft, hop_length):
+    """Generate standard spectrogram from audio signal."""
     return librosa.stft(y, n_fft=n_fft, hop_length=hop_length)
 
 

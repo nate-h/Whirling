@@ -14,7 +14,7 @@ from rx.subject.behaviorsubject import BehaviorSubject
 from schema import Schema, And, Optional
 from whirling.signal_transformers import VALID_SIGNALS
 from whirling.signal_transformers import audio_features
-from whirling.signal_transformers import spectrogram_varients
+from whirling.signal_transformers import spectrogram_variants
 from whirling.signal_transformers import signal_dissectors
 
 
@@ -43,6 +43,8 @@ class Store():
             self.is_plan_loaded_bs: BehaviorSubject = None
             self.plan_name: str = None
             self.use_cache: bool = None
+
+            # The plan output contains the output from processing the plan.
             self.plan_output = None
 
     def initialize(self, plan_name: str, use_cache: bool):
@@ -82,12 +84,14 @@ class Store():
 
     @property
     def plan(self):
+        """Grab plan from dnz output."""
         if self.plan_output is None:
             return None
         return self.plan_output['plan']
 
     @property
     def visualizers(self) -> List[str]:
+        """Grab visualizers from dnz file."""
         if not self.plan:
             logging.error('No plan found.')
             quit()
@@ -95,6 +99,7 @@ class Store():
 
     @property
     def signals(self) -> List[str]:
+        """Grab signal names from plan."""
         if not self.plan:
             logging.error('No plan found.')
             quit()
@@ -105,7 +110,7 @@ class Store():
 
     @property
     def signal_features(self):
-        # Find features per signal.
+        """Grab loaded features per signal."""
         signal_features = {}
         for _v, v_obj in self.plan['visualizers'].items():
             for s, s_obj in v_obj['signals'].items():
@@ -118,7 +123,7 @@ class Store():
 
     @property
     def signal_spectrograms(self):
-        # Find out which signals want a spectrogram.
+        """Find out which signals want a spectrogram."""
         signal_spectrograms = {}
         for _v, v_obj in self.plan['visualizers'].items():
             for s, s_obj in v_obj['signals'].items():
@@ -129,14 +134,8 @@ class Store():
                     signal_spectrograms[s].update(spectrograms)
         return signal_spectrograms
 
-    def get_visualizer_plan(self, visualizer_name):
-        if visualizer_name not in self.plan['visualizers']:
-            logging.error('Couldn\'t find visualizer plan %s', visualizer_name)
-            quit()
-        return self.plan['visualizers'][visualizer_name]
-
     def load_plan(self):
-        """Load data generation plan."""
+        """Generate the plan output aka dnz (dance) file from the plan."""
         full_plan_loc = f'plans/{self.plan_name}.json'
         if not os.path.exists(full_plan_loc):
             logging.error('Couldn\'t find plan %s', full_plan_loc)
@@ -165,7 +164,7 @@ class Store():
                         "settings": dict,
                         "signals": {
                             And(str, lambda n: n in VALID_SIGNALS): {
-                                Optional('spectrograms'): spectrogram_varients.SPECTROGRAM_SCHEMA,
+                                Optional('spectrograms'): spectrogram_variants.SPECTROGRAM_SCHEMA,
                                 Optional('features'): audio_features.FEATURES_SCHEMA,
                             }
                         }
@@ -181,7 +180,7 @@ class Store():
         work. Each visualizer can then access the plan and get the necessary
         data to render."""
         merged = {}
-        for v, v_obj in self.plan['visualizers'].items():
+        for _, v_obj in self.plan['visualizers'].items():
             for sig_name, s_obj in v_obj['signals'].items():
                 if sig_name not in merged:
                     merged[sig_name] = {}
@@ -210,8 +209,6 @@ class Store():
         merged_signal_data_defs = self.merge_plan_signal_defs()
         self.plan_output.update(merged_signal_data_defs)
 
-        # TODO: inform visualizer controller of intended visualizers (via subject?).
-
         # Generate signals
         sigs = self.signals
         for sig_name in sigs:
@@ -220,7 +217,7 @@ class Store():
         # Generate spectrogram.
         for sig, spectrograms in self.signal_spectrograms.items():
             for s in spectrograms:
-                spectrogram_varients.generate(self.plan_output, sig, s)
+                spectrogram_variants.generate(self.plan_output, sig, s)
 
         # Generate features.
         for sig, features in self.signal_features.items():
@@ -255,6 +252,3 @@ class Store():
         pickle_name = self.store_file_name(track_name)
         with open(pickle_name, "rb") as f:
             return pickle.load(f)
-
-    def get_version(self):
-        return pkg_resources.require("Whirling")[0].version
