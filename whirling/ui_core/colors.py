@@ -74,6 +74,6 @@ def as255(color):
         print('Not valid color.')
         return CLEAR
     new_color = []
-    for i, c in enumerate(color):
+    for _, c in enumerate(color):
         new_color.append(round(c*255))
     return tuple(new_color)

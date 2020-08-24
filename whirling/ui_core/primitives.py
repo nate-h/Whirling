@@ -34,12 +34,12 @@ class Rect:
 
     def translate(self, dx, dy):
         return Rect(self.left + dx, self.top + dy,
-            self.right + dx, self.bottom + dy)
+                    self.right + dx, self.bottom + dy)
 
     def __str__(self):
         s = 'Left: %d, Top: %d, Right: %d, Bottom: %d Width: %d, Height: %d'
         return s % (self.left, self.top, self.right, self.bottom,
-            self.width, self.height)
+                    self.width, self.height)
 
     def contains_point(self, point):
         x = point[0]

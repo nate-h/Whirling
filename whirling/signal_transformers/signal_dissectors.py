@@ -1,7 +1,11 @@
+"""All track segmenters are defined in this file.
+"""
+
 import numpy as np
 import librosa
 import logging
 from spleeter.separator import Separator
+
 
 def generate(track_name: str, store, signal_name: str) -> None:
 
@@ -86,6 +90,7 @@ def already_ran_segmenter(store, signal_name: str) -> bool:
     return 'y' in store['signals'][signal_name]
 
 def add_signal(store, signal_name, y, D=None):
+    """Add signal to store."""
     if signal_name not in store['signals']:
         store['signals'][signal_name] = {
             'y': None,

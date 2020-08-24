@@ -1,3 +1,6 @@
+"""Initialize package."""
+
+# What are the valid signals that can be defined in a plan.
 VALID_SIGNALS = [
     "full",
     "librosa_harmonic",

@@ -1,7 +1,9 @@
-import librosa
+"""Define all the features that can be extracted from an audio signal."""
+
 import logging
-import sklearn
 import numpy as np
+import librosa
+import sklearn
 from schema import Schema, Optional
 
 
@@ -40,22 +42,26 @@ def get_frame_times(y, D, sr, hop_length):
 
 
 def get_rms(y, D, sr, hop_length):
+    """Get root mean square of an audio signal. Sort of like volume of loudness
+    but not really since what humans perceive as being loud is non-trivial."""
     rms = librosa.feature.rms(y, hop_length=hop_length)[0]
     return normalize(rms)
 
 
 def get_spectral_centroids(y, D, sr, hop_length):
+    """Basically an average all frequency bins weighted by their intensity."""
     spectral_centroids = librosa.feature.spectral_centroid(y, sr=sr, hop_length=hop_length)[0]
     return normalize(spectral_centroids)
 
 
 def get_spectral_flatness(y, D, sr, hop_length):
+    """An attempt to quantify how noisy a signal is."""
     spectral_flatness = librosa.feature.spectral_flatness(y, hop_length=hop_length)[0]
     return normalize(spectral_flatness)
 
 
 def get_zero_crossing_rates(y, D, sr, hop_length):
-    # Zero crossings are associated with percussive events.
+    """Get how often the signal crosses zero."""
     zcr = librosa.feature.zero_crossing_rate(y, hop_length=hop_length)[0]
     return normalize(zcr)
 
@@ -64,13 +70,11 @@ def get_beats(y, D, sr, hop_length):
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=hop_length)
     logging.info('Estimated tempo: {:.2f} beats per minute'.format(tempo))
     return beat_frames
-    #return librosa.frames_to_time(beat_frames, sr=sr)
 
 
 def get_onsets(y, D, sr, hop_length):
     onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
     return onsets
-    #return librosa.frames_to_time(onsets, sr=sr)
 
 
 def get_onset_strength(y, D, sr, hop_length):
@@ -79,6 +83,8 @@ def get_onset_strength(y, D, sr, hop_length):
 
 
 def get_loudness(y, D, sr, hop_length):
+    """An attempt to quantify how loud a track is. It's more complex but this
+    is an okay approximation. Better than RMS."""
     n_fft = 2048
     S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
     power = np.abs(S)**2
@@ -95,6 +101,7 @@ def smooth_operator(y, box_pts):
 
 
 def get_loudness_smoothed(y, D, sr, hop_length):
+    """Smooth out the loudness signal."""
     n_fft = 2048
     S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
     power = np.abs(S)**2
@@ -106,6 +113,7 @@ def get_loudness_smoothed(y, D, sr, hop_length):
 
 
 def function_listing(name):
+    """List available audio features."""
     feature_extraction_fns = {
         'beats': {'fn': get_beats, 'flavor': 'discrete'},
         'onsets': {'fn': get_onsets, 'flavor': 'discrete'},
@@ -125,6 +133,7 @@ def function_listing(name):
 
 
 def generate(store, sig, feature_name):
+    """Generate audio feature given feature name."""
     y = store['signals'][sig]['y']
     D = store['signals'][sig]['D']
     sr = store['plan']['metadata']['sr']
