@@ -1,15 +1,18 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+"""Whirling
+Renders concentric colorful rings.
+"""
+
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 import numpy as np
-from whirling.ui_core import colors
 from whirling.ui_core.primitives import Point
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.tools.code_timer import CodeTimer
 
-settings = {
+
+SETTINGS = {
     'librosa_harmonic':   {
         'use': False, 'filter_bins': 30, 'high_pass': 0.5,
         'color': np.array([0, 1, 0]), "keep_biggest":5, 'scalar': 1
@@ -36,6 +39,7 @@ settings = {
         'color': np.array([0.54, 0.0, 0.54]), "keep_biggest":3, 'scalar': 1.5
     },
 }
+
 
 class ConcentricSquares(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -128,7 +132,7 @@ class ConcentricSquares(UIVisualizerBase):
 
     def create_grid_colors(self):
 
-        # Settings.
+        # SETTINGS.
         biggest_damper = 0.85
         past_weights = 0.3
         new_weight = 1 - past_weights
@@ -144,7 +148,7 @@ class ConcentricSquares(UIVisualizerBase):
         pnt = self.center_point()
 
         for signal_name, s_obj in self.data.items():
-            if not settings[signal_name]['use']:
+            if not SETTINGS[signal_name]['use']:
                 continue
 
             log_db_s = s_obj['spectrograms']['custom_log_db']
@@ -152,29 +156,29 @@ class ConcentricSquares(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # High pass.
-            high_pass = settings[signal_name]['high_pass']
+            high_pass = SETTINGS[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
 
             # Scale up anything that needs to pop.
-            scalar = settings[signal_name]['scalar']
+            scalar = SETTINGS[signal_name]['scalar']
             log_db_s_clip = log_db_s_clip * scalar
 
             # Floor all values smaller than nth largest values.
-            keep_biggest = settings[signal_name]['keep_biggest']
+            keep_biggest = SETTINGS[signal_name]['keep_biggest']
             idxs = np.argpartition(log_db_s_clip, -keep_biggest)
             val = log_db_s_clip[idxs[-keep_biggest]]
             log_db_s_clip[log_db_s_clip < val * biggest_damper] = 0
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
-            bins = settings[signal_name]['filter_bins']
+            bins = SETTINGS[signal_name]['filter_bins']
             self.spec_slices[signal_name] = np.append(
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
                 self.spec_slices[signal_name] = self.spec_slices[signal_name][-bins:]
             log_db_s_clip = np.average(self.spec_slices[signal_name], axis=0)
 
-            c = settings[signal_name]['color']
+            c = SETTINGS[signal_name]['color']
 
             for i, v in enumerate(log_db_s_clip):
                 side = 2 * i + 1
@@ -202,7 +206,7 @@ class ConcentricSquares(UIVisualizerBase):
         grid_colors[x1, y1:y2, :] += color      # left   t->b
 
     def initialize_shader(self):
-        VERTEX_SHADER = """
+        vertex_shader = """
 
             #version 130
 
@@ -220,7 +224,7 @@ class ConcentricSquares(UIVisualizerBase):
 
         """
 
-        FRAGMENT_SHADER = """
+        fragment_shader = """
             #version 130
 
             in vec3 newColor;
@@ -236,6 +240,6 @@ class ConcentricSquares(UIVisualizerBase):
 
         # Compile The Program and shaders.
         self.shader = OpenGL.GL.shaders.compileProgram(
-            OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
-            OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+            OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
         )

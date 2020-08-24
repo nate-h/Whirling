@@ -1,13 +1,15 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+"""Whirling
+Renders equalizers stacked on each other. Each equalizer corresponds to a
+separated track for the current track.
+"""
+
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 import numpy as np
-from whirling.ui_core import colors
-from whirling.ui_core.primitives import Point
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.tools.code_timer import CodeTimer
 
 settings = {
     'librosa_harmonic':   {

@@ -17,7 +17,11 @@ _visualizers = [
 # Create tuples of (visualizer name, visualizer class).
 VISUALIZERS = [
     (
-        re.sub( '(?<!^)(?=[A-Z])', '_', v.__name__.replace('Visualizer', '')).lower(),
+        re.sub('(?<!^)(?=[A-Z])', '_', v.__name__.replace('Visualizer', '')).lower(),
         v
     ) for v in _visualizers
 ]
+
+def find_visualizer_class(vis_name):
+    """Get visualizer class from name."""
+    return list(filter(lambda x: x[0] == vis_name, VISUALIZERS))[0][1]

@@ -1,18 +1,25 @@
+"""Whirling
+A wrapper element to contain the current visualizer and contains methods
+to switch between them.
+"""
+
 from whirling.ui_core.ui_core import UIDock
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
-from whirling.visualizers import VISUALIZERS
+from whirling.visualizers import find_visualizer_class
 from whirling.ui_audio_controller import UIAudioController
 from whirling.store import Store
 
 
 class UIVisualizerSwitcher(UIDock):
+    """A wrapper element class to contain the current visualizer and contains
+    methods to switch between them.
+    """
     def __init__(self, plan, audio_controller: UIAudioController,
                  rect: Rect, bg_color=colors.CLEAR, border_color=colors.BLACK):
-
-        # Initialize base class.
+        """Initialize the class."""
         super().__init__(rect=rect, bg_color=bg_color,
-            border_color=border_color)
+                         border_color=border_color)
 
         self.visualizer = None
         self.audio_controller = audio_controller
@@ -23,6 +30,7 @@ class UIVisualizerSwitcher(UIDock):
             self.on_visualizer_change)
 
     def get_visualizer_rect(self):
+        """Return rect the current visualizer should render to."""
         padding_percent = .03
         padding = self.rect.width * padding_percent
         return Rect(
@@ -33,14 +41,12 @@ class UIVisualizerSwitcher(UIDock):
         )
 
     def draw(self):
+        """Draw the visualizer."""
         super().draw()
-
         self.visualizer.draw()
 
-    def find_visualizer_class(self, vis_name):
-        return list(filter(lambda x: x[0] == vis_name, VISUALIZERS))[0][1]
-
     def on_visualizer_change(self, vis_name):
+        """Switch out current visualizer with another."""
         print('Changing visualizer: %s ' % vis_name)
         rect = self.get_visualizer_rect()
 
@@ -49,5 +55,5 @@ class UIVisualizerSwitcher(UIDock):
         if self.visualizer:
             self.visualizer.sub.dispose()
 
-        self.visualizer = self.find_visualizer_class(vis_name)(
+        self.visualizer = find_visualizer_class(vis_name)(
             rect, self.audio_controller) #, border_color=colors.RED)

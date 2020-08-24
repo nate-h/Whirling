@@ -1,7 +1,7 @@
 from os.path import splitext
-from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import pygame as pg
 
 # Code adapated from here:

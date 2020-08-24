@@ -1,9 +1,12 @@
+"""Whirling
+A visualizer to view all plan specified audio features.
+"""
+
 import math
 import numpy as np
-import pygame as pg
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 from whirling.ui_core import colors
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController

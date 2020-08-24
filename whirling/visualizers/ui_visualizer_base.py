@@ -1,9 +1,13 @@
+"""Whirling
+The base class for all visualizers.
+"""
+
 import re
 import copy
 from abc import ABC, abstractmethod
-from OpenGL.GL import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import
-from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import
+from OpenGL.GL import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import *  # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 from whirling.ui_core.primitives import Rect
 from whirling.ui_core.ui_core import UIElement
 from whirling.ui_audio_controller import UIAudioController

@@ -1,8 +1,11 @@
-import time
+"""Whirling
+A visualizer that renders all plan specified spectrograms.
+"""
+
 import math
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 from whirling.ui_core import colors
 from whirling.ui_core.primitives import Rect
@@ -34,10 +37,10 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if self.spec_window != math.floor(curr_time / self.seconds_worth):
             self.create_spectrograms(curr_time)
 
-        if len(self.specs): # and self.spec.state == spectrogram.SpecState.LOADED:
+        if self.specs and len(self.specs):
             for s in self.specs:
                 s.draw()
-            for label, text_element in self.text_elements.items():
+            for _label, text_element in self.text_elements.items():
                 text_element.draw()
 
         # Draw time indicator.

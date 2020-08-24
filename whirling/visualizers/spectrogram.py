@@ -1,17 +1,15 @@
-import math
+"""Whirling
+An individual spectrogram to be rendered by the spectrogram visualizer.
+"""
+
 from enum import Enum
 import numpy as np
-import librosa
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 from whirling.ui_core.ui_core import UIElement
-from whirling.ui_core import colors
-from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
-from whirling.ui_audio_controller import UIAudioController
 from whirling.ui_core import viridis
-from whirling.tools.code_timer import CodeTimer
 
 
 class SpecState(Enum):

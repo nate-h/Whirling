@@ -1,17 +1,18 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+"""Whirling
+A visualizer that renders a colorful looking checkerboard.
+"""
+
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 import numpy as np
-from whirling.ui_core import colors
-from whirling.ui_core.primitives import Point
+from scipy.signal import argrelextrema
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.tools.code_timer import CodeTimer
 
-from scipy.signal import argrelextrema
 
-settings = {
+SETTINGS = {
     'spleeter_vocals': {
         'use': True, 'filter_bins': 5, 'high_pass': 0.20, 'extrema': False,
         'color': np.array([0.23, 1, .08])
@@ -27,12 +28,17 @@ settings = {
     'spleeter_bass': {
         'use': True, 'filter_bins': 10, 'high_pass': 0.1, 'extrema': False,
         'color': np.array([0.54, 0.0, 0.54])
-    },
+    }
 }
 
+
 class CheckerboardVisualizer(UIVisualizerBase):
+    """A visualizer that contains a grid of rectangles that change their color
+    depending upon the song. It's basically just a reshaped slice of a
+    spectrogram mapped to the dimensions of the checkerboard.
+    """
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
-        # Initialize base class.
+        """Initialize class."""
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         # Create 15 element weighted array.
@@ -57,10 +63,12 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.grid_colors_flat = None
 
     def __del__(self):
+        """Clear buffers on destruction."""
         glDeleteBuffers(1, [self.VBO])
         glDeleteBuffers(1, [self.EBO])
 
     def create_vbo(self):
+        """Create vertex buffer object."""
         # Create Buffer object in gpu.
         self.VBO = glGenBuffers(1)
 
@@ -80,7 +88,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glEnableVertexAttribArray(position)
 
     def draw_visuals(self):
-
+        """Draw the visuals associated with this visualizer."""
         if not self.spec_slices:
             self.spec_slices = {}
             for signal_name in self.data:
@@ -107,6 +115,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
         glDeleteBuffers(1, [CBO])
 
     def create_cells(self):
+        """Create the data associated with positioning the rectangles."""
         sw = (self.width - (self.pnts_x - 1) * self.grid_gap) / self.pnts_x
         sh = (self.height - (self.pnts_y - 1) * self.grid_gap) / self.pnts_y
 
@@ -127,7 +136,9 @@ class CheckerboardVisualizer(UIVisualizerBase):
         self.indices = (a[:, np.newaxis] + b).flatten()
 
     def create_grid_colors(self):
-
+        """Create the grid colors that correspond to the current time in
+        the track.
+        """
         # Reset colors.
         self.grid_colors[:] = 0
 
@@ -138,7 +149,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         # Calculate colors for signal at current time.
         for i, (signal_name, s_obj) in enumerate(self.data.items()):
-            if not settings[signal_name]['use']:
+            if not SETTINGS[signal_name]['use']:
                 continue
 
             # Get spectrogram data for current time.
@@ -147,7 +158,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # Apply a high pass.
-            high_pass = settings[signal_name]['high_pass']
+            high_pass = SETTINGS[signal_name]['high_pass']
             log_db_s_clip = (log_db_s_clip - high_pass) /(1 - high_pass)
             log_db_s_clip[log_db_s_clip < 0] = 0
 
@@ -157,7 +168,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
-            bins = settings[signal_name]['filter_bins']
+            bins = SETTINGS[signal_name]['filter_bins']
             self.spec_slices[signal_name] = np.append(
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
@@ -165,14 +176,14 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
             # Calculate final set of values for this signal at time t.
             sig = np.average(self.spec_slices[signal_name], axis=0)
-            if settings[signal_name]['extrema']:
+            if SETTINGS[signal_name]['extrema']:
                 sig_indices = argrelextrema(sig, np.greater)
                 mask = np.ones(sig.size, dtype=bool)
                 mask[sig_indices] = False
                 sig[mask] *= 0.8
             current_vals[i] = sig
             #weights=self.weights[:len(self.spec_slices[signal_name])])
-            signal_colors.append(settings[signal_name]['color'])
+            signal_colors.append(SETTINGS[signal_name]['color'])
 
         # Find brightest signal per frequency and record which signal it was.
         max_signal_vals = np.max(current_vals, axis=0)
@@ -184,15 +195,18 @@ class CheckerboardVisualizer(UIVisualizerBase):
             self.draw_rect_into_grid(self.grid_colors, color=color, index=i)
 
         # Repeat color 4 times, one for each cell vertex.
-        self.grid_colors_flat = np.repeat(self.grid_colors.reshape(-1, self.grid_colors.shape[-1]), 4, axis=0).flatten()
+        reshaped_colors = self.grid_colors.reshape(-1, self.grid_colors.shape[-1])
+        self.grid_colors_flat = np.repeat(reshaped_colors, 4, axis=0).flatten()
 
     def draw_rect_into_grid(self, grid_colors, color, index: int):
+        """Translate 1D index to a grid cell position. Then change the color of
+        that cell."""
         x = index % self.pnts_x
         y = int(index / self.pnts_x)
         grid_colors[x, y, :] += color
 
     def initialize_shader(self):
-        VERTEX_SHADER = """
+        vertex_shader = """
 
             #version 130
 
@@ -210,7 +224,7 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         """
 
-        FRAGMENT_SHADER = """
+        fragment_shader = """
             #version 130
 
             in vec3 newColor;
@@ -226,6 +240,6 @@ class CheckerboardVisualizer(UIVisualizerBase):
 
         # Compile The Program and shaders.
         self.shader = OpenGL.GL.shaders.compileProgram(
-            OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
-            OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+            OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
         )

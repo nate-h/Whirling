@@ -45,6 +45,7 @@ class UIVisualizerController(UIDock):
         self.elements = []
 
         def button_rect():
+            """Create rect for buttons."""
             count = len(self.elements)
             base_rect = Rect(0, button_h, button_w, 0)
             x = 10 + count*(button_w + margin_x)
@@ -53,6 +54,7 @@ class UIVisualizerController(UIDock):
             return base_rect
 
         def initialize_button(texname, action):
+            """Create a button with a text label."""
             rect = button_rect()
             button = UIButton(rect, action,
                               texset=self.whirling_textures,

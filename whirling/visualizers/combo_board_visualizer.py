@@ -1,31 +1,22 @@
+"""Whirling
+Renders a colorful checkerboard.
+Just like the checkerboard visualizer but a little more intelligent at
+filtering data so the user isn't bombarded with colors.
 """
-    0. Start off with checkerboard
-    1. Local value modifies l
-    2. Local value modifies square size
-    4. Spectral centroid modifies random jiggle size.
-    3. Full volume modifies s
-"""
-
-# Get full
-# Get spectral centroid
 
 import math
 import random
 import colorsys
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+from OpenGL.GL import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLU import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
+from OpenGL.GLUT import * # pylint: disable=unused-wildcard-import,redefined-builtin,wildcard-import
 import OpenGL.GL.shaders
 import numpy as np
-from whirling.ui_core import colors
-from whirling.ui_core.primitives import Point
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
-from whirling.tools.code_timer import CodeTimer
 
-from scipy.signal import argrelextrema
 
-settings = {
+SETTINGS = {
     'spleeter_vocals': {
         'use': True, 'filter_bins': 12, 'high_pass': 0.25,
         'max_cutoff': 0.75, 'hsl_color': np.array([1/3, 0.5, 1])
@@ -43,6 +34,7 @@ settings = {
         'max_cutoff': 0.6, 'hsl_color': np.array([.81, .22, .4])
     },
 }
+
 
 class ComboBoardVisualizer(UIVisualizerBase):
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
@@ -107,7 +99,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
         if not self.spec_slices:
             self.spec_slices = {}
-            used_signals = [s for s in self.data.keys() if s in settings]
+            used_signals = [s for s in self.data.keys() if s in SETTINGS]
             for signal_name in used_signals:
                 self.spec_slices[signal_name] = np.empty((0, self.freq_bands), dtype=np.float32)
 
@@ -203,7 +195,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
         curr_time = self.audio_controller.get_time()
         min_window_frame = self.get_frame_number(curr_time)
-        used_signals = [s for s in self.data.keys() if s in settings]
+        used_signals = [s for s in self.data.keys() if s in SETTINGS]
         current_vals = np.zeros((len(used_signals), self.freq_bands), dtype=np.float32)
         signal_colors = []
 
@@ -212,10 +204,10 @@ class ComboBoardVisualizer(UIVisualizerBase):
 
             s_obj = self.data[signal_name]
 
-            if signal_name not in settings:
+            if signal_name not in SETTINGS:
                 continue
 
-            if not settings[signal_name]['use']:
+            if not SETTINGS[signal_name]['use']:
                 continue
 
             # Get spectrogram data for current time.
@@ -224,18 +216,18 @@ class ComboBoardVisualizer(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # Apply a high pass.
-            high_pass = settings[signal_name]['high_pass']
+            high_pass = SETTINGS[signal_name]['high_pass']
             log_db_s_clip = (log_db_s_clip - high_pass) /(1 - high_pass)
             log_db_s_clip[log_db_s_clip < 0] = 0
 
             # Floor everything below max*threshold
-            max_cutoff = settings[signal_name]['max_cutoff']
+            max_cutoff = SETTINGS[signal_name]['max_cutoff']
             localMax = np.max(log_db_s_clip)
             log_db_s_clip[log_db_s_clip < max_cutoff * localMax] = 0
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
-            bins = settings[signal_name]['filter_bins']
+            bins = SETTINGS[signal_name]['filter_bins']
             self.spec_slices[signal_name] = np.append(
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
@@ -245,7 +237,7 @@ class ComboBoardVisualizer(UIVisualizerBase):
             sig = np.average(self.spec_slices[signal_name], axis=0, weights= \
                              self.weights[:len(self.spec_slices[signal_name])])
             current_vals[i] = sig
-            signal_colors.append(np.copy(settings[signal_name]['hsl_color']))
+            signal_colors.append(np.copy(SETTINGS[signal_name]['hsl_color']))
 
         # Find brightest signal per frequency and record which signal it was.
         self.max_signal_vals = np.max(current_vals, axis=0)
