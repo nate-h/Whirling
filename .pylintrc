@@ -258,6 +258,8 @@ good-names=i,
            y,
            s,
            f,
+           x,
+           e,
            _
 
 # Include a hint for the correct naming format with invalid-name.

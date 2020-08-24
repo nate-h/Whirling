@@ -1,3 +1,7 @@
+"""Contains code to change tracks, control their play state and to render
+UI to do these things.
+"""
+
 import os
 import time
 import logging
@@ -16,12 +20,16 @@ STARTING_TRACK_NUMBER = 0
 
 
 class UIAudioController(UIDock):
+    """A UIDock element that has buttons to control what song is playing,
+    fast forward, pausing, playing, etc. Also contains the logic for doing
+    these operations and rendering these UI elements.
+    """
     def __init__(self, music_tracks: List[str], rect: Rect,
                  bg_color=colors.CLEAR, border_color=colors.BLACK):
 
         # Initialize base class.
         super().__init__(rect=rect, bg_color=bg_color,
-            border_color=border_color)
+                         border_color=border_color)
 
         # Setup player.
         self.volume = 100
@@ -43,6 +51,7 @@ class UIAudioController(UIDock):
         self.initialize_elements()
 
     def initialize_elements(self):
+        """Initialize UI Elements."""
         button_w = 50
         button_h = 50
         margin_x = 20
@@ -55,6 +64,7 @@ class UIAudioController(UIDock):
         ])
 
         def button_rect():
+            """Create rect used for buttons."""
             count = len(self.elements)
             base_rect = Rect(0, button_h, button_w, 0)
             x = 10 + count*(button_w + margin_x) + gap
@@ -62,6 +72,7 @@ class UIAudioController(UIDock):
             return base_rect
 
         def initialize_button(texname, action):
+            """Create a button with a tex label."""
             rect = button_rect()
             button = UIButton(rect, action,
                 texset=self.whirling_textures, texname=texname,
@@ -91,11 +102,13 @@ class UIAudioController(UIDock):
         self.elements.append(self.current_time)
 
     def handle_event(self, event):
+        """Distribute event to all elements."""
         for e in self.elements:
             if hasattr(e, 'handle_event') and callable(e.handle_event):
                 e.handle_event(event)
 
     def update(self):
+        """What to update on every timestep of this program."""
         # Determine if song is over and should go to next.
         self.play_next_track_if_over()
 
@@ -103,6 +116,7 @@ class UIAudioController(UIDock):
         self.current_time.text = time_str
 
     def draw(self):
+        """Draw all elements this UIDock owns."""
         self.draw_background()
         self.draw_border(bottom=False, left=False, right=False)
 
@@ -111,6 +125,7 @@ class UIAudioController(UIDock):
             e.draw()
 
     def on_track_change(self, new_track):
+        """Handle track changing."""
         is_playing = self.player and (self.player.is_playing() or self.player.get_state() == 6)
         if is_playing:
             self.player.stop()
@@ -138,25 +153,31 @@ class UIAudioController(UIDock):
                 self.next()
 
     def volume_up(self):
+        """Adjust volume up."""
         self.set_volume(self.volume + 10)
 
     def volume_down(self):
+        """Adjust volume down."""
         self.set_volume(self.volume - 10)
 
     def set_volume(self, volume):
+        """Adjust volume. Takes a number between 0 to 100."""
         self.volume = max(min(volume, 100), 0)
         self.player.audio_set_volume(self.volume)
         self.volume_text.text = 'Volume: %s' % self.volume
 
     @property
     def is_playing(self):
+        """Return if song is playing."""
         return self.player and self.player.is_playing()
 
     @property
     def track_name(self):
+        """Return track name."""
         return os.path.basename(self.music_tracks[self.track_num])
 
     def play(self):
+        """Play the song."""
         logging.info('Play')
         self.player.play()
 
@@ -165,6 +186,7 @@ class UIAudioController(UIDock):
         self.reset_time_vars()
 
     def pause(self):
+        """Pause the song."""
         logging.info('Pause')
         self.player.pause()
 
@@ -173,42 +195,46 @@ class UIAudioController(UIDock):
         self.reset_time_vars()
 
     def toggle_play(self):
+        """Toggle songs play state."""
         logging.info('Toggle play')
         self.play_button.perform_action()
 
     def ffw_key_down(self):
+        """Fast forward the track."""
         if self.player is None:
             return
         self.player.set_rate(20)
 
-    # def rw_key_down(self):
-    #     if self.player is None:
-    #         return
-    #     self.player.set_rate(-5)
-
     def playback_speed_key_up(self):
+        """Needed to set play rate back to normal speed when used lifts up
+        on the ffw key.
+        """
         if self.player is None:
             return
         self.player.set_rate(1)
 
     def prev(self):
+        """Go to previous track."""
         count = len(self.music_tracks)
         self.track_num = (self.track_num - 1 + count) % count
         self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
 
     def next(self):
+        """Go to next track."""
         count = len(self.music_tracks)
         self.track_num = (self.track_num + 1) % count
         self.store.current_track_bs.on_next(self.music_tracks[self.track_num])
 
     def get_pretty_time_string(self):
+        """Convert the time into the track into a rounded number."""
         length_seconds = round(self.player.get_length()/1000, 1)
         time_seconds = round(self.get_time(), 1)
         return '%s / %s' % (time_seconds, length_seconds)
 
     def get_time(self):
-        # This exists because vlcs default get time updates only a couple
-        # of times per second.
+        """Get time into current track. VLC returns a rounded time into the
+        current track so this code attempt to get a more accurate time.
+        """
         if not self.is_playing:
             return self.player.get_time() * .001
 
@@ -224,6 +250,9 @@ class UIAudioController(UIDock):
         return curr_time
 
     def reset_time_vars(self):
+        """These vars are needed to interpolate the time into the current
+        track.
+        """
         curr_time = self.player.get_time() * .001
         self.last_play_time = curr_time
         self.last_play_time_global = time.time()
