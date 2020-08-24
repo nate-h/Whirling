@@ -42,6 +42,11 @@ SETTINGS = {
 
 
 class ConcentricSquares(UIVisualizerBase):
+    """Renders concentric colorful rings.
+    Each ring corresponds to a bin in the chunked frequency bins.
+    For determining the color for each ring, each track segmentations color is
+    combined. Probably not the best strategy but it was fun to explore!
+    """
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)

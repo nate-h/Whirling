@@ -37,7 +37,7 @@ class SpectrogramVisualizer(UIVisualizerBase):
         if self.spec_window != math.floor(curr_time / self.seconds_worth):
             self.create_spectrograms(curr_time)
 
-        if self.specs and len(self.specs):
+        if len(self.specs) > 0:
             for s in self.specs:
                 s.draw()
             for _label, text_element in self.text_elements.items():

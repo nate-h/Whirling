@@ -11,7 +11,8 @@ import numpy as np
 from whirling.visualizers.ui_visualizer_base import UIVisualizerBase
 from whirling.ui_audio_controller import UIAudioController
 
-settings = {
+
+SETTINGS = {
     'librosa_harmonic':   {
         'use': False, 'filter_bins': 30, 'high_pass': 0.5,
         'color': np.array([0, 1, 0]), 'order': 1
@@ -39,21 +40,28 @@ settings = {
     },
 }
 
+
 class StackedEqualizersVisualizer(UIVisualizerBase):
+    """Renders equalizers stacked on each other. Each equalizer corresponds to a
+    separated track for the current track. I do some scaling so if all tracks
+    are maxed, the sum of each bar will be greater than the height of the screen
+    but this isn't ever the case. It's just to get the base to take up more of
+    the screen.
+    """
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)
 
         self.freq_bands = 81
         self.initialize_shader()
-        self.stems = len([k for k in self.data if settings[k]['use']])
+        self.stems = len([k for k in self.data if SETTINGS[k]['use']])
         self.rectangle = None
 
         # Create a sorted list of stems, colors, order. Where order corresponds
         # to the order each stem appears in a stacked bar.
         self.color_order = \
             sorted([
-                [k, v['color'], v['order']] for k, v in settings.items()
+                [k, v['color'], v['order']] for k, v in SETTINGS.items()
                 if k in self.data.keys() and v['use']
             ], key=lambda x: x[2])
 
@@ -109,7 +117,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
     def create_vbo(self):
 
-         # Settings.
+        # Settings.
         sw = self.width / self.freq_bands
         sh = self.height / self.stems
 
@@ -131,7 +139,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         y_previous = y0
 
-
         count = 0
         for s_array in self.color_order:  # Is this the same order as "color_order"
 
@@ -143,7 +150,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
             log_db_s_clip = (log_db_s_clip + 80) / 80
 
             # High pass.
-            high_pass = settings[signal_name]['high_pass']
+            high_pass = SETTINGS[signal_name]['high_pass']
             log_db_s_clip[log_db_s_clip < high_pass] = 0
 
             # Scale up anything that needs to pop.
@@ -153,7 +160,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
             # Apply moving average.
             # Save up to 'filter_bins' and use that for the average.
-            bins = settings[signal_name]['filter_bins']
+            bins = SETTINGS[signal_name]['filter_bins']
             self.spec_slices[signal_name] = np.append(
                 self.spec_slices[signal_name], np.array([log_db_s_clip]), axis=0)
             if len(self.spec_slices[signal_name]) > bins:
@@ -191,7 +198,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
         glEnableVertexAttribArray(position)
 
     def initialize_shader(self):
-        VERTEX_SHADER = """
+        vertex_shader = """
 
             #version 130
 
@@ -209,7 +216,7 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         """
 
-        FRAGMENT_SHADER = """
+        fragment_shader = """
             #version 130
 
             in vec3 newColor;
@@ -225,6 +232,6 @@ class StackedEqualizersVisualizer(UIVisualizerBase):
 
         # Compile The Program and shaders.
         self.shader = OpenGL.GL.shaders.compileProgram(
-            OpenGL.GL.shaders.compileShader(VERTEX_SHADER, GL_VERTEX_SHADER),
-            OpenGL.GL.shaders.compileShader(FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
+            OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
+            OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER)
         )

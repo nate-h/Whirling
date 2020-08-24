@@ -76,11 +76,13 @@ class UIVisualizerBase(UIElement, ABC):
         self.post_process_data()
 
     def post_process_data(self):
+        """Derived classes should override this to perform post processing
+        manipulations to the dnz data."""
         pass
 
     @property
     def name(self):
-        return re.sub( '(?<!^)(?=[A-Z])', '_', self.__class__.__name__.replace(
+        return re.sub('(?<!^)(?=[A-Z])', '_', self.__class__.__name__.replace(
             'Visualizer', '')).lower()
 
     @property

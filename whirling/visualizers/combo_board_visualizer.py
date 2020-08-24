@@ -37,6 +37,14 @@ SETTINGS = {
 
 
 class ComboBoardVisualizer(UIVisualizerBase):
+    """Renders a colorful checkerboard.
+    Just like the checkerboard visualizer but a little more intelligent at
+    filtering data so the user isn't bombarded with colors.
+    As of now, it just uses the aggregated track loudness feature but I explored
+    using several other features including spectral centroid to jiggle the
+    rects. I left that code in but it's not active since I couldn't make it look
+    nice.
+    """
     def __init__(self, rect, audio_controller: UIAudioController, **kwargs):
         # Initialize base class.
         super().__init__(rect=rect, audio_controller=audio_controller, **kwargs)

@@ -35,13 +35,12 @@ class DebugVisualizer(UIVisualizerBase):
         if max_window_frame == 0:
             return
 
-        num_frames = max_window_frame - min_window_frame
         signals = self.data
 
         # Count number of features we have so we can scale the rows properly.
         num_rows = 0
-        for s, s_obj in self.data.items():
-            for f, f_obj in s_obj['features'].items():
+        for _, s_obj in self.data.items():
+            for _, f_obj in s_obj['features'].items():
                 if f_obj is not None:
                     num_rows += 1
 
