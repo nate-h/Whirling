@@ -59,6 +59,8 @@ how to operate on sound
 how to use all my knowledge
 more mathy stuff
 Don't blame the lib or framework, blame your bad code
+Applying exponentials - gamma correction
+Floor everything below max * threshold
 
 
 Viridis slowness

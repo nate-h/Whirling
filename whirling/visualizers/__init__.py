@@ -10,8 +10,8 @@ from whirling.visualizers.checkerboard_visualizer import CheckerboardVisualizer
 
 # Listify visualizer classes.
 _visualizers = [
-    ComboBoardVisualizer, DebugVisualizer, SpectrogramVisualizer,
-    ConcentricSquares, StackedEqualizersVisualizer, CheckerboardVisualizer
+    DebugVisualizer, SpectrogramVisualizer, StackedEqualizersVisualizer,
+    ConcentricSquares, CheckerboardVisualizer, ComboBoardVisualizer
 ]
 
 # Create tuples of (visualizer name, visualizer class).
