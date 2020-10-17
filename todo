@@ -1,9 +1,12 @@
-FIX:
+FIX
+
 # FIXME: Hack to get around circular import.
 
 
-# MUST HAVE TODOS
+MUST HAVE TODOS
+
 * Create dnz file extension
 * Play next track
 * Finish linting
 * Figure out spectrogram saving more gracefully - if user wants spec, give it
+* 

@@ -1,10 +1,10 @@
-Whirling - music visualization with a bit of AI
+Whirling - Music Visualization With a Bit of AI
 ===============================================
 
 Intro
 -----
 
-Whirling is a music visualizer that tries to intelligently understand as much about the song that's playing so it could create more representative visuals. It currently has 6 visuals that can be sorted into debug visualizers and fun attempts. This is a project I did for the pure fun of coding and great learning experience!
+Whirling is a music visualizer that tries to intelligently understand as much about the song that's playing so it could create more representative visuals. It currently has 6 visuals  with half focusiong on debug visualizations like spectrograms and extracted feature plots and the other half being fun attempts at molding data. This is a project I did for the pure fun of coding and great learning experience!
 
 [View demo on Vimeo](https://vimeo.com/454955980)
 
