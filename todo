@@ -9,4 +9,5 @@ MUST HAVE TODOS
 * Play next track
 * Finish linting
 * Figure out spectrogram saving more gracefully - if user wants spec, give it
-* 
+* Create script to royalty free download tracks for new users
+* test on laptop
