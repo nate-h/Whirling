@@ -12,7 +12,7 @@ setup(
     package_dir={'': '.'},
     packages=find_packages(),
     install_requires=[
-        'numpy==1.18.5',
+        'numpy==1.22.0',
         'pygame',
         'python-vlc',
         'Rx==3.2.0',
